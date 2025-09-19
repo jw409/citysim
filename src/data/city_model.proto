@@ -1,0 +1,112 @@
+syntax = "proto3";
+
+package urbansynth;
+
+message City {
+  string name = 1;
+  BoundingBox bounds = 2;
+  repeated Zone zones = 3;
+  repeated Road roads = 4;
+  repeated POI pois = 5;
+  repeated Building buildings = 6;
+  CityMetadata metadata = 7;
+}
+
+message BoundingBox {
+  float min_x = 1;
+  float min_y = 2;
+  float max_x = 3;
+  float max_y = 4;
+}
+
+message Zone {
+  string id = 1;
+  ZoneType type = 2;
+  repeated Point2D boundary = 3;
+  float density = 4;
+  ZoneProperties properties = 5;
+}
+
+message Road {
+  string id = 1;
+  RoadType type = 2;
+  repeated Point2D path = 3;
+  float width = 4;
+  int32 lanes = 5;
+  float speed_limit = 6;
+}
+
+message POI {
+  string id = 1;
+  POIType type = 2;
+  Point2D position = 3;
+  string zone_id = 4;
+  int32 capacity = 5;
+  POIProperties properties = 6;
+}
+
+message Building {
+  string id = 1;
+  repeated Point2D footprint = 2;
+  float height = 3;
+  string zone_id = 4;
+  BuildingType type = 5;
+}
+
+message Point2D {
+  float x = 1;
+  float y = 2;
+}
+
+message ZoneProperties {
+  float residential_density = 1;
+  float commercial_density = 2;
+  float office_density = 3;
+}
+
+message POIProperties {
+  string name = 1;
+  repeated string tags = 2;
+}
+
+message CityMetadata {
+  int64 generation_timestamp = 1;
+  string generation_seed = 2;
+  int32 total_population = 3;
+  float total_area = 4;
+}
+
+enum ZoneType {
+  RESIDENTIAL = 0;
+  COMMERCIAL = 1;
+  INDUSTRIAL = 2;
+  DOWNTOWN = 3;
+  PARK = 4;
+  WATER = 5;
+}
+
+enum RoadType {
+  HIGHWAY = 0;
+  ARTERIAL = 1;
+  COLLECTOR = 2;
+  LOCAL = 3;
+}
+
+enum POIType {
+  HOME = 0;
+  OFFICE = 1;
+  SHOP = 2;
+  RESTAURANT = 3;
+  SCHOOL = 4;
+  HOSPITAL = 5;
+  PARK_POI = 6;
+  FACTORY = 7;
+}
+
+enum BuildingType {
+  HOUSE = 0;
+  APARTMENT = 1;
+  OFFICE_BUILDING = 2;
+  STORE = 3;
+  WAREHOUSE = 4;
+}

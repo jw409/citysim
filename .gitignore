@@ -1,1 +1,35 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+
+# Environment files
+.env
+.env.local
+.env.production
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Rust/WASM
+target/
+Cargo.lock
+wasm/pkg/
+src/wasm/
+
+# Generated files
+public/model.pbf
+*.log
+
+# Plan files
 PLAN*.md

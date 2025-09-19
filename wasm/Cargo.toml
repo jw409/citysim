@@ -1,0 +1,40 @@
+[package]
+name = "urbansynth-sim"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+wasm-bindgen = "0.2"
+js-sys = "0.3"
+serde = { version = "1.0", features = ["derive"] }
+serde-wasm-bindgen = "0.6"
+console_error_panic_hook = "0.1"
+wee_alloc = "0.4"
+rand = { version = "0.8", features = ["small_rng"] }
+rand_chacha = "0.3"
+
+[dependencies.web-sys]
+version = "0.3"
+features = [
+  "console",
+  "Performance",
+]
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+panic = "abort"
+
+# Future extensibility features (commented out for v1.0)
+# [features]
+# default = ["basic-simulation"]
+# basic-simulation = []
+# advanced-ai = ["dep:petgraph"]
+# economics = ["dep:nalgebra"]
+# physics = ["dep:rapier2d-f64"]
+# scripting = ["dep:rhai"]
+# networking = ["dep:bincode"]
