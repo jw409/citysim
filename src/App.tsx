@@ -10,6 +10,7 @@ import { OptimizationPanel } from './components/OptimizationPanel';
 import { OptimizationResults } from './components/OptimizationResults';
 import { useSimulation } from './hooks/useSimulation';
 import { useSimulationContext } from './contexts/SimulationContext';
+import { usePerformanceAdaptation } from './hooks/usePerformanceAdaptation';
 import { EVChargingOptimizer } from './solver/evOptimization';
 import { processTrafficData } from './utils/trafficAnalysis';
 import { OptimizationResult, OptimizationConfig, SolverProgress } from './types/optimization';
@@ -18,15 +19,51 @@ import './styles/components.css';
 
 function AppContent() {
   const { state, dispatch } = useSimulationContext();
-  const { initialize } = useSimulation();
+  const { initialize, start, pause, setSpeed } = useSimulation();
   const [showPerformance, setShowPerformance] = useState(true);
   const [optimizationResult, setOptimizationResult] = useState<OptimizationResult | null>(null);
+
+  // Performance adaptation system
+  const {
+    performanceState,
+    isInitialized: perfInitialized,
+    updateAgentCount,
+    currentLevel
+  } = usePerformanceAdaptation({
+    onProfileChange: (profile) => {
+      console.log(`🎯 Performance adapted to ${currentLevel} profile:`, profile);
+      dispatch({ type: 'UPDATE_PERFORMANCE_PROFILE', payload: profile });
+    },
+    onMetricsUpdate: (metrics) => {
+      if (state.performance) {
+        dispatch({
+          type: 'SET_PERFORMANCE_STATE',
+          payload: { ...state.performance, metrics }
+        });
+      }
+    }
+  });
   const [isOptimizing, setIsOptimizing] = useState(false);
   const [optimizationProgress, setOptimizationProgress] = useState<SolverProgress>();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     initialize();
   }, [initialize]);
+
+  // Initialize performance state when performance system is ready
+  useEffect(() => {
+    if (perfInitialized && performanceState && !state.performance) {
+      dispatch({ type: 'SET_PERFORMANCE_STATE', payload: performanceState });
+    }
+  }, [perfInitialized, performanceState, state.performance, dispatch]);
+
+  // Sync agent count with performance system
+  useEffect(() => {
+    if (perfInitialized && state.agents.length > 0) {
+      updateAgentCount(state.agents.length);
+    }
+  }, [state.agents.length, updateAgentCount, perfInitialized]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -104,6 +141,67 @@ function AppContent() {
         <main className="app-main">
           <div className="visualization-container">
             <CityVisualization optimizationResult={optimizationResult} />
+          </div>
+
+          {/* EMERGENCY TIME CONTROLS - ALWAYS VISIBLE */}
+          <div style={{
+            position: 'fixed',
+            top: '80px',
+            right: '20px',
+            background: '#ffffff',
+            border: '3px solid #ff0000',
+            padding: '20px',
+            borderRadius: '8px',
+            zIndex: 9999,
+            boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+            minWidth: '250px'
+          }}>
+            <h3 style={{ margin: '0 0 15px 0', color: '#000' }}>⏱️ TIME CONTROLS</h3>
+
+            <div style={{ marginBottom: '15px' }}>
+              <label style={{ display: 'block', color: '#000', marginBottom: '5px' }}>
+                Status: {state.isInitialized ? '✅ Ready' : '⏳ Loading'}
+              </label>
+              <button
+                onClick={state.isRunning ? pause : start}
+                style={{
+                  background: '#007bff',
+                  color: 'white',
+                  border: 'none',
+                  padding: '10px 20px',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  fontSize: '16px',
+                  width: '100%'
+                }}
+              >
+                {state.isRunning ? '⏸️ PAUSE' : '▶️ PLAY'}
+              </button>
+            </div>
+
+            <div style={{ marginBottom: '15px' }}>
+              <label style={{ display: 'block', color: '#000', marginBottom: '5px' }}>
+                Speed: {state.speed.toFixed(1)}x
+              </label>
+              <input
+                type="range"
+                min="0.1"
+                max="5"
+                step="0.1"
+                value={state.speed}
+                onChange={(e) => setSpeed(parseFloat(e.target.value))}
+                style={{ width: '100%' }}
+              />
+            </div>
+
+            <div>
+              <label style={{ display: 'block', color: '#000', marginBottom: '5px' }}>Time</label>
+              <div style={{ color: '#000', fontSize: '18px', fontWeight: 'bold' }}>
+                {Math.floor(state.currentTime).toString().padStart(2, '0')}:
+                {Math.floor((state.currentTime - Math.floor(state.currentTime)) * 60).toString().padStart(2, '0')}
+                <span style={{ marginLeft: '10px', fontSize: '14px' }}>Day {state.day + 1}</span>
+              </div>
+            </div>
           </div>
 
           <aside className="sidebar">

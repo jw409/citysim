@@ -1,11 +1,11 @@
-import { ScatterplotLayer } from '@deck.gl/layers';
+import { IconLayer } from '@deck.gl/layers';
 import { getTimeBasedColors } from '../utils/colorSchemes';
 import { localToLatLng } from '../utils/coordinates';
 
 export function createAgentLayer(agents: any[], timeOfDay: number = 12) {
   const colors = getTimeBasedColors(timeOfDay);
 
-  return new ScatterplotLayer({
+  return new IconLayer({
     id: 'agents',
     data: agents,
     getPosition: (d: any) => {
@@ -13,40 +13,72 @@ export function createAgentLayer(agents: any[], timeOfDay: number = 12) {
       const [lng, lat] = localToLatLng(d.position.x, d.position.y);
       return [lng, lat, 5];
     },
-    getRadius: (d: any) => getAgentSize(d.agent_type),
-    getFillColor: (d: any) => {
+    getIcon: (d: any) => getAgentIcon(d.agent_type),
+    getSize: (d: any) => getAgentSize(d.agent_type),
+    getColor: (d: any) => {
       const agentType = d.agent_type?.toLowerCase() || 'car';
       return colors.agents[agentType] || colors.agents.car;
     },
-    getLineColor: [0, 0, 0, 100],
-    getLineWidth: 1,
-    radiusUnits: 'meters',
-    radiusScale: 1,
-    radiusMinPixels: 2,
-    radiusMaxPixels: 10,
-    stroked: true,
-    filled: true,
+    getAngle: (d: any) => d.heading || 0,
+    sizeUnits: 'meters',
+    sizeScale: 1,
+    sizeMinPixels: 8,
+    sizeMaxPixels: 24,
     pickable: true,
+    iconAtlas: '/agent-icons.png', // We'll create a simple icon atlas
+    iconMapping: getIconMapping(),
     updateTriggers: {
       getPosition: [agents],
-      getFillColor: [timeOfDay],
+      getColor: [timeOfDay],
+      getAngle: [agents],
     },
     transitions: {
       getPosition: {
         duration: 100,
-        easing: (t: number) => t, // Linear interpolation for smooth movement
+        easing: (t: number) => t,
       },
-      getFillColor: 1000,
+      getColor: 1000,
     },
   });
 }
 
+function getAgentIcon(agentType: string): string {
+  const icons: { [key: string]: string } = {
+    'Pedestrian': 'person',
+    'Car': 'car',
+    'Bus': 'bus',
+    'Truck': 'truck',
+  };
+  return icons[agentType] || 'car';
+}
+
 function getAgentSize(agentType: string): number {
   const sizes: { [key: string]: number } = {
-    'Pedestrian': 1.5,
-    'Car': 3,
-    'Bus': 6,
-    'Truck': 5,
+    'Pedestrian': 8,
+    'Car': 12,
+    'Bus': 16,
+    'Truck': 14,
   };
-  return sizes[agentType] || 3;
+  return sizes[agentType] || 12;
+}
+
+function getIconMapping(): any {
+  return {
+    car: {
+      x: 0, y: 0, width: 16, height: 16,
+      anchorY: 8, anchorX: 8
+    },
+    bus: {
+      x: 16, y: 0, width: 16, height: 16,
+      anchorY: 8, anchorX: 8
+    },
+    truck: {
+      x: 32, y: 0, width: 16, height: 16,
+      anchorY: 8, anchorX: 8
+    },
+    person: {
+      x: 48, y: 0, width: 16, height: 16,
+      anchorY: 8, anchorX: 8
+    }
+  };
 }

@@ -3,6 +3,18 @@ import { urbansynth } from '../data/city_model';
 
 let wasmModule: any = null;
 
+function generateRoadName(roadType: number, index: number): string {
+  const roadTypeNames = ['Street', 'Road', 'Highway', 'Boulevard', 'Avenue'];
+  const streetNames = [
+    'Main', 'Oak', 'First', 'Park', 'Washington', 'Second', 'Maple', 'Church', 'Third', 'Elm',
+    'Cedar', 'Pine', 'Lincoln', 'Spring', 'Fourth', 'River', 'Mill', 'Lake', 'Hill', 'State'
+  ];
+
+  const typeName = roadTypeNames[roadType] || 'Street';
+  const baseName = streetNames[index % streetNames.length];
+  return `${baseName} ${typeName}`;
+}
+
 // Generate POIs for agent spawning
 function generatePOIsFromCityData(city: any): any[] {
   const existingPOIs = city.pois || [];
@@ -23,8 +35,10 @@ function generatePOIsFromCityData(city: any): any[] {
 
         // Create multiple residential POIs per zone
         for (let i = 0; i < 3; i++) {
-          const offsetX = (Math.random() - 0.5) * 200;
-          const offsetY = (Math.random() - 0.5) * 200;
+          // Use deterministic offsets based on zone index and POI index
+          const seedBase = (zoneIndex * 7 + i * 3) % 1000;
+          const offsetX = ((seedBase % 400) - 200);
+          const offsetY = (((seedBase * 3) % 400) - 200);
 
           generatedPOIs.push({
             id: `home_${zoneIndex}_${i}`,
@@ -33,7 +47,7 @@ function generatePOIsFromCityData(city: any): any[] {
               x: centerX + offsetX,
               y: centerY + offsetY
             },
-            capacity: 50 + Math.floor(Math.random() * 100), // 50-150 capacity
+            capacity: 50 + (seedBase % 100), // 50-150 capacity
             zone_id: zone.id || `zone_${zoneIndex}`
           });
         }
@@ -50,11 +64,12 @@ function generatePOIsFromCityData(city: any): any[] {
           const centerX = footprint.reduce((sum: number, p: any) => sum + p.x, 0) / footprint.length;
           const centerY = footprint.reduce((sum: number, p: any) => sum + p.y, 0) / footprint.length;
 
+          const buildingSeed = buildingIndex % 100;
           generatedPOIs.push({
             id: `building_home_${buildingIndex}`,
             type: 0, // HOME
             position: { x: centerX, y: centerY },
-            capacity: 30 + Math.floor(Math.random() * 70), // 30-100 capacity
+            capacity: 30 + (buildingSeed % 70), // 30-100 capacity
             zone_id: building.zone_id || 'default'
           });
         }
@@ -93,12 +108,13 @@ export async function initializeSimulation(cityModel: any): Promise<void> {
       zone_type: zone.type || zone.zone_type || 0
     }));
 
-    const transformedRoads = (cityModel.roads || []).map((road: any) => ({
+    const transformedRoads = (cityModel.roads || []).map((road: any, index: number) => ({
       ...road,
       road_type: road.type || road.road_type || 0,
       speed_limit: road.speed_limit || road.speedLimit || 50,
       width: road.width || 6,
-      lanes: road.lanes || 2
+      lanes: road.lanes || 2,
+      name: road.name || road.road_name || generateRoadName(road.road_type || road.type || 0, index)
     }));
 
     const transformedPOIs = (cityModel.pois || []).map((poi: any) => ({
@@ -110,7 +126,8 @@ export async function initializeSimulation(cityModel: any): Promise<void> {
     const transformedBuildings = (cityModel.buildings || []).map((building: any) => ({
       ...building,
       building_type: building.type || building.building_type || 0,
-      zone_id: building.zone_id || building.zoneId || 'default'
+      zone_id: building.zone_id || building.zoneId || 'default',
+      height: building.height || building.stories * 3.5 || Math.random() * 30 + 10, // Ensure buildings have height
     }));
 
     // Convert city model to format expected by WASM (JSON format)

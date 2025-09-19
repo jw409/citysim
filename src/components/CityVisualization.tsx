@@ -7,8 +7,8 @@ import { OptimizationResult } from '../types/optimization';
 const INITIAL_VIEW_STATE = {
   longitude: 0,
   latitude: 0,
-  zoom: 14,
-  pitch: 45,
+  zoom: 15,
+  pitch: 60,
   bearing: 0,
 };
 
@@ -48,6 +48,7 @@ export function CityVisualization({ optimizationResult }: CityVisualizationProps
       <Cityscape
         width={window.innerWidth}
         height={window.innerHeight}
+        optimizationResult={optimizationResult}
       />
 
       {state.selectedTool && (

@@ -1,6 +1,6 @@
 import React, { useMemo, useCallback, useState, useEffect } from 'react';
 import DeckGL from '@deck.gl/react';
-import { MapView } from '@deck.gl/core';
+import { OrbitView } from '@deck.gl/core';
 import { useSimulationContext } from '../contexts/SimulationContext';
 import { useCamera } from '../hooks/useCamera';
 import { createBuildingLayer } from '../layers/BuildingLayer';
@@ -9,6 +9,7 @@ import { createRoadLayer } from '../layers/RoadLayer';
 import { createZoneLayer } from '../layers/ZoneLayer';
 import { getBoundsFromCityModel } from '../utils/coordinates';
 import { PolygonLayer } from '@deck.gl/layers';
+import { generateTerrainLayers } from '../utils/terrainGenerator';
 
 // Infrastructure layers
 import { createSewerLayer } from '../layers/infrastructure/SewerLayer';
@@ -23,51 +24,28 @@ import { createElevatedTransitLayer } from '../layers/elevated/ElevatedTransitLa
 import { createHelicopterLayer } from '../layers/aerial/HelicopterLayer';
 import { createAircraftLayer } from '../layers/aerial/AircraftLayer';
 import { createDroneLayer } from '../layers/aerial/DroneLayer';
+// Optimization layers
+import { createChargingStationLayer } from '../layers/ChargingStationLayer';
+import { OptimizationResult } from '../types/optimization';
 
 interface CityscapeProps {
   width?: number;
   height?: number;
+  optimizationResult?: OptimizationResult | null;
 }
 
-// Create a ground layer to provide contrast and context
-function createGroundLayer(bounds: any) {
-  const { min_x, min_y, max_x, max_y } = bounds;
-  const padding = Math.max(max_x - min_x, max_y - min_y) * 0.2;
 
-  // Create ground polygon
-  const groundPolygon = [
-    [min_x - padding, min_y - padding],
-    [max_x + padding, min_y - padding],
-    [max_x + padding, max_y + padding],
-    [min_x - padding, max_y + padding]
-  ];
-
-  return new PolygonLayer({
-    id: 'ground',
-    data: [{ polygon: groundPolygon }],
-    getPolygon: (d: any) => d.polygon.map((p: any) => [-74.0060 + (p[0] / 85000), 40.7128 + (p[1] / 111000)]),
-    getFillColor: [45, 45, 45, 255], // Dark gray ground
-    getLineColor: [70, 70, 70, 255],
-    getLineWidth: 2,
-    filled: true,
-    stroked: true,
-    extruded: false,
-    pickable: false,
-    getElevation: -1, // Below everything else
-  });
-}
-
-export function Cityscape({ width = 800, height = 600 }: CityscapeProps) {
+export function Cityscape({ width = 800, height = 600, optimizationResult }: CityscapeProps) {
   const { state } = useSimulationContext();
   const [showZones, setShowZones] = useState(false);
 
-  // Initialize camera with default view
+  // Initialize camera with proper 3D perspective
   const camera = useCamera({
     longitude: -74.0060,
     latitude: 40.7128,
-    zoom: 12,
-    pitch: 45,
-    bearing: 0
+    zoom: 14,      // Closer zoom for building detail
+    pitch: 60,     // More angle for 3D effect
+    bearing: -30   // Slight rotation for depth
   });
 
   // Update view state when city model is available
@@ -108,18 +86,32 @@ export function Cityscape({ width = 800, height = 600 }: CityscapeProps) {
       hasEnhancedData: !!enhancedData
     });
 
-    // Add ground/terrain layer first (bottom layer)
+    // Layer ordering for professional 3D visualization:
+    // 1. Terrain (base) 2. River 3. Roads 4. Zones 5. Buildings 6. Agents
+
     if (state.cityModel?.bounds) {
-      activeLayers.push(createGroundLayer(state.cityModel.bounds));
+      // Generate deterministic seed from city bounds
+      const { min_x, min_y, max_x, max_y } = state.cityModel.bounds;
+      const terrainSeed = Math.abs(min_x + min_y + max_x + max_y) % 100000;
+
+      // Add terrain layers as base (continuous mesh replaces ground layer)
+      const terrainLayers = generateTerrainLayers(state.cityModel.bounds, state.currentTime || 12, terrainSeed);
+      activeLayers.push(...terrainLayers);
     }
 
-    // Basic layers
+    // Roads layer (above terrain, below buildings)
+    activeLayers.push(createRoadLayer(cityData.roads || [], state.currentTime || 12));
+
+    // Zones layer (optional, for debugging)
     if (showZones) {
       activeLayers.push(createZoneLayer(cityData.zones || [], state.currentTime || 12, true));
     }
 
-    activeLayers.push(createRoadLayer(cityData.roads || [], state.currentTime || 12));
-    activeLayers.push(createBuildingLayer(cityData.buildings || [], state.currentTime || 12));
+    console.log('Creating building layer with buildings:', cityData.buildings?.length, cityData.buildings?.slice(0, 2));
+    const buildingLayer = createBuildingLayer(cityData.buildings || [], state.currentTime || 12);
+    console.log('Building layer created:', buildingLayer);
+    activeLayers.push(buildingLayer);
+
     activeLayers.push(createAgentLayer(state.agents, state.currentTime || 12));
 
     // Advanced layers (only if enhanced data is available)
@@ -163,6 +155,18 @@ export function Cityscape({ width = 800, height = 600 }: CityscapeProps) {
       }
     }
 
+    // Optimization results layer (charging stations)
+    if (optimizationResult && optimizationResult.stations.length > 0) {
+      activeLayers.push(
+        createChargingStationLayer(
+          optimizationResult.stations,
+          optimizationResult.coverage_map,
+          true, // showCoverage
+          true  // showLabels
+        )
+      );
+    }
+
     console.log(`Rendering ${activeLayers.length} layers (${activeLayers.map(l => l.id).join(', ')})`);
 
     return activeLayers;
@@ -196,6 +200,39 @@ export function Cityscape({ width = 800, height = 600 }: CityscapeProps) {
     event.preventDefault();
   }, []);
 
+  // Handle keyboard shortcuts for camera controls
+  useEffect(() => {
+    const handleKeyPress = (event: KeyboardEvent) => {
+      if (event.target !== document.body) return; // Only handle when not in an input
+
+      switch (event.key.toLowerCase()) {
+        case '1':
+          camera.presets.overview();
+          break;
+        case '2':
+          camera.presets.street();
+          break;
+        case '3':
+          camera.presets.aerial();
+          break;
+        case '4':
+          camera.presets.isometric();
+          break;
+        case 'z':
+          setShowZones(prev => !prev);
+          break;
+        case 'escape':
+          if (camera.controls.followTarget) {
+            camera.stopFollowing();
+          }
+          break;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [camera, setShowZones]);
+
   return (
     <div
       style={{ position: 'relative', width, height }}
@@ -208,14 +245,24 @@ export function Cityscape({ width = 800, height = 600 }: CityscapeProps) {
         onViewStateChange={handleViewStateChange}
         onClick={handleClick}
         layers={layers}
-        views={new MapView({ repeat: true })}
+        views={new OrbitView({
+          orbitAxis: 'Z',
+          fov: 50,
+          minZoom: 10,
+          maxZoom: 20,
+          minPitch: 0,
+          maxPitch: 85
+        })}
         controller={{
           dragRotate: true,
           dragPan: true,
           scrollZoom: true,
           touchZoom: true,
           touchRotate: true,
-          keyboard: true
+          keyboard: true,
+          inertia: true,
+          scrollZoomSpeed: 0.5,
+          dragRotateSpeed: 0.01
         }}
         getCursor={() => camera.controls.followTarget ? 'crosshair' : 'grab'}
         getTooltip={({ object, layer }) => {
@@ -305,10 +352,15 @@ export function Cityscape({ width = 800, height = 600 }: CityscapeProps) {
 
         {/* Controls Help */}
         <div style={{ fontSize: '10px', color: '#ccc', marginTop: '10px', borderTop: '1px solid #444', paddingTop: '5px' }}>
+          <div style={{ marginBottom: '3px', fontWeight: 'bold', color: '#fff' }}>Mouse Controls:</div>
           <div>🖱️ Left click + drag: Pan</div>
           <div>🖱️ Right click + drag: Rotate</div>
           <div>🖱️ Scroll: Zoom</div>
           <div>🖱️ Click agent: Follow</div>
+          <div style={{ marginTop: '5px', marginBottom: '3px', fontWeight: 'bold', color: '#fff' }}>Keyboard Shortcuts:</div>
+          <div>1,2,3,4: Camera presets</div>
+          <div>Z: Toggle zones</div>
+          <div>ESC: Stop following</div>
         </div>
       </div>
 

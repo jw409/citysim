@@ -3,6 +3,9 @@ mod world;
 mod simulation;
 mod traffic;
 mod pathfinding;
+mod performance;
+mod benchmarking;
+mod adaptive_scaling;
 
 use wasm_bindgen::prelude::*;
 use serde_wasm_bindgen::to_value;
@@ -11,6 +14,9 @@ use std::rc::Rc;
 
 use simulation::Simulation;
 use world::CityModel;
+use performance::PerformanceProfile;
+use benchmarking::DeviceBenchmark;
+use adaptive_scaling::AdaptiveScaler;
 
 #[cfg(feature = "wee_alloc")]
 #[global_allocator]
@@ -154,4 +160,106 @@ pub fn getSeed() -> u64 {
             0
         }
     })
+}
+
+// Export performance system classes directly for JS usage
+#[wasm_bindgen]
+pub struct WasmPerformanceProfile {
+    inner: PerformanceProfile,
+}
+
+#[wasm_bindgen]
+impl WasmPerformanceProfile {
+    #[wasm_bindgen(constructor)]
+    pub fn new() -> WasmPerformanceProfile {
+        WasmPerformanceProfile {
+            inner: PerformanceProfile::default(),
+        }
+    }
+
+    #[wasm_bindgen(getter)]
+    pub fn target_fps(&self) -> u32 {
+        self.inner.target_fps()
+    }
+
+    #[wasm_bindgen(getter)]
+    pub fn max_agents(&self) -> u32 {
+        self.inner.max_agents()
+    }
+
+    #[wasm_bindgen(getter)]
+    pub fn render_distance(&self) -> f32 {
+        self.inner.render_distance()
+    }
+
+    #[wasm_bindgen(getter)]
+    pub fn update_frequency(&self) -> u32 {
+        self.inner.update_frequency()
+    }
+}
+
+#[wasm_bindgen]
+pub struct WasmDeviceBenchmark {
+    inner: DeviceBenchmark,
+}
+
+#[wasm_bindgen]
+impl WasmDeviceBenchmark {
+    #[wasm_bindgen(constructor)]
+    pub fn new() -> WasmDeviceBenchmark {
+        WasmDeviceBenchmark {
+            inner: DeviceBenchmark::new(),
+        }
+    }
+
+    #[wasm_bindgen]
+    pub fn run_cpu_test(&self) -> f64 {
+        self.inner.run_cpu_test()
+    }
+
+    #[wasm_bindgen]
+    pub fn test_memory_bandwidth(&self) -> f64 {
+        self.inner.test_memory_bandwidth()
+    }
+
+    #[wasm_bindgen]
+    pub fn get_recommended_profile(&self, cpu_score: f64, memory_mb: f64, refresh_rate: u32) -> WasmPerformanceProfile {
+        let profile = self.inner.get_recommended_profile(cpu_score, memory_mb, refresh_rate);
+        WasmPerformanceProfile { inner: profile }
+    }
+}
+
+#[wasm_bindgen]
+pub struct WasmAdaptiveScaler {
+    inner: AdaptiveScaler,
+}
+
+#[wasm_bindgen]
+impl WasmAdaptiveScaler {
+    #[wasm_bindgen(constructor)]
+    pub fn new() -> WasmAdaptiveScaler {
+        WasmAdaptiveScaler {
+            inner: AdaptiveScaler::new(),
+        }
+    }
+
+    #[wasm_bindgen]
+    pub fn set_target_fps(&mut self, fps: f64) {
+        self.inner.set_target_fps(fps);
+    }
+
+    #[wasm_bindgen]
+    pub fn update_fps(&mut self, current_fps: f64) {
+        self.inner.update_fps_simple(current_fps);
+    }
+
+    #[wasm_bindgen]
+    pub fn should_adapt(&self) -> bool {
+        self.inner.should_adapt()
+    }
+
+    #[wasm_bindgen]
+    pub fn get_adaptation_direction(&self) -> i32 {
+        self.inner.get_adaptation_direction()
+    }
 }

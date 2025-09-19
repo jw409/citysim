@@ -37,6 +37,7 @@ class CityGenerator {
     console.log('🏙️ Generating city with seed:', this.seed);
 
     this.generateZones();
+    this.generateRiver();
     this.generateRoadNetwork();
     this.generatePOIs();
     this.generateBuildings();
@@ -45,78 +46,146 @@ class CityGenerator {
   }
 
   generateZones() {
-    console.log('📍 Generating zones...');
+    console.log('📍 Generating realistic zones...');
 
-    // Downtown core
+    // Dense downtown core (offset from center like many real cities)
     this.zones.push({
-      id: 'downtown',
+      id: 'downtown_core',
       type: 3, // DOWNTOWN
-      boundary: this.generatePolygon(0, 0, 1500, 8),
-      density: 0.9,
-      properties: { residential_density: 0.2, commercial_density: 0.6, office_density: 0.8 }
+      boundary: this.generateRectangularZone(-800, -200, 1600, 1000),
+      density: 0.95,
+      properties: { residential_density: 0.1, commercial_density: 0.4, office_density: 0.8 }
     });
 
-    // Residential suburbs
-    for (let i = 0; i < 6; i++) {
-      const angle = (i / 6) * Math.PI * 2;
-      const distance = 3000 + this.noise(i, 0) * 1000;
-      const x = Math.cos(angle) * distance;
-      const y = Math.sin(angle) * distance;
+    // Financial district (adjacent to downtown)
+    this.zones.push({
+      id: 'financial_district',
+      type: 3, // DOWNTOWN
+      boundary: this.generateRectangularZone(-800, 800, 1200, 600),
+      density: 0.9,
+      properties: { residential_density: 0.05, commercial_density: 0.2, office_density: 0.9 }
+    });
 
+    // Central Park (like NYC's Central Park)
+    this.zones.push({
+      id: 'central_park',
+      type: 4, // PARK
+      boundary: this.generateRectangularZone(800, -500, 800, 1000),
+      density: 0.05,
+      properties: { residential_density: 0, commercial_density: 0, office_density: 0 }
+    });
+
+    // Residential neighborhoods (organic grid-based placement)
+    const residentialAreas = [
+      // Upper East Side equivalent
+      { x: 1800, y: 1000, width: 1500, height: 1800, id: 'upper_east' },
+      // Greenwich Village equivalent
+      { x: -1200, y: -1500, width: 1200, height: 1000, id: 'village' },
+      // Brooklyn Heights equivalent
+      { x: -3000, y: 1500, width: 2000, height: 1500, id: 'heights' },
+      // Suburbs North
+      { x: 800, y: 2500, width: 2500, height: 1500, id: 'suburbs_north' },
+      // Suburbs South
+      { x: -1500, y: -3000, width: 2200, height: 1200, id: 'suburbs_south' },
+      // Westside
+      { x: -3500, y: -800, width: 1800, height: 1600, id: 'westside' }
+    ];
+
+    residentialAreas.forEach(area => {
       this.zones.push({
-        id: `residential_${i}`,
+        id: `residential_${area.id}`,
         type: 0, // RESIDENTIAL
-        boundary: this.generatePolygon(x, y, 1200, 6),
-        density: 0.6,
-        properties: { residential_density: 0.8, commercial_density: 0.2, office_density: 0.1 }
-      });
-    }
-
-    // Commercial districts
-    for (let i = 0; i < 4; i++) {
-      const angle = (i / 4) * Math.PI * 2 + Math.PI / 4;
-      const distance = 2000;
-      const x = Math.cos(angle) * distance;
-      const y = Math.sin(angle) * distance;
-
-      this.zones.push({
-        id: `commercial_${i}`,
-        type: 1, // COMMERCIAL
-        boundary: this.generatePolygon(x, y, 800, 5),
+        boundary: this.generateRectangularZone(area.x, area.y, area.width, area.height),
         density: 0.7,
-        properties: { residential_density: 0.1, commercial_density: 0.8, office_density: 0.3 }
+        properties: { residential_density: 0.85, commercial_density: 0.15, office_density: 0.05 }
       });
-    }
+    });
 
-    // Industrial areas
-    for (let i = 0; i < 2; i++) {
-      const x = (i === 0 ? -1 : 1) * 4000;
-      const y = 2000 + this.noise(i + 10, 0) * 1000;
+    // Commercial corridors (along major streets)
+    const commercialAreas = [
+      // Main commercial strip
+      { x: 0, y: 1800, width: 1800, height: 400, id: 'main_strip' },
+      // Shopping district
+      { x: 1200, y: -1000, width: 1000, height: 600, id: 'shopping' },
+      // Entertainment district
+      { x: -1800, y: 500, width: 800, height: 800, id: 'entertainment' }
+    ];
 
+    commercialAreas.forEach(area => {
       this.zones.push({
-        id: `industrial_${i}`,
+        id: `commercial_${area.id}`,
+        type: 1, // COMMERCIAL
+        boundary: this.generateRectangularZone(area.x, area.y, area.width, area.height),
+        density: 0.8,
+        properties: { residential_density: 0.1, commercial_density: 0.85, office_density: 0.2 }
+      });
+    });
+
+    // Industrial districts (typically on city edges, near transport)
+    const industrialAreas = [
+      // Port/waterfront industrial
+      { x: -4500, y: -2000, width: 1500, height: 2500, id: 'port' },
+      // Manufacturing zone
+      { x: 3500, y: -1500, width: 1800, height: 1500, id: 'manufacturing' },
+      // Logistics hub near highway
+      { x: 2500, y: 3500, width: 2000, height: 1000, id: 'logistics' }
+    ];
+
+    industrialAreas.forEach(area => {
+      this.zones.push({
+        id: `industrial_${area.id}`,
         type: 2, // INDUSTRIAL
-        boundary: this.generatePolygon(x, y, 1500, 4),
+        boundary: this.generateRectangularZone(area.x, area.y, area.width, area.height),
         density: 0.4,
-        properties: { residential_density: 0.05, commercial_density: 0.1, office_density: 0.2 }
+        properties: { residential_density: 0.02, commercial_density: 0.1, office_density: 0.15 }
       });
-    }
+    });
 
-    // Parks
-    for (let i = 0; i < 3; i++) {
-      const angle = (i / 3) * Math.PI * 2;
-      const distance = 1500;
-      const x = Math.cos(angle) * distance;
-      const y = Math.sin(angle) * distance;
+    // Additional parks and green spaces throughout city
+    const parks = [
+      { x: -2500, y: 3000, width: 800, height: 600, id: 'riverside' },
+      { x: 2800, y: 800, width: 600, height: 600, id: 'neighborhood' },
+      { x: -1000, y: -2200, width: 500, height: 400, id: 'community' },
+      { x: 1500, y: -2800, width: 700, height: 500, id: 'south_park' }
+    ];
 
+    parks.forEach(park => {
       this.zones.push({
-        id: `park_${i}`,
+        id: `park_${park.id}`,
         type: 4, // PARK
-        boundary: this.generatePolygon(x, y, 600, 8),
-        density: 0.1,
+        boundary: this.generateRectangularZone(park.x, park.y, park.width, park.height),
+        density: 0.05,
         properties: { residential_density: 0, commercial_density: 0, office_density: 0 }
       });
-    }
+    });
+  }
+
+  generateRectangularZone(centerX, centerY, width, height) {
+    // Create rectangular zones with slight irregularities for realism
+    const halfWidth = width / 2;
+    const halfHeight = height / 2;
+
+    // Add some noise for organic boundaries
+    const noiseAmount = 100;
+
+    return [
+      {
+        x: centerX - halfWidth + (this.noise(centerX, centerY) - 0.5) * noiseAmount,
+        y: centerY - halfHeight + (this.noise(centerX + 1, centerY) - 0.5) * noiseAmount
+      },
+      {
+        x: centerX + halfWidth + (this.noise(centerX + 2, centerY) - 0.5) * noiseAmount,
+        y: centerY - halfHeight + (this.noise(centerX + 3, centerY) - 0.5) * noiseAmount
+      },
+      {
+        x: centerX + halfWidth + (this.noise(centerX + 4, centerY) - 0.5) * noiseAmount,
+        y: centerY + halfHeight + (this.noise(centerX + 5, centerY) - 0.5) * noiseAmount
+      },
+      {
+        x: centerX - halfWidth + (this.noise(centerX + 6, centerY) - 0.5) * noiseAmount,
+        y: centerY + halfHeight + (this.noise(centerX + 7, centerY) - 0.5) * noiseAmount
+      }
+    ];
   }
 
   generatePolygon(centerX, centerY, radius, sides) {
@@ -133,77 +202,311 @@ class CityGenerator {
     return points;
   }
 
-  generateRoadNetwork() {
-    console.log('🛣️ Generating road network...');
+  generateRiver() {
+    console.log('🌊 Generating meandering river...');
 
-    // Major highways (ring road)
-    const ringRadius = 3500;
-    const ringPoints = [];
-    for (let i = 0; i <= 32; i++) {
-      const angle = (i / 32) * Math.PI * 2;
-      ringPoints.push({
-        x: Math.cos(angle) * ringRadius,
-        y: Math.sin(angle) * ringRadius
-      });
+    // Create a sinusoidal river that flows through the city from north to south
+    const riverPoints = [];
+    const riverWidth = 150 + this.random() * 100; // 150-250m wide river
+
+    // River flows roughly north-south but with curves
+    for (let y = -6000; y <= 6000; y += 150) {
+      // Create meandering pattern using sine wave with some randomness
+      const baseX = Math.sin(y / 1200) * 800; // Main curve
+      const noise = (this.noise(y / 500, 0) - 0.5) * 300; // Add natural variation
+      const x = baseX + noise;
+
+      riverPoints.push({ x, y });
     }
+
+    // Store river as both a road-like feature and as water data
+    this.river = {
+      id: 'main_river',
+      type: 'water',
+      path: riverPoints,
+      width: riverWidth
+    };
+
+    // River is stored separately, not as a road (for visualization only)
+
+    console.log(`✅ Generated river with ${riverPoints.length} points, width: ${riverWidth.toFixed(1)}m`);
+
+    // Store river crossing points for bridge placement
+    this.riverCrossings = this.findRiverCrossings(riverPoints, riverWidth);
+  }
+
+  findRiverCrossings(riverPoints, riverWidth) {
+    // Find where major roads will need to cross the river
+    const crossings = [];
+
+    // We'll add bridges at regular intervals and at key connection points
+    const bridgeInterval = 1500; // Bridge every 1.5km
+
+    for (let y = -4500; y <= 4500; y += bridgeInterval) {
+      // Find river x-coordinate at this y position
+      const riverPoint = this.interpolateRiverPosition(riverPoints, y);
+      if (riverPoint) {
+        crossings.push({
+          x: riverPoint.x,
+          y: y,
+          width: riverWidth * 1.2, // Bridge slightly wider than river
+          type: 'bridge'
+        });
+      }
+    }
+
+    console.log(`✅ Planned ${crossings.length} river crossings`);
+    return crossings;
+  }
+
+  interpolateRiverPosition(riverPoints, targetY) {
+    // Find the river x-coordinate at a given y position
+    for (let i = 0; i < riverPoints.length - 1; i++) {
+      const p1 = riverPoints[i];
+      const p2 = riverPoints[i + 1];
+
+      if (p1.y <= targetY && p2.y >= targetY) {
+        // Interpolate between these two points
+        const ratio = (targetY - p1.y) / (p2.y - p1.y);
+        const x = p1.x + (p2.x - p1.x) * ratio;
+        return { x, y: targetY };
+      }
+    }
+    return null;
+  }
+
+  generateRoadNetwork() {
+    console.log('🛣️ Generating realistic road network...');
+
+    // Create a Manhattan-style grid system instead of radial pattern
+    const cityBounds = { min_x: -5000, min_y: -5000, max_x: 5000, max_y: 5000 };
+
+    // Major highway perimeter (rectangular, not circular)
+    const highways = [
+      // North highway
+      { x: cityBounds.min_x - 500, y: cityBounds.max_y + 500 },
+      { x: cityBounds.max_x + 500, y: cityBounds.max_y + 500 },
+      // East highway
+      { x: cityBounds.max_x + 500, y: cityBounds.max_y + 500 },
+      { x: cityBounds.max_x + 500, y: cityBounds.min_y - 500 },
+      // South highway
+      { x: cityBounds.max_x + 500, y: cityBounds.min_y - 500 },
+      { x: cityBounds.min_x - 500, y: cityBounds.min_y - 500 },
+      // West highway
+      { x: cityBounds.min_x - 500, y: cityBounds.min_y - 500 },
+      { x: cityBounds.min_x - 500, y: cityBounds.max_y + 500 }
+    ];
+
+    // Split into segments for realistic highway system
     this.roads.push({
-      id: 'ring_highway',
+      id: 'highway_north',
       type: 0, // HIGHWAY
-      path: ringPoints,
+      path: [highways[0], highways[1]],
       width: 20,
       lanes: 6,
       speed_limit: 80
     });
 
-    // Arterial roads connecting zones
-    this.zones.forEach((zone, i) => {
-      if (zone.type !== 4) { // Not parks
-        const centerX = zone.boundary.reduce((sum, p) => sum + p.x, 0) / zone.boundary.length;
-        const centerY = zone.boundary.reduce((sum, p) => sum + p.y, 0) / zone.boundary.length;
+    this.roads.push({
+      id: 'highway_east',
+      type: 0, // HIGHWAY
+      path: [highways[2], highways[3]],
+      width: 20,
+      lanes: 6,
+      speed_limit: 80
+    });
 
-        // Connect to downtown
+    this.roads.push({
+      id: 'highway_south',
+      type: 0, // HIGHWAY
+      path: [highways[4], highways[5]],
+      width: 20,
+      lanes: 6,
+      speed_limit: 80
+    });
+
+    this.roads.push({
+      id: 'highway_west',
+      type: 0, // HIGHWAY
+      path: [highways[6], highways[7]],
+      width: 20,
+      lanes: 6,
+      speed_limit: 80
+    });
+
+    // Major arterials in grid pattern (like Broadway, 5th Ave)
+    const arterialSpacing = 1500;
+    let roadId = 0;
+
+    // North-South arterials
+    for (let x = cityBounds.min_x; x <= cityBounds.max_x; x += arterialSpacing) {
+      this.roads.push({
+        id: `arterial_ns_${roadId++}`,
+        type: 1, // ARTERIAL
+        path: [
+          { x: x, y: cityBounds.min_y },
+          { x: x, y: cityBounds.max_y }
+        ],
+        width: 12,
+        lanes: 4,
+        speed_limit: 50
+      });
+    }
+
+    // East-West arterials
+    for (let y = cityBounds.min_y; y <= cityBounds.max_y; y += arterialSpacing) {
+      this.roads.push({
+        id: `arterial_ew_${roadId++}`,
+        type: 1, // ARTERIAL
+        path: [
+          { x: cityBounds.min_x, y: y },
+          { x: cityBounds.max_x, y: y }
+        ],
+        width: 12,
+        lanes: 4,
+        speed_limit: 50
+      });
+    }
+
+    // Add river and bridge (natural feature affecting road layout)
+    const riverY = -500;
+    this.roads.push({
+      id: 'bridge_main',
+      type: 2, // BRIDGE
+      path: [
+        { x: -200, y: riverY - 50 },
+        { x: 200, y: riverY + 50 }
+      ],
+      width: 10,
+      lanes: 3,
+      speed_limit: 40
+    });
+
+    // Secondary street grid (finer resolution)
+    const streetSpacing = 500;
+    for (let x = cityBounds.min_x + 250; x <= cityBounds.max_x; x += streetSpacing) {
+      // Skip if too close to arterials
+      if (Math.abs(x % arterialSpacing) > 200) {
         this.roads.push({
-          id: `arterial_to_${zone.id}`,
-          type: 1, // ARTERIAL
+          id: `street_ns_${roadId++}`,
+          type: 3, // LOCAL
           path: [
-            { x: 0, y: 0 },
-            { x: centerX * 0.7, y: centerY * 0.7 },
-            { x: centerX, y: centerY }
+            { x: x, y: cityBounds.min_y + 200 },
+            { x: x, y: cityBounds.max_y - 200 }
+          ],
+          width: 8,
+          lanes: 2,
+          speed_limit: 35
+        });
+      }
+    }
+
+    for (let y = cityBounds.min_y + 250; y <= cityBounds.max_y; y += streetSpacing) {
+      if (Math.abs(y % arterialSpacing) > 200) {
+        this.roads.push({
+          id: `street_ew_${roadId++}`,
+          type: 3, // LOCAL
+          path: [
+            { x: cityBounds.min_x + 200, y: y },
+            { x: cityBounds.max_x - 200, y: y }
+          ],
+          width: 8,
+          lanes: 2,
+          speed_limit: 35
+        });
+      }
+    }
+
+    // Add some curved suburban roads for variety
+    this.generateSuburbanRoads(cityBounds);
+
+    // Add bridges where roads cross the river
+    this.generateBridges();
+  }
+
+  generateSuburbanRoads(bounds) {
+    // Add curved roads in residential areas for realism
+    const curves = [
+      // Curved residential street
+      {
+        id: 'suburban_curve_1',
+        type: 3,
+        path: [
+          { x: bounds.min_x + 1000, y: bounds.min_y + 1000 },
+          { x: bounds.min_x + 1200, y: bounds.min_y + 1100 },
+          { x: bounds.min_x + 1400, y: bounds.min_y + 1050 },
+          { x: bounds.min_x + 1600, y: bounds.min_y + 1200 }
+        ],
+        width: 6,
+        lanes: 2,
+        speed_limit: 25
+      },
+      // Cul-de-sac
+      {
+        id: 'cul_de_sac_1',
+        type: 3,
+        path: [
+          { x: bounds.max_x - 1000, y: bounds.max_y - 1000 },
+          { x: bounds.max_x - 900, y: bounds.max_y - 950 },
+          { x: bounds.max_x - 850, y: bounds.max_y - 1000 },
+          { x: bounds.max_x - 900, y: bounds.max_y - 1050 },
+          { x: bounds.max_x - 1000, y: bounds.max_y - 1000 }
+        ],
+        width: 6,
+        lanes: 2,
+        speed_limit: 20
+      }
+    ];
+
+    curves.forEach(road => this.roads.push(road));
+  }
+
+  generateBridges() {
+    console.log('🌉 Generating bridges...');
+
+    if (!this.riverCrossings || this.riverCrossings.length === 0) {
+      console.log('No river crossings planned, skipping bridge generation');
+      return;
+    }
+
+    this.riverCrossings.forEach((crossing, index) => {
+      // Create bridge road segments that span the river
+      const bridgeLength = crossing.width + 100; // Extra length on each side
+      const bridgeId = `bridge_${index}`;
+
+      // Create a bridge that crosses the river at this point
+      // For east-west arterials
+      if (Math.abs(crossing.y % 1500) < 100) { // Near arterial level
+        this.roads.push({
+          id: `${bridgeId}_ew`,
+          type: 2, // COLLECTOR (bridges use collector type)
+          path: [
+            { x: crossing.x - bridgeLength/2, y: crossing.y },
+            { x: crossing.x + bridgeLength/2, y: crossing.y }
           ],
           width: 12,
           lanes: 4,
-          speed_limit: 60
+          speed_limit: 40
+        });
+      }
+
+      // For north-south arterials
+      if (Math.abs(crossing.x) < 200) { // Near center line where NS roads pass
+        this.roads.push({
+          id: `${bridgeId}_ns`,
+          type: 2, // COLLECTOR (bridges use collector type)
+          path: [
+            { x: crossing.x, y: crossing.y - bridgeLength/2 },
+            { x: crossing.x, y: crossing.y + bridgeLength/2 }
+          ],
+          width: 12,
+          lanes: 4,
+          speed_limit: 40
         });
       }
     });
 
-    // Local roads within zones
-    this.zones.forEach(zone => {
-      if (zone.type === 0 || zone.type === 1) { // Residential or commercial
-        const centerX = zone.boundary.reduce((sum, p) => sum + p.x, 0) / zone.boundary.length;
-        const centerY = zone.boundary.reduce((sum, p) => sum + p.y, 0) / zone.boundary.length;
-
-        // Grid of local roads
-        for (let i = 0; i < 3; i++) {
-          for (let j = 0; j < 3; j++) {
-            const offsetX = (i - 1) * 400;
-            const offsetY = (j - 1) * 400;
-
-            this.roads.push({
-              id: `local_${zone.id}_${i}_${j}`,
-              type: 3, // LOCAL
-              path: [
-                { x: centerX + offsetX - 200, y: centerY + offsetY },
-                { x: centerX + offsetX + 200, y: centerY + offsetY }
-              ],
-              width: 6,
-              lanes: 2,
-              speed_limit: 30
-            });
-          }
-        }
-      }
-    });
+    console.log(`✅ Generated ${this.riverCrossings.length} bridge crossings`);
   }
 
   generatePOIs() {
@@ -272,16 +575,21 @@ class CityGenerator {
   }
 
   generateBuildings() {
-    console.log('🏢 Generating buildings...');
+    console.log('🏢 Generating realistic buildings...');
 
-    // Generate buildings for high-capacity POIs
+    // Generate buildings based on zones with proper density and height gradients
+    this.zones.forEach(zone => {
+      this.generateBuildingsForZone(zone);
+    });
+
+    // Also generate buildings for high-capacity POIs (as landmarks)
     this.pois.forEach((poi, i) => {
-      if (poi.capacity > 50) {
-        const footprint = this.generatePolygon(poi.position.x, poi.position.y, 50, 4);
-        const height = 30 + this.random() * 100;
+      if (poi.capacity > 80) {
+        const footprint = this.generateBuildingFootprint(poi.position.x, poi.position.y, 3, true);
+        const height = this.getBuildingHeight(poi.zone_id, poi.type, true);
 
         this.buildings.push({
-          id: `building_${i}`,
+          id: `landmark_${i}`,
           footprint,
           height,
           zone_id: poi.zone_id,
@@ -289,6 +597,123 @@ class CityGenerator {
         });
       }
     });
+  }
+
+  generateBuildingsForZone(zone) {
+    const bounds = this.getZoneBounds(zone.boundary);
+    const buildingCount = Math.floor(zone.density * 100); // More buildings in denser zones
+
+    for (let i = 0; i < buildingCount; i++) {
+      // Place buildings on a grid-like pattern with some randomness
+      const gridX = bounds.min_x + (i % 10) * (bounds.width / 10);
+      const gridY = bounds.min_y + Math.floor(i / 10) * (bounds.height / 10);
+
+      // Add randomness to avoid perfect grid
+      const x = gridX + (this.random() - 0.5) * 100;
+      const y = gridY + (this.random() - 0.5) * 100;
+
+      // Ensure building is within zone
+      if (this.isPointInZone(x, y, zone.boundary)) {
+        const footprint = this.generateBuildingFootprint(x, y, zone.type);
+        const height = this.getBuildingHeight(zone.id, zone.type);
+
+        this.buildings.push({
+          id: `building_${zone.id}_${i}`,
+          footprint,
+          height,
+          zone_id: zone.id,
+          type: this.getZoneBuildingType(zone.type)
+        });
+      }
+    }
+  }
+
+  generateBuildingFootprint(x, y, zoneType, isLandmark = false) {
+    let baseSize, sides;
+
+    switch (zoneType) {
+      case 3: // DOWNTOWN - large office buildings
+        baseSize = isLandmark ? 120 : 60 + this.random() * 80;
+        sides = 4; // Rectangular office buildings
+        break;
+      case 1: // COMMERCIAL - medium stores/shops
+        baseSize = 40 + this.random() * 40;
+        sides = 4;
+        break;
+      case 2: // INDUSTRIAL - large warehouses
+        baseSize = 80 + this.random() * 120;
+        sides = 4;
+        break;
+      case 0: // RESIDENTIAL - small houses
+        baseSize = 20 + this.random() * 30;
+        sides = 4;
+        break;
+      default:
+        baseSize = 30;
+        sides = 4;
+    }
+
+    return this.generatePolygon(x, y, baseSize, sides);
+  }
+
+  getBuildingHeight(zoneId, zoneType, isLandmark = false) {
+    // Create realistic height distributions
+    if (zoneId.includes('downtown') || zoneId.includes('financial')) {
+      // Downtown skyscrapers
+      if (isLandmark) return 300 + this.random() * 200; // Super tall landmarks
+      return 100 + this.random() * 300; // 100-400m skyscrapers
+    } else if (zoneType === 1) { // Commercial
+      return 30 + this.random() * 60; // 30-90m mid-rise
+    } else if (zoneType === 2) { // Industrial
+      return 15 + this.random() * 25; // 15-40m warehouses
+    } else if (zoneType === 0) { // Residential
+      if (this.random() < 0.8) {
+        return 8 + this.random() * 12; // 8-20m houses
+      } else {
+        return 30 + this.random() * 40; // 30-70m apartment buildings
+      }
+    }
+    return 15 + this.random() * 35;
+  }
+
+  getZoneBuildingType(zoneType) {
+    switch (zoneType) {
+      case 3: return 2; // OFFICE_BUILDING
+      case 1: return 3; // STORE
+      case 2: return 4; // WAREHOUSE
+      case 0: return 0; // HOUSE
+      default: return 0;
+    }
+  }
+
+  getZoneBounds(boundary) {
+    const xs = boundary.map(p => p.x);
+    const ys = boundary.map(p => p.y);
+    const min_x = Math.min(...xs);
+    const max_x = Math.max(...xs);
+    const min_y = Math.min(...ys);
+    const max_y = Math.max(...ys);
+
+    return {
+      min_x,
+      max_x,
+      min_y,
+      max_y,
+      width: max_x - min_x,
+      height: max_y - min_y
+    };
+  }
+
+  isPointInZone(x, y, boundary) {
+    // Simple point-in-polygon test
+    let inside = false;
+    for (let i = 0, j = boundary.length - 1; i < boundary.length; j = i++) {
+      if (((boundary[i].y > y) !== (boundary[j].y > y)) &&
+          (x < (boundary[j].x - boundary[i].x) * (y - boundary[i].y) / (boundary[j].y - boundary[i].y) + boundary[i].x)) {
+        inside = !inside;
+      }
+    }
+    return inside;
   }
 
   getBuildingType(poiType) {
@@ -314,6 +739,7 @@ class CityGenerator {
       roads: this.roads,
       pois: this.pois,
       buildings: this.buildings,
+      river: this.river || null,
       metadata: {
         generationTimestamp: 1700000000000 + Math.floor(this.hashSeed(this.seed + '_timestamp') * 86400000), // Deterministic timestamp
         generationSeed: this.seed,

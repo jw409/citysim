@@ -1,302 +1,408 @@
 import { PolygonLayer, PathLayer, ScatterplotLayer } from '@deck.gl/layers';
 import { localToLatLng } from './coordinates';
 
-// Generate terrain features around city bounds
-export function generateTerrainLayers(bounds: any, timeOfDay: number = 12) {
+// Simple seeded random number generator
+class SeededRandom {
+  private seed: number;
+
+  constructor(seed: number) {
+    this.seed = seed;
+  }
+
+  next(): number {
+    this.seed = (this.seed * 9301 + 49297) % 233280;
+    return this.seed / 233280;
+  }
+}
+
+// Perlin noise implementation for smooth, natural terrain
+class PerlinNoise {
+  private permutation: number[];
+  private rng: SeededRandom;
+
+  constructor(seed: number) {
+    this.rng = new SeededRandom(seed);
+    this.permutation = [];
+
+    // Generate permutation table
+    for (let i = 0; i < 256; i++) {
+      this.permutation[i] = i;
+    }
+
+    // Shuffle using seeded random
+    for (let i = 255; i > 0; i--) {
+      const j = Math.floor(this.rng.next() * (i + 1));
+      [this.permutation[i], this.permutation[j]] = [this.permutation[j], this.permutation[i]];
+    }
+
+    // Duplicate for wrapping
+    for (let i = 0; i < 256; i++) {
+      this.permutation[256 + i] = this.permutation[i];
+    }
+  }
+
+  private fade(t: number): number {
+    return t * t * t * (t * (t * 6 - 15) + 10);
+  }
+
+  private lerp(t: number, a: number, b: number): number {
+    return a + t * (b - a);
+  }
+
+  private grad(hash: number, x: number, y: number): number {
+    const h = hash & 15;
+    const u = h < 8 ? x : y;
+    const v = h < 4 ? y : h === 12 || h === 14 ? x : 0;
+    return ((h & 1) === 0 ? u : -u) + ((h & 2) === 0 ? v : -v);
+  }
+
+  noise2D(x: number, y: number): number {
+    const X = Math.floor(x) & 255;
+    const Y = Math.floor(y) & 255;
+
+    x -= Math.floor(x);
+    y -= Math.floor(y);
+
+    const u = this.fade(x);
+    const v = this.fade(y);
+
+    const A = this.permutation[X] + Y;
+    const AA = this.permutation[A];
+    const AB = this.permutation[A + 1];
+    const B = this.permutation[X + 1] + Y;
+    const BA = this.permutation[B];
+    const BB = this.permutation[B + 1];
+
+    return this.lerp(v,
+      this.lerp(u, this.grad(this.permutation[AA], x, y),
+                   this.grad(this.permutation[BA], x - 1, y)),
+      this.lerp(u, this.grad(this.permutation[AB], x, y - 1),
+                   this.grad(this.permutation[BB], x - 1, y - 1))
+    );
+  }
+
+  // Generate octave noise for more natural variation
+  octaveNoise2D(x: number, y: number, octaves: number, persistence: number): number {
+    let total = 0;
+    let frequency = 1;
+    let amplitude = 1;
+    let maxValue = 0;
+
+    for (let i = 0; i < octaves; i++) {
+      total += this.noise2D(x * frequency, y * frequency) * amplitude;
+      maxValue += amplitude;
+      amplitude *= persistence;
+      frequency *= 2;
+    }
+
+    return total / maxValue;
+  }
+}
+
+// Generate terrain features using smooth Perlin noise instead of ugly polygons
+export function generateTerrainLayers(bounds: any, timeOfDay: number = 12, seed: number = 12345) {
   const { min_x, min_y, max_x, max_y } = bounds;
   const cityWidth = max_x - min_x;
   const cityHeight = max_y - min_y;
-  const padding = Math.max(cityWidth, cityHeight) * 0.5;
+  const padding = Math.max(cityWidth, cityHeight) * 0.4;
 
   const layers: any[] = [];
+  const perlin = new PerlinNoise(seed);
 
-  // Generate hills/mountains around the city
-  const hills = generateHills(bounds, padding);
-  if (hills.length > 0) {
+  // Generate smooth terrain mesh for continuous surface
+  const terrainMesh = generateTerrainMesh(bounds, padding, perlin, timeOfDay);
+  if (terrainMesh.length > 0) {
     layers.push(new PolygonLayer({
-      id: 'hills',
-      data: hills,
-      getPolygon: (d: any) => d.polygon.map((p: any) => localToLatLng(p[0], p[1])),
-      getFillColor: getHillColor(timeOfDay),
-      getLineColor: [100, 120, 80, 100],
-      getLineWidth: 1,
-      filled: true,
-      stroked: true,
-      extruded: true,
-      getElevation: (d: any) => d.height,
-      pickable: false,
-    }));
-  }
-
-  // Generate forests around the perimeter
-  const forests = generateForests(bounds, padding);
-  if (forests.length > 0) {
-    layers.push(new PolygonLayer({
-      id: 'forests',
-      data: forests,
-      getPolygon: (d: any) => d.polygon.map((p: any) => localToLatLng(p[0], p[1])),
-      getFillColor: getForestColor(timeOfDay),
-      getLineColor: [40, 80, 40, 80],
-      getLineWidth: 0.5,
+      id: 'continuous_terrain',
+      data: terrainMesh,
+      getPolygon: (d: any) => d.vertices.map((v: any) => {
+        const [lng, lat] = localToLatLng(v.x, v.y);
+        return [lng, lat];
+      }),
+      getElevation: (d: any) => Math.max(0, d.elevation),
+      getFillColor: (d: any) => d.color,
+      getLineColor: [0, 0, 0, 0],
       filled: true,
       stroked: false,
-      extruded: false,
+      extruded: true,
+      elevationScale: 1,
       pickable: false,
+      material: {
+        ambient: 0.6,
+        diffuse: 0.8,
+        shininess: 32,
+        specularColor: [255, 255, 255]
+      }
     }));
   }
 
-  // Generate water features
-  const waterFeatures = generateWaterFeatures(bounds, padding);
-  if (waterFeatures.length > 0) {
-    layers.push(new PolygonLayer({
-      id: 'water',
-      data: waterFeatures,
-      getPolygon: (d: any) => d.polygon.map((p: any) => localToLatLng(p[0], p[1])),
-      getFillColor: getWaterColor(timeOfDay),
-      getLineColor: [70, 130, 180, 120],
-      getLineWidth: 1,
-      filled: true,
-      stroked: true,
-      extruded: false,
-      pickable: false,
-    }));
+  // Add river if it exists in the city model
+  const river = generateRiverLayer(bounds, timeOfDay, seed);
+  if (river) {
+    layers.push(river);
   }
 
-  // Generate scattered vegetation/trees
-  const vegetation = generateScatteredVegetation(bounds, padding);
+  // Generate natural vegetation using noise patterns with elevation
+  const vegetation = generateNaturalVegetation(bounds, perlin, timeOfDay);
   if (vegetation.length > 0) {
     layers.push(new ScatterplotLayer({
-      id: 'vegetation',
+      id: 'natural_vegetation',
       data: vegetation,
-      getPosition: (d: any) => localToLatLng(d.x, d.y),
+      getPosition: (d: any) => {
+        const [lng, lat] = localToLatLng(d.x, d.y);
+        // Get terrain elevation at vegetation position
+        const terrainElevation = perlin.octaveNoise2D(d.x * 0.001, d.y * 0.001, 4, 0.5) * 100;
+        return [lng, lat, Math.max(0, terrainElevation + d.size/2)]; // Place vegetation on terrain
+      },
       getRadius: (d: any) => d.size,
-      getFillColor: getVegetationColor(timeOfDay),
+      getFillColor: (d: any) => d.color,
       pickable: false,
-      radiusMinPixels: 2,
-      radiusMaxPixels: 8,
+      radiusMinPixels: 3,
+      radiusMaxPixels: 12,
     }));
   }
 
   return layers;
 }
 
-function generateHills(bounds: any, padding: number): any[] {
-  const { min_x, min_y, max_x, max_y } = bounds;
-  const hills: any[] = [];
+// Professional terrain colors for realistic urban visualization
+function getTerrainColor(elevation: number, terrainType: string, timeOfDay: number, distanceFromCity: number): number[] {
+  const isDaytime = timeOfDay >= 6 && timeOfDay <= 18;
+  const urbanFactor = Math.max(0, 1 - distanceFromCity);
 
-  // Generate 3-5 hills around the city
-  const numHills = 3 + Math.floor(Math.random() * 3);
+  let baseColor: number[];
 
-  for (let i = 0; i < numHills; i++) {
-    const angle = (i / numHills) * 2 * Math.PI + Math.random() * 0.5;
-    const distance = padding * (0.7 + Math.random() * 0.6);
-
-    const centerX = ((min_x + max_x) / 2) + Math.cos(angle) * distance;
-    const centerY = ((min_y + max_y) / 2) + Math.sin(angle) * distance;
-
-    const hillRadius = 200 + Math.random() * 400;
-    const hillHeight = 50 + Math.random() * 150;
-
-    // Create irregular hill shape
-    const hillPoints: number[][] = [];
-    const numPoints = 8 + Math.floor(Math.random() * 4);
-
-    for (let j = 0; j < numPoints; j++) {
-      const pointAngle = (j / numPoints) * 2 * Math.PI;
-      const variance = 0.7 + Math.random() * 0.6;
-      const pointDistance = hillRadius * variance;
-
-      hillPoints.push([
-        centerX + Math.cos(pointAngle) * pointDistance,
-        centerY + Math.sin(pointAngle) * pointDistance
-      ]);
-    }
-
-    hills.push({
-      polygon: hillPoints,
-      height: hillHeight,
-      type: 'hill'
-    });
+  switch (terrainType) {
+    case 'water':
+      // Deep blue water for realism
+      baseColor = isDaytime ? [45, 85, 135] : [20, 40, 70];
+      break;
+    case 'lowland':
+      // Urban areas: concrete gray, suburban areas: muted green
+      if (urbanFactor > 0.4) {
+        baseColor = isDaytime ? [140, 135, 125] : [70, 68, 63]; // Urban concrete
+      } else {
+        baseColor = isDaytime ? [100, 120, 75] : [50, 60, 38]; // Suburban grass
+      }
+      break;
+    case 'grassland':
+      // Natural grassland with subdued colors
+      baseColor = isDaytime ? [95, 115, 70] : [48, 58, 35];
+      break;
+    case 'forest':
+      // Dense forest with realistic dark green
+      baseColor = isDaytime ? [65, 95, 55] : [33, 48, 28];
+      break;
+    case 'mountain':
+      // Rocky terrain with natural stone colors
+      baseColor = isDaytime ? [115, 105, 90] : [58, 53, 45];
+      break;
+    default:
+      baseColor = isDaytime ? [120, 118, 115] : [60, 59, 58];
   }
 
-  return hills;
+  // Subtle elevation-based shading
+  const elevationFactor = Math.max(0, Math.min(1, (elevation + 40) / 120));
+  const brightness = 0.85 + elevationFactor * 0.3;
+
+  return [
+    Math.round(baseColor[0] * brightness),
+    Math.round(baseColor[1] * brightness),
+    Math.round(baseColor[2] * brightness),
+    240 // More opaque for professional look
+  ];
 }
 
-function generateForests(bounds: any, padding: number): any[] {
-  const { min_x, min_y, max_x, max_y } = bounds;
-  const forests: any[] = [];
+// Natural vegetation colors
+function getVegetationColor(timeOfDay: number, vegetationType: string): number[] {
+  const isDaytime = timeOfDay >= 6 && timeOfDay <= 18;
 
-  // Generate forest patches around the city
-  const numForests = 4 + Math.floor(Math.random() * 4);
-
-  for (let i = 0; i < numForests; i++) {
-    const side = Math.floor(Math.random() * 4); // 0=top, 1=right, 2=bottom, 3=left
-    let centerX: number, centerY: number;
-
-    switch (side) {
-      case 0: // Top
-        centerX = min_x + Math.random() * (max_x - min_x);
-        centerY = max_y + padding * (0.3 + Math.random() * 0.4);
-        break;
-      case 1: // Right
-        centerX = max_x + padding * (0.3 + Math.random() * 0.4);
-        centerY = min_y + Math.random() * (max_y - min_y);
-        break;
-      case 2: // Bottom
-        centerX = min_x + Math.random() * (max_x - min_x);
-        centerY = min_y - padding * (0.3 + Math.random() * 0.4);
-        break;
-      default: // Left
-        centerX = min_x - padding * (0.3 + Math.random() * 0.4);
-        centerY = min_y + Math.random() * (max_y - min_y);
-        break;
-    }
-
-    const forestSize = 300 + Math.random() * 500;
-
-    // Create organic forest shape
-    const forestPoints: number[][] = [];
-    const numPoints = 6 + Math.floor(Math.random() * 4);
-
-    for (let j = 0; j < numPoints; j++) {
-      const angle = (j / numPoints) * 2 * Math.PI;
-      const variance = 0.6 + Math.random() * 0.8;
-      const distance = forestSize * variance;
-
-      forestPoints.push([
-        centerX + Math.cos(angle) * distance,
-        centerY + Math.sin(angle) * distance
-      ]);
-    }
-
-    forests.push({
-      polygon: forestPoints,
-      type: 'forest'
-    });
+  if (vegetationType === 'tree') {
+    return isDaytime ? [60, 100, 50, 180] : [30, 50, 25, 180]; // Dark green trees
+  } else {
+    return isDaytime ? [90, 140, 70, 160] : [45, 70, 35, 160]; // Lighter green bushes
   }
-
-  return forests;
 }
 
-function generateWaterFeatures(bounds: any, padding: number): any[] {
+// Generate continuous terrain mesh using triangulated polygons
+function generateTerrainMesh(bounds: any, padding: number, perlin: PerlinNoise, timeOfDay: number) {
   const { min_x, min_y, max_x, max_y } = bounds;
-  const waterFeatures: any[] = [];
+  const terrainMesh: any[] = [];
 
-  // Generate 1-2 water features (lakes, rivers)
-  const numWaterFeatures = 1 + Math.floor(Math.random() * 2);
+  // Create a finer grid for better mesh quality
+  const resolution = 200; // 200m grid for smoother terrain
+  const noiseScale = 0.001;
 
-  for (let i = 0; i < numWaterFeatures; i++) {
-    if (Math.random() < 0.6) {
-      // Generate a lake
-      const centerX = min_x + Math.random() * (max_x - min_x);
-      const centerY = min_y + Math.random() * (max_y - min_y);
-      const lakeSize = 150 + Math.random() * 300;
+  // Generate height map grid
+  const heightMap: { [key: string]: { x: number; y: number; elevation: number; terrainType: string; color: number[] } } = {};
 
-      const lakePoints: number[][] = [];
-      const numPoints = 8 + Math.floor(Math.random() * 4);
+  for (let x = min_x - padding; x <= max_x + padding; x += resolution) {
+    for (let y = min_y - padding; y <= max_y + padding; y += resolution) {
+      const elevation = perlin.octaveNoise2D(x * noiseScale, y * noiseScale, 4, 0.5) * 80; // Reduced from 100 to 80
 
-      for (let j = 0; j < numPoints; j++) {
-        const angle = (j / numPoints) * 2 * Math.PI;
-        const variance = 0.7 + Math.random() * 0.6;
-        const distance = lakeSize * variance;
+      const distanceFromCity = Math.min(
+        Math.abs(x - (min_x + max_x) / 2) / ((max_x - min_x) / 2),
+        Math.abs(y - (min_y + max_y) / 2) / ((max_y - min_y) / 2)
+      );
 
-        lakePoints.push([
-          centerX + Math.cos(angle) * distance,
-          centerY + Math.sin(angle) * distance
-        ]);
+      let terrainType: string;
+      if (elevation < -15) {
+        terrainType = 'water';
+      } else if (elevation < 10) {
+        terrainType = 'lowland';
+      } else if (elevation < 25) {
+        terrainType = 'grassland';
+      } else if (elevation < 45) {
+        terrainType = 'forest';
+      } else {
+        terrainType = 'mountain';
       }
 
-      waterFeatures.push({
-        polygon: lakePoints,
-        type: 'lake'
-      });
-    } else {
-      // Generate a river (simplified as elongated water body)
-      const startX = Math.random() < 0.5 ? min_x - padding * 0.5 : max_x + padding * 0.5;
-      const startY = min_y + Math.random() * (max_y - min_y);
-      const endX = Math.random() < 0.5 ? min_x - padding * 0.5 : max_x + padding * 0.5;
-      const endY = min_y + Math.random() * (max_y - min_y);
-
-      const riverWidth = 50 + Math.random() * 100;
-
-      waterFeatures.push({
-        polygon: [
-          [startX - riverWidth/2, startY],
-          [endX - riverWidth/2, endY],
-          [endX + riverWidth/2, endY],
-          [startX + riverWidth/2, startY]
-        ],
-        type: 'river'
-      });
+      const key = `${x},${y}`;
+      heightMap[key] = {
+        x, y, elevation, terrainType,
+        color: getTerrainColor(elevation, terrainType, timeOfDay, distanceFromCity)
+      };
     }
   }
 
-  return waterFeatures;
+  // Create triangulated mesh from grid points
+  for (let x = min_x - padding; x < max_x + padding; x += resolution) {
+    for (let y = min_y - padding; y < max_y + padding; y += resolution) {
+      const p1 = heightMap[`${x},${y}`];
+      const p2 = heightMap[`${x + resolution},${y}`];
+      const p3 = heightMap[`${x},${y + resolution}`];
+      const p4 = heightMap[`${x + resolution},${y + resolution}`];
+
+      if (p1 && p2 && p3 && p4) {
+        // Create two triangles per grid square
+        // Triangle 1: p1, p2, p3
+        const avgElevation1 = (p1.elevation + p2.elevation + p3.elevation) / 3;
+        const avgColor1 = blendColors([p1.color, p2.color, p3.color]);
+
+        terrainMesh.push({
+          vertices: [
+            { x: p1.x, y: p1.y },
+            { x: p2.x, y: p2.y },
+            { x: p3.x, y: p3.y }
+          ],
+          elevation: avgElevation1,
+          color: avgColor1
+        });
+
+        // Triangle 2: p2, p3, p4
+        const avgElevation2 = (p2.elevation + p3.elevation + p4.elevation) / 3;
+        const avgColor2 = blendColors([p2.color, p3.color, p4.color]);
+
+        terrainMesh.push({
+          vertices: [
+            { x: p2.x, y: p2.y },
+            { x: p3.x, y: p3.y },
+            { x: p4.x, y: p4.y }
+          ],
+          elevation: avgElevation2,
+          color: avgColor2
+        });
+      }
+    }
+  }
+
+  return terrainMesh;
 }
 
-function generateScatteredVegetation(bounds: any, padding: number): any[] {
+// Helper function to blend colors
+function blendColors(colors: number[][]): number[] {
+  if (colors.length === 0) return [150, 150, 150, 200];
+
+  const result = [0, 0, 0, 0];
+  colors.forEach(color => {
+    result[0] += color[0];
+    result[1] += color[1];
+    result[2] += color[2];
+    result[3] += color[3];
+  });
+
+  return result.map(channel => Math.round(channel / colors.length));
+}
+
+// Generate river layer from city model
+function generateRiverLayer(bounds: any, timeOfDay: number, seed: number) {
+  const { min_x, min_y, max_x, max_y } = bounds;
+  const rng = new SeededRandom(seed);
+
+  // Generate meandering river path similar to city generation
+  const riverPath: { x: number; y: number }[] = [];
+  const riverWidth = 120 + rng.next() * 80; // 120-200m wide river
+
+  // River flows roughly north-south through the city with curves
+  for (let y = min_y - 1000; y <= max_y + 1000; y += 100) {
+    // Create meandering pattern using sine wave with randomness
+    const baseX = Math.sin(y / 1200) * 600; // Main curve
+    const noise = (rng.next() - 0.5) * 200; // Add natural variation
+    const x = baseX + noise;
+    riverPath.push({ x, y });
+  }
+
+  if (riverPath.length === 0) return null;
+
+  // Create river as PathLayer for flowing water effect
+  const isDaytime = timeOfDay >= 6 && timeOfDay <= 18;
+  const waterColor = isDaytime ? [70, 130, 180, 200] : [30, 60, 90, 200]; // Blue water
+
+  return new PathLayer({
+    id: 'river',
+    data: [{ path: riverPath }],
+    getPath: (d: any) => d.path.map((p: any) => {
+      const [lng, lat] = localToLatLng(p.x, p.y);
+      return [lng, lat, -2]; // Slightly below ground level
+    }),
+    getColor: waterColor,
+    getWidth: riverWidth,
+    widthMinPixels: 8,
+    widthMaxPixels: 50,
+    pickable: false,
+    capRounded: true,
+    jointRounded: true,
+    material: {
+      ambient: 0.8,
+      diffuse: 0.6,
+      shininess: 128,
+      specularColor: [200, 220, 255]
+    }
+  });
+}
+
+// Generate natural vegetation using noise patterns
+function generateNaturalVegetation(bounds: any, perlin: PerlinNoise, timeOfDay: number) {
   const { min_x, min_y, max_x, max_y } = bounds;
   const vegetation: any[] = [];
 
-  // Generate scattered trees and bushes
-  const numVegetation = 50 + Math.floor(Math.random() * 100);
+  // Generate clusters of vegetation using noise
+  const density = 0.3; // Vegetation density
+  const noiseThreshold = 0.2; // Only place vegetation where noise > threshold
 
-  for (let i = 0; i < numVegetation; i++) {
-    // Place vegetation around the city perimeter
-    const angle = Math.random() * 2 * Math.PI;
-    const distance = padding * (0.2 + Math.random() * 0.8);
+  for (let x = min_x; x <= max_x; x += 100) {
+    for (let y = min_y; y <= max_y; y += 100) {
+      const vegetationNoise = perlin.octaveNoise2D(x * 0.003, y * 0.003, 3, 0.6);
 
-    const x = ((min_x + max_x) / 2) + Math.cos(angle) * distance;
-    const y = ((min_y + max_y) / 2) + Math.sin(angle) * distance;
+      if (vegetationNoise > noiseThreshold && Math.random() < density) {
+        const elevationNoise = perlin.noise2D(x * 0.001, y * 0.001);
+        const vegetationType = elevationNoise > 0 ? 'tree' : 'bush';
 
-    vegetation.push({
-      x,
-      y,
-      size: 10 + Math.random() * 20,
-      type: Math.random() < 0.7 ? 'tree' : 'bush'
-    });
+        // Add some scatter around the grid point
+        const scatterX = x + (Math.random() - 0.5) * 80;
+        const scatterY = y + (Math.random() - 0.5) * 80;
+
+        vegetation.push({
+          x: scatterX,
+          y: scatterY,
+          type: vegetationType,
+          size: vegetationType === 'tree' ? 8 + Math.random() * 6 : 4 + Math.random() * 3,
+          color: getVegetationColor(timeOfDay, vegetationType)
+        });
+      }
+    }
   }
 
   return vegetation;
-}
-
-// Color functions based on time of day
-function getHillColor(timeOfDay: number): number[] {
-  if (timeOfDay >= 6 && timeOfDay <= 18) {
-    // Daytime - brown/green hills
-    return [101, 67, 33, 180];
-  } else {
-    // Nighttime - darker hills
-    return [60, 40, 20, 180];
-  }
-}
-
-function getForestColor(timeOfDay: number): number[] {
-  if (timeOfDay >= 6 && timeOfDay <= 18) {
-    // Daytime - green forest
-    return [34, 139, 34, 160];
-  } else {
-    // Nighttime - darker forest
-    return [20, 80, 20, 160];
-  }
-}
-
-function getWaterColor(timeOfDay: number): number[] {
-  if (timeOfDay >= 6 && timeOfDay <= 18) {
-    // Daytime - blue water
-    return [70, 130, 180, 200];
-  } else {
-    // Nighttime - darker water
-    return [30, 60, 90, 200];
-  }
-}
-
-function getVegetationColor(timeOfDay: number): number[] {
-  if (timeOfDay >= 6 && timeOfDay <= 18) {
-    // Daytime - green vegetation
-    return [46, 125, 50, 180];
-  } else {
-    // Nighttime - darker vegetation
-    return [25, 70, 30, 180];
-  }
 }

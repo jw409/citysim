@@ -4,6 +4,7 @@ import {
   ChargingStation,
   TrafficDensityPoint,
 } from '../types/optimization';
+import { generateCandidateLocations } from '../utils/trafficAnalysis';
 
 export class FacilityLocationProblem {
   private input: OptimizationInput;
@@ -17,21 +18,12 @@ export class FacilityLocationProblem {
   }
 
   private generateCandidates(): { x: number; y: number }[] {
-    // Generate candidate locations based on traffic density
-    const candidates: { x: number; y: number }[] = [];
-    const { traffic_data, config } = this.input;
-
-    // Use high-traffic areas as candidate locations
-    const sortedTrafficPoints = traffic_data
-      .filter(point => point.density >= config.min_traffic_threshold)
-      .sort((a, b) => b.density - a.density)
-      .slice(0, 30); // Limit candidates for performance
-
-    sortedTrafficPoints.forEach(point => {
-      candidates.push(point.position);
-    });
-
-    return candidates;
+    // Use the traffic analysis utility to generate candidate locations
+    return generateCandidateLocations(
+      this.input.traffic_data,
+      this.input.roads,
+      this.input.existing_stations
+    );
   }
 
   private calculateCoverageMatrix(): number[][] {
@@ -48,6 +40,7 @@ export class FacilityLocationProblem {
         );
 
         if (distance <= config.coverage_radius) {
+          // Coverage value is weighted by traffic density and flow
           matrix[i][j] = trafficPoint.density * trafficPoint.flow_volume;
         } else {
           matrix[i][j] = 0;
@@ -89,6 +82,23 @@ export class FacilityLocationProblem {
   public calculateCost(selectedStations: number[]): number {
     return selectedStations.length * this.input.config.cost_per_station;
   }
+
+  public calculateObjectiveValue(selectedStations: number[]): number {
+    const coverage = this.calculateCoverage(selectedStations);
+    const cost = this.calculateCost(selectedStations);
+    const { weight_coverage, weight_cost } = this.input.config;
+
+    // Maximize coverage, minimize cost
+    return coverage * weight_coverage - (cost / 100000) * weight_cost;
+  }
+
+  public getCandidateCount(): number {
+    return this.candidateLocations.length;
+  }
+
+  public getTrafficPointCount(): number {
+    return this.input.traffic_data.length;
+  }
 }
 
 export function formatSolutionForVisualization(
@@ -97,17 +107,20 @@ export function formatSolutionForVisualization(
 ): ChargingStation[] {
   return selectedStations.map((stationIndex, id) => {
     const position = problemData.candidates[stationIndex];
-    const coverage = problemData.coverageMatrix[stationIndex];
+    const coverage = problemData.coverageMatrix[stationIndex] || [];
     const totalCoverage = coverage.reduce((sum: number, cov: number) => sum + cov, 0);
 
+    // Calculate which POIs are covered (for future use)
+    const coveredPOIs: string[] = [];
+
     return {
-      id: `station_${id}`,
+      id: `station_${id + 1}`,
       position,
       capacity: 4, // 4 charging ports per station
       cost: problemData.config.cost_per_station,
       coverage_radius: problemData.config.coverage_radius,
       traffic_coverage: totalCoverage,
-      poi_ids_covered: [], // Could be calculated if needed
+      poi_ids_covered: coveredPOIs,
     };
   });
 }

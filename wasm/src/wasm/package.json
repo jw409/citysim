@@ -1,0 +1,15 @@
+{
+  "name": "urbansynth-sim",
+  "type": "module",
+  "version": "0.1.0",
+  "files": [
+    "urbansynth_sim_bg.wasm",
+    "urbansynth_sim.js",
+    "urbansynth_sim.d.ts"
+  ],
+  "main": "urbansynth_sim.js",
+  "types": "urbansynth_sim.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}

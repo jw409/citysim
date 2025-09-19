@@ -11,15 +11,24 @@ export function ControlPanel() {
     return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
   };
 
+  console.log('ControlPanel render:', {
+    isInitialized: state.isInitialized,
+    isRunning: state.isRunning,
+    isLoading: state.isLoading,
+    currentTime: state.currentTime,
+    speed: state.speed
+  });
+
   return (
     <div className="control-panel">
+      <h3 className="toolbar-title">⏱️ Time Controls</h3>
       <div className="control-group">
-        <label className="control-label">Simulation</label>
+        <label className="control-label">Simulation Status: {state.isInitialized ? '✅ Ready' : '⏳ Loading'}</label>
         <div className="control-buttons">
           <button
             className="button button-primary"
             onClick={state.isRunning ? pause : start}
-            disabled={!state.isInitialized}
+            style={{ minWidth: '100px' }}
           >
             {state.isRunning ? '⏸️ Pause' : '▶️ Play'}
           </button>
@@ -38,7 +47,7 @@ export function ControlPanel() {
           value={state.speed}
           onChange={(e) => setSpeed(parseFloat(e.target.value))}
           className="speed-slider"
-          disabled={!state.isInitialized}
+          style={{ width: '100%' }}
         />
       </div>
 

@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useReducer, ReactNode } from 'react';
 import { Agent, TrafficData, CityModel } from '../types/simulation';
+import { PerformanceState, PerformanceProfile } from '../types/performance';
 
 export interface SimulationState {
   isInitialized: boolean;
@@ -20,6 +21,7 @@ export interface SimulationState {
     averageSpeed: number;
     congestionLevel: number;
   };
+  performance: PerformanceState | null;
 }
 
 type SimulationAction =
@@ -34,7 +36,9 @@ type SimulationAction =
   | { type: 'SET_TIME'; payload: { time: number; day: number } }
   | { type: 'SET_SPEED'; payload: number }
   | { type: 'SET_TOOL'; payload: string | null }
-  | { type: 'UPDATE_STATS'; payload: Partial<SimulationState['stats']> };
+  | { type: 'UPDATE_STATS'; payload: Partial<SimulationState['stats']> }
+  | { type: 'SET_PERFORMANCE_STATE'; payload: PerformanceState }
+  | { type: 'UPDATE_PERFORMANCE_PROFILE'; payload: PerformanceProfile };
 
 const initialState: SimulationState = {
   isInitialized: false,
@@ -45,7 +49,7 @@ const initialState: SimulationState = {
   trafficData: null,
   cityModel: null,
   simulationData: null,
-  currentTime: 0,
+  currentTime: 8.0, // Start at 8 AM
   day: 0,
   speed: 1.0,
   selectedTool: null,
@@ -55,6 +59,7 @@ const initialState: SimulationState = {
     averageSpeed: 0,
     congestionLevel: 0,
   },
+  performance: null,
 };
 
 function simulationReducer(state: SimulationState, action: SimulationAction): SimulationState {
@@ -83,6 +88,16 @@ function simulationReducer(state: SimulationState, action: SimulationAction): Si
       return { ...state, selectedTool: action.payload };
     case 'UPDATE_STATS':
       return { ...state, stats: { ...state.stats, ...action.payload } };
+    case 'SET_PERFORMANCE_STATE':
+      return { ...state, performance: action.payload };
+    case 'UPDATE_PERFORMANCE_PROFILE':
+      return {
+        ...state,
+        performance: state.performance ? {
+          ...state.performance,
+          current_profile: action.payload
+        } : null
+      };
     default:
       return state;
   }

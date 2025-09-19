@@ -66,6 +66,11 @@ export function getOptimalZoom(bounds: any, viewportSize: { width: number; heigh
   return Math.min(zoomX, zoomY) - 1; // Add some padding
 }
 
+function getRoadTypeName(roadType: number): string {
+  const types = ['Local Street', 'Main Road', 'Highway', 'Boulevard', 'Avenue'];
+  return types[roadType] || 'Local Street';
+}
+
 export function createPickingInfoTooltip(info: any): string | null {
   if (!info.object) return null;
 
@@ -79,7 +84,9 @@ export function createPickingInfoTooltip(info: any): string | null {
       return `Agent: ${object.agent_type || 'Unknown'}\nSpeed: ${object.speed?.toFixed(1) || 0} km/h`;
 
     case 'roads':
-      return `Road: ${object.road_type || 'Unknown'}\nSpeed Limit: ${object.speed_limit || 0} km/h`;
+      const roadTypeName = getRoadTypeName(object.road_type || object.type || 0);
+      const roadName = object.name || object.road_name || 'Unnamed Road';
+      return `${roadName}\nType: ${roadTypeName}\nSpeed Limit: ${object.speed_limit || object.speedLimit || 50} km/h`;
 
     case 'pois':
       return `POI: ${object.properties?.name || 'Unknown'}\nCapacity: ${object.capacity || 0}`;
