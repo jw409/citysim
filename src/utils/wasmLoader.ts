@@ -182,8 +182,9 @@ export async function initializeSimulation(cityModel: any): Promise<void> {
 
 export async function loadCityModel(): Promise<any> {
   try {
-    console.log('Loading city model from /model.pbf...');
-    const response = await fetch('/model.pbf');
+    const modelPath = `${import.meta.env.BASE_URL}model.pbf`;
+    console.log(`Loading city model from ${modelPath}...`);
+    const response = await fetch(modelPath);
     if (!response.ok) {
       throw new Error(`Failed to fetch city model: ${response.statusText}`);
     }

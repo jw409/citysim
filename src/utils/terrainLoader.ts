@@ -39,8 +39,9 @@ export async function loadPlanetaryTerrain(): Promise<PlanetaryTerrainData | nul
   // Start loading
   loadingPromise = (async () => {
     try {
-      console.log('Loading planetary terrain data from /model-terrain.json...');
-      const response = await fetch('/model-terrain.json');
+      const terrainPath = `${import.meta.env.BASE_URL}model-terrain.json`;
+      console.log(`Loading planetary terrain data from ${terrainPath}...`);
+      const response = await fetch(terrainPath);
 
       console.log('Terrain fetch response:', {
         ok: response.ok,
