@@ -44,11 +44,8 @@ export function useSimulation() {
       dispatch({ type: 'SET_INITIALIZED', payload: true });
       dispatch({ type: 'SET_LOADING', payload: false });
 
-      // Auto-start simulation for immediate agent visibility
-      setTimeout(() => {
-        dispatch({ type: 'SET_RUNNING', payload: true });
-        console.log('Auto-started simulation for immediate agent testing');
-      }, 100);
+      // Simulation starts paused - user can click PLAY to start
+      console.log('Simulation initialized and ready - click PLAY to start');
     } catch (error) {
       console.error('Critical initialization error:', error);
       dispatch({
