@@ -2,10 +2,10 @@ export const DAY_COLORS = {
   sky: [135, 206, 235],
   ground: [34, 139, 34],
   buildings: {
-    residential: [255, 228, 181],
-    commercial: [176, 224, 230],
-    industrial: [169, 169, 169],
-    office: [70, 130, 180],
+    residential: [255, 228, 181, 255],
+    commercial: [176, 224, 230, 255],
+    industrial: [169, 169, 169, 255],
+    office: [70, 130, 180, 255],
   },
   roads: {
     highway: [64, 64, 64],

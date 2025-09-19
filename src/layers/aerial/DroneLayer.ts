@@ -19,12 +19,18 @@ export function createDroneLayer(droneData: any[]) {
         if (d.status === 'emergency') return [255, 0, 0, 255]; // Red for emergency
 
         switch (d.drone_type) {
-          case 'delivery': return [0, 255, 0, 255]; // Green for delivery
-          case 'surveillance': return [255, 165, 0, 255]; // Orange for surveillance
-          case 'inspection': return [0, 0, 255, 255]; // Blue for inspection
-          case 'photography': return [255, 255, 0, 255]; // Yellow for photography
-          case 'research': return [128, 0, 128, 255]; // Purple for research
-          default: return layerConfig.color;
+          case 'delivery':
+            return [0, 255, 0, 255]; // Green for delivery
+          case 'surveillance':
+            return [255, 165, 0, 255]; // Orange for surveillance
+          case 'inspection':
+            return [0, 0, 255, 255]; // Blue for inspection
+          case 'photography':
+            return [255, 255, 0, 255]; // Yellow for photography
+          case 'research':
+            return [128, 0, 128, 255]; // Purple for research
+          default:
+            return layerConfig.color;
         }
       },
       getLineColor: [0, 0, 0, 150],
@@ -35,12 +41,12 @@ export function createDroneLayer(droneData: any[]) {
       material: {
         ambient: 0.7,
         diffuse: 0.9,
-        shininess: 16
+        shininess: 16,
       },
       transitions: {
         getPosition: 500,
-        getFillColor: 300
-      }
+        getFillColor: 300,
+      },
     }),
 
     // Drone flight paths
@@ -52,19 +58,25 @@ export function createDroneLayer(droneData: any[]) {
       getColor: (d: any) => {
         // Semi-transparent paths
         switch (d.drone_type) {
-          case 'delivery': return [0, 255, 0, 120];
-          case 'surveillance': return [255, 165, 0, 120];
-          case 'inspection': return [0, 0, 255, 120];
-          case 'photography': return [255, 255, 0, 120];
-          case 'research': return [128, 0, 128, 120];
-          default: return [255, 255, 255, 100];
+          case 'delivery':
+            return [0, 255, 0, 120];
+          case 'surveillance':
+            return [255, 165, 0, 120];
+          case 'inspection':
+            return [0, 0, 255, 120];
+          case 'photography':
+            return [255, 255, 0, 120];
+          case 'research':
+            return [128, 0, 128, 120];
+          default:
+            return [255, 255, 255, 100];
         }
       },
       opacity: 0.7,
       pickable: true,
       widthMinPixels: 1,
-      widthMaxPixels: 3
-    })
+      widthMaxPixels: 3,
+    }),
   ];
 }
 
@@ -96,7 +108,7 @@ export function generateDroneTraffic(bounds: any, density: number = 0.3): any[] 
       operator: generateOperator(type),
       mission: generateDroneMission(type),
       status: Math.random() > 0.95 ? 'emergency' : 'normal',
-      registration: `D-${Math.random().toString(36).substr(2, 4).toUpperCase()}`
+      registration: `D-${Math.random().toString(36).substr(2, 4).toUpperCase()}`,
     };
 
     drones.push(drone);
@@ -120,34 +132,52 @@ export function generateDroneTraffic(bounds: any, density: number = 0.3): any[] 
 
 function getDroneAltitude(type: string): number {
   switch (type) {
-    case 'delivery': return 50 + Math.random() * 100; // 50-150m
-    case 'surveillance': return 80 + Math.random() * 70; // 80-150m
-    case 'inspection': return 30 + Math.random() * 50; // 30-80m
-    case 'photography': return 60 + Math.random() * 90; // 60-150m
-    case 'research': return 100 + Math.random() * 50; // 100-150m
-    default: return 80;
+    case 'delivery':
+      return 50 + Math.random() * 100; // 50-150m
+    case 'surveillance':
+      return 80 + Math.random() * 70; // 80-150m
+    case 'inspection':
+      return 30 + Math.random() * 50; // 30-80m
+    case 'photography':
+      return 60 + Math.random() * 90; // 60-150m
+    case 'research':
+      return 100 + Math.random() * 50; // 100-150m
+    default:
+      return 80;
   }
 }
 
 function getDroneSize(type: string): number {
   switch (type) {
-    case 'delivery': return 3; // Large delivery drones
-    case 'surveillance': return 2; // Medium surveillance drones
-    case 'inspection': return 1.5; // Small inspection drones
-    case 'photography': return 2; // Medium camera drones
-    case 'research': return 2.5; // Large research drones
-    default: return 2;
+    case 'delivery':
+      return 3; // Large delivery drones
+    case 'surveillance':
+      return 2; // Medium surveillance drones
+    case 'inspection':
+      return 1.5; // Small inspection drones
+    case 'photography':
+      return 2; // Medium camera drones
+    case 'research':
+      return 2.5; // Large research drones
+    default:
+      return 2;
   }
 }
 
 function getDroneSpeed(type: string): number {
   switch (type) {
-    case 'delivery': return 60; // Fast delivery
-    case 'surveillance': return 40; // Moderate surveillance speed
-    case 'inspection': return 25; // Slow and precise inspection
-    case 'photography': return 35; // Smooth camera movement
-    case 'research': return 45; // Variable research speed
-    default: return 40;
+    case 'delivery':
+      return 60; // Fast delivery
+    case 'surveillance':
+      return 40; // Moderate surveillance speed
+    case 'inspection':
+      return 25; // Slow and precise inspection
+    case 'photography':
+      return 35; // Smooth camera movement
+    case 'research':
+      return 45; // Variable research speed
+    default:
+      return 40;
   }
 }
 
@@ -157,7 +187,7 @@ function generateOperator(type: string): string {
     surveillance: ['Police Department', 'Security Corp', 'Private Investigator', 'Border Patrol'],
     inspection: ['Utility Company', 'Construction Corp', 'Insurance Adjuster', 'Survey Co'],
     photography: ['News Station', 'Real Estate', 'Event Photography', 'Tourism Board'],
-    research: ['University', 'Weather Service', 'Environmental Agency', 'Tech Company']
+    research: ['University', 'Weather Service', 'Environmental Agency', 'Tech Company'],
   };
 
   const typeOperators = operators[type] || operators.delivery;
@@ -168,9 +198,14 @@ function generateDroneMission(type: string): string {
   const missions: Record<string, string[]> = {
     delivery: ['Package Delivery', 'Food Delivery', 'Medical Supply', 'Emergency Supply'],
     surveillance: ['Area Patrol', 'Traffic Monitoring', 'Security Watch', 'Search & Rescue'],
-    inspection: ['Infrastructure Check', 'Damage Assessment', 'Maintenance Survey', 'Safety Inspection'],
+    inspection: [
+      'Infrastructure Check',
+      'Damage Assessment',
+      'Maintenance Survey',
+      'Safety Inspection',
+    ],
     photography: ['Aerial Photography', 'Event Coverage', 'Property Survey', 'Documentary Film'],
-    research: ['Data Collection', 'Environmental Monitor', 'Weather Observation', 'Traffic Study']
+    research: ['Data Collection', 'Environmental Monitor', 'Weather Observation', 'Traffic Study'],
   };
 
   const typeMissions = missions[type] || missions.delivery;
@@ -219,7 +254,7 @@ function generateDroneFlightPath(drones: any[], drone: any, bounds: any, type: s
       drone_id: drone.id,
       path: pathPoints,
       drone_type: type,
-      width: 1
+      width: 1,
     });
   }
 }
@@ -306,7 +341,7 @@ function generateResearchPath(pathPoints: [number, number, number][], drone: any
   const spacing = 80;
 
   for (let i = 0; i < samples; i++) {
-    const x = drone.x + (i % 3 - 1) * spacing;
+    const x = drone.x + ((i % 3) - 1) * spacing;
     const y = drone.y + Math.floor(i / 3) * spacing;
     const altitude = drone.altitude + Math.random() * 20 - 10;
 
@@ -346,7 +381,7 @@ function generateDroneCorridor(drones: any[], index: number, bounds: any) {
     corridor_type: 'highway',
     average_altitude: altitude,
     traffic_density: Math.random(),
-    width: 2
+    width: 2,
   });
 }
 
@@ -355,7 +390,7 @@ function generateDeliveryNetworks(drones: any[], bounds: any, density: number) {
   const hubCount = Math.floor(density * 3) + 1;
 
   for (let hub = 0; hub < hubCount; hub++) {
-    const hubX = min_x + (hub + 1) * (max_x - min_x) / (hubCount + 1);
+    const hubX = min_x + ((hub + 1) * (max_x - min_x)) / (hubCount + 1);
     const hubY = min_y + Math.random() * (max_y - min_y);
 
     // Create spoke routes from hub
@@ -382,7 +417,7 @@ function generateDeliveryNetworks(drones: any[], bounds: any, density: number) {
           network_type: 'delivery_hub',
           hub_id: hub,
           average_altitude: 80,
-          width: 1
+          width: 1,
         });
       }
     }

@@ -65,11 +65,27 @@ export interface Building {
   building_type: number;
 }
 
+export interface CityBounds {
+  min_x: number;
+  min_y: number;
+  max_x: number;
+  max_y: number;
+}
+
+export interface PlanetaryTerrainScale {
+  scale: number;
+  data: any[];
+}
+
 export interface CityModel {
+  name?: string;
+  bounds?: CityBounds;
   zones: Zone[];
   roads: Road[];
   pois: POI[];
   buildings: Building[];
+  metadata?: any;
+  planetaryTerrain?: PlanetaryTerrainScale[];
 }
 
 export interface TrafficData {

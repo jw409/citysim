@@ -1,0 +1,16 @@
+<svg width="128" height="16" xmlns="http://www.w3.org/2000/svg">
+  <!-- Car -->
+  <rect x="2" y="4" width="12" height="8" fill="#ff6464"/>
+  <!-- Bus -->
+  <rect x="18" y="4" width="12" height="8" fill="#ffc832"/>
+  <!-- Truck -->
+  <rect x="34" y="4" width="12" height="8" fill="#969696"/>
+  <!-- Person -->
+  <circle cx="56" cy="8" r="6" fill="#6496ff"/>
+  <!-- Plane -->
+  <polygon points="72,2 66,14 78,14" fill="#ffffff"/>
+  <!-- Helicopter -->
+  <polygon points="88,2 82,14 94,14" fill="#c8c8ff"/>
+  <!-- Drone -->
+  <rect x="98" y="4" width="12" height="8" fill="#64ff64"/>
+</svg>

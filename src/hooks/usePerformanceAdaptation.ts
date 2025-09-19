@@ -5,7 +5,7 @@ import {
   AdaptationSettings,
   PerformanceMetrics,
   DeviceBenchmarkResult,
-  PerformanceLevel
+  PerformanceLevel,
 } from '../types/performance';
 import { performanceProfiler } from '../utils/performanceProfiler';
 
@@ -21,7 +21,7 @@ export function usePerformanceAdaptation(options: UsePerformanceAdaptationOption
     autoStart = true,
     adaptationSettings: userSettings,
     onProfileChange,
-    onMetricsUpdate
+    onMetricsUpdate,
   } = options;
 
   const [performanceState, setPerformanceState] = useState<PerformanceState>({
@@ -29,10 +29,10 @@ export function usePerformanceAdaptation(options: UsePerformanceAdaptationOption
     metrics: getDefaultMetrics(),
     adaptation_settings: {
       ...performanceProfiler.createDefaultAdaptationSettings(),
-      ...userSettings
+      ...userSettings,
     },
     is_adapting: false,
-    last_adaptation_time: 0
+    last_adaptation_time: 0,
   });
 
   const [benchmarkResult, setBenchmarkResult] = useState<DeviceBenchmarkResult | null>(null);
@@ -57,23 +57,24 @@ export function usePerformanceAdaptation(options: UsePerformanceAdaptationOption
         current_profile: result.recommended_profile,
         metrics: {
           ...prev.metrics,
-          target_fps: result.recommended_profile.target_fps
-        }
+          target_fps: result.recommended_profile.target_fps,
+        },
       }));
 
       // Notify about profile change
       onProfileChange?.(result.recommended_profile);
 
       setIsInitialized(true);
-      console.log(`✅ Performance system initialized with ${PerformanceLevel[result.recommended_profile.level]} profile`);
-
+      console.log(
+        `✅ Performance system initialized with ${PerformanceLevel[result.recommended_profile.level]} profile`
+      );
     } catch (error) {
       console.error('❌ Failed to initialize performance system:', error);
       // Fallback to medium profile
       const fallbackProfile = getDefaultProfile();
       setPerformanceState(prev => ({
         ...prev,
-        current_profile: fallbackProfile
+        current_profile: fallbackProfile,
       }));
       onProfileChange?.(fallbackProfile);
       setIsInitialized(true);
@@ -82,12 +83,12 @@ export function usePerformanceAdaptation(options: UsePerformanceAdaptationOption
 
   // Start performance monitoring
   const startMonitoring = useCallback(() => {
-    performanceProfiler.startFrameMonitoring((metrics) => {
+    performanceProfiler.startFrameMonitoring(metrics => {
       setPerformanceState(prev => {
         const updatedMetrics = {
           ...metrics,
           target_fps: prev.current_profile.target_fps,
-          agent_count: prev.metrics.agent_count // Preserve agent count from external updates
+          agent_count: prev.metrics.agent_count, // Preserve agent count from external updates
         };
 
         // Check if adaptation is needed
@@ -99,7 +100,7 @@ export function usePerformanceAdaptation(options: UsePerformanceAdaptationOption
 
         return {
           ...prev,
-          metrics: updatedMetrics
+          metrics: updatedMetrics,
         };
       });
     });
@@ -142,66 +143,74 @@ export function usePerformanceAdaptation(options: UsePerformanceAdaptationOption
   }, []);
 
   // Adapt performance up or down
-  const adaptPerformance = useCallback((direction: 'up' | 'down') => {
-    setPerformanceState(prev => {
-      if (prev.is_adapting) return prev;
+  const adaptPerformance = useCallback(
+    (direction: 'up' | 'down') => {
+      setPerformanceState(prev => {
+        if (prev.is_adapting) return prev;
 
-      const currentLevel = prev.current_profile.level;
-      let newLevel = currentLevel;
+        const currentLevel = prev.current_profile.level;
+        let newLevel = currentLevel;
 
-      if (direction === 'down' && currentLevel > PerformanceLevel.UltraLow) {
-        newLevel = currentLevel - 1;
-      } else if (direction === 'up' && currentLevel < PerformanceLevel.Ultra) {
-        newLevel = currentLevel + 1;
-      } else {
-        return prev; // No change needed
-      }
-
-      const newProfile = createProfileForLevel(newLevel);
-
-      console.log(`🔄 Adapting performance ${direction}: ${PerformanceLevel[currentLevel]} → ${PerformanceLevel[newLevel]}`);
-
-      // Set adapting state temporarily
-      const newState = {
-        ...prev,
-        current_profile: newProfile,
-        is_adapting: true,
-        last_adaptation_time: Date.now(),
-        metrics: {
-          ...prev.metrics,
-          target_fps: newProfile.target_fps
+        if (direction === 'down' && currentLevel > PerformanceLevel.UltraLow) {
+          newLevel = currentLevel - 1;
+        } else if (direction === 'up' && currentLevel < PerformanceLevel.Ultra) {
+          newLevel = currentLevel + 1;
+        } else {
+          return prev; // No change needed
         }
-      };
 
-      // Clear adapting state after delay
-      if (adaptationTimeoutRef.current) {
-        clearTimeout(adaptationTimeoutRef.current);
-      }
-      adaptationTimeoutRef.current = setTimeout(() => {
-        setPerformanceState(state => ({
-          ...state,
-          is_adapting: false
-        }));
-      }, 1000);
+        const newProfile = createProfileForLevel(newLevel);
 
-      onProfileChange?.(newProfile);
-      return newState;
-    });
-  }, [onProfileChange]);
+        console.log(
+          `🔄 Adapting performance ${direction}: ${PerformanceLevel[currentLevel]} → ${PerformanceLevel[newLevel]}`
+        );
+
+        // Set adapting state temporarily
+        const newState = {
+          ...prev,
+          current_profile: newProfile,
+          is_adapting: true,
+          last_adaptation_time: Date.now(),
+          metrics: {
+            ...prev.metrics,
+            target_fps: newProfile.target_fps,
+          },
+        };
+
+        // Clear adapting state after delay
+        if (adaptationTimeoutRef.current) {
+          clearTimeout(adaptationTimeoutRef.current);
+        }
+        adaptationTimeoutRef.current = setTimeout(() => {
+          setPerformanceState(state => ({
+            ...state,
+            is_adapting: false,
+          }));
+        }, 1000);
+
+        onProfileChange?.(newProfile);
+        return newState;
+      });
+    },
+    [onProfileChange]
+  );
 
   // Manual profile override
-  const setProfile = useCallback((profile: PerformanceProfile) => {
-    setPerformanceState(prev => ({
-      ...prev,
-      current_profile: profile,
-      metrics: {
-        ...prev.metrics,
-        target_fps: profile.target_fps
-      },
-      last_adaptation_time: Date.now()
-    }));
-    onProfileChange?.(profile);
-  }, [onProfileChange]);
+  const setProfile = useCallback(
+    (profile: PerformanceProfile) => {
+      setPerformanceState(prev => ({
+        ...prev,
+        current_profile: profile,
+        metrics: {
+          ...prev.metrics,
+          target_fps: profile.target_fps,
+        },
+        last_adaptation_time: Date.now(),
+      }));
+      onProfileChange?.(profile);
+    },
+    [onProfileChange]
+  );
 
   // Update agent count (called externally by simulation)
   const updateAgentCount = useCallback((count: number) => {
@@ -209,8 +218,8 @@ export function usePerformanceAdaptation(options: UsePerformanceAdaptationOption
       ...prev,
       metrics: {
         ...prev.metrics,
-        agent_count: count
-      }
+        agent_count: count,
+      },
     }));
   }, []);
 
@@ -220,8 +229,8 @@ export function usePerformanceAdaptation(options: UsePerformanceAdaptationOption
       ...prev,
       adaptation_settings: {
         ...prev.adaptation_settings,
-        ...settings
-      }
+        ...settings,
+      },
     }));
   }, []);
 
@@ -255,9 +264,11 @@ export function usePerformanceAdaptation(options: UsePerformanceAdaptationOption
 
     // Computed values
     currentLevel: PerformanceLevel[performanceState.current_profile.level],
-    isPerformingWell: Math.abs(performanceState.metrics.current_fps - performanceState.metrics.target_fps) <= performanceState.adaptation_settings.fps_tolerance,
+    isPerformingWell:
+      Math.abs(performanceState.metrics.current_fps - performanceState.metrics.target_fps) <=
+      performanceState.adaptation_settings.fps_tolerance,
     canAdaptUp: performanceState.current_profile.level < PerformanceLevel.Ultra,
-    canAdaptDown: performanceState.current_profile.level > PerformanceLevel.UltraLow
+    canAdaptDown: performanceState.current_profile.level > PerformanceLevel.UltraLow,
   };
 }
 
@@ -268,7 +279,7 @@ function getDefaultProfile(): PerformanceProfile {
     max_agents: 5000,
     render_distance: 600.0,
     update_frequency: 30,
-    level: PerformanceLevel.Medium
+    level: PerformanceLevel.Medium,
   };
 }
 
@@ -280,7 +291,7 @@ function getDefaultMetrics(): PerformanceMetrics {
     agent_count: 0,
     memory_usage_mb: 0,
     gpu_utilization: 0,
-    cpu_utilization: 0
+    cpu_utilization: 0,
   };
 }
 
@@ -292,7 +303,7 @@ function createProfileForLevel(level: PerformanceLevel): PerformanceProfile {
         max_agents: 500,
         render_distance: 200.0,
         update_frequency: 10,
-        level
+        level,
       };
     case PerformanceLevel.Low:
       return {
@@ -300,7 +311,7 @@ function createProfileForLevel(level: PerformanceLevel): PerformanceProfile {
         max_agents: 2000,
         render_distance: 400.0,
         update_frequency: 15,
-        level
+        level,
       };
     case PerformanceLevel.Medium:
       return {
@@ -308,7 +319,7 @@ function createProfileForLevel(level: PerformanceLevel): PerformanceProfile {
         max_agents: 5000,
         render_distance: 600.0,
         update_frequency: 30,
-        level
+        level,
       };
     case PerformanceLevel.High:
       return {
@@ -316,7 +327,7 @@ function createProfileForLevel(level: PerformanceLevel): PerformanceProfile {
         max_agents: 15000,
         render_distance: 800.0,
         update_frequency: 60,
-        level
+        level,
       };
     case PerformanceLevel.Ultra:
       return {
@@ -324,7 +335,7 @@ function createProfileForLevel(level: PerformanceLevel): PerformanceProfile {
         max_agents: 50000,
         render_distance: 1000.0,
         update_frequency: 120,
-        level
+        level,
       };
     default:
       return getDefaultProfile();

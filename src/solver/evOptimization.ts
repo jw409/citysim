@@ -22,11 +22,17 @@ export class EVChargingOptimizer {
     const problem = new FacilityLocationProblem(input);
     const problemData = problem.getProblemData();
 
-    this.reportProgress('preparing', 20, `Found ${problemData.candidates.length} candidate locations`);
+    this.reportProgress(
+      'preparing',
+      20,
+      `Found ${problemData.candidates.length} candidate locations`
+    );
 
     // Check if we have valid data
     if (problemData.candidates.length === 0) {
-      throw new Error('No suitable candidate locations found. Make sure the simulation is running with agents.');
+      throw new Error(
+        'No suitable candidate locations found. Make sure the simulation is running with agents.'
+      );
     }
 
     this.reportProgress('solving', 25, 'Running greedy optimization algorithm...');
@@ -50,7 +56,11 @@ export class EVChargingOptimizer {
       station_id: station.id,
     }));
 
-    this.reportProgress('complete', 100, `Optimization complete! Placed ${stations.length} stations`);
+    this.reportProgress(
+      'complete',
+      100,
+      `Optimization complete! Placed ${stations.length} stations`
+    );
 
     return {
       stations,
@@ -96,15 +106,16 @@ export class EVChargingOptimizer {
         // Calculate objective improvement (coverage benefit vs cost)
         const testSelection = [...selectedStations, candidateIndex];
         const newObjectiveValue = problem.calculateObjectiveValue(testSelection);
-        const currentObjectiveValue = selectedStations.length > 0
-          ? problem.calculateObjectiveValue(selectedStations)
-          : 0;
+        const currentObjectiveValue =
+          selectedStations.length > 0 ? problem.calculateObjectiveValue(selectedStations) : 0;
         const objectiveImprovement = newObjectiveValue - currentObjectiveValue;
 
         // Select based on objective improvement, with coverage as tiebreaker
-        if (objectiveImprovement > bestObjectiveImprovement ||
-            (Math.abs(objectiveImprovement - bestObjectiveImprovement) < 0.001 &&
-             additionalCoverage > bestAdditionalCoverage)) {
+        if (
+          objectiveImprovement > bestObjectiveImprovement ||
+          (Math.abs(objectiveImprovement - bestObjectiveImprovement) < 0.001 &&
+            additionalCoverage > bestAdditionalCoverage)
+        ) {
           bestObjectiveImprovement = objectiveImprovement;
           bestAdditionalCoverage = additionalCoverage;
           bestStation = candidateIndex;

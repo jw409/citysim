@@ -44,20 +44,20 @@ export function createAgentLayer(agents: any[], timeOfDay: number = 12) {
 
 function getAgentIcon(agentType: string): string {
   const icons: { [key: string]: string } = {
-    'Pedestrian': 'person',
-    'Car': 'car',
-    'Bus': 'bus',
-    'Truck': 'truck',
+    Pedestrian: 'person',
+    Car: 'car',
+    Bus: 'bus',
+    Truck: 'truck',
   };
   return icons[agentType] || 'car';
 }
 
 function getAgentSize(agentType: string): number {
   const sizes: { [key: string]: number } = {
-    'Pedestrian': 8,
-    'Car': 12,
-    'Bus': 16,
-    'Truck': 14,
+    Pedestrian: 8,
+    Car: 12,
+    Bus: 16,
+    Truck: 14,
   };
   return sizes[agentType] || 12;
 }
@@ -65,20 +65,36 @@ function getAgentSize(agentType: string): number {
 function getIconMapping(): any {
   return {
     car: {
-      x: 0, y: 0, width: 16, height: 16,
-      anchorY: 8, anchorX: 8
+      x: 0,
+      y: 0,
+      width: 16,
+      height: 16,
+      anchorY: 8,
+      anchorX: 8,
     },
     bus: {
-      x: 16, y: 0, width: 16, height: 16,
-      anchorY: 8, anchorX: 8
+      x: 16,
+      y: 0,
+      width: 16,
+      height: 16,
+      anchorY: 8,
+      anchorX: 8,
     },
     truck: {
-      x: 32, y: 0, width: 16, height: 16,
-      anchorY: 8, anchorX: 8
+      x: 32,
+      y: 0,
+      width: 16,
+      height: 16,
+      anchorY: 8,
+      anchorX: 8,
     },
     person: {
-      x: 48, y: 0, width: 16, height: 16,
-      anchorY: 8, anchorX: 8
-    }
+      x: 48,
+      y: 0,
+      width: 16,
+      height: 16,
+      anchorY: 8,
+      anchorX: 8,
+    },
   };
 }

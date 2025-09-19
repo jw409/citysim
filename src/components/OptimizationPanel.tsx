@@ -36,15 +36,13 @@ export function OptimizationPanel({ onOptimize, isOptimizing, progress }: Optimi
       {!isOptimizing ? (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <div className="control-group">
-            <label className="control-label">
-              Max Stations: {config.max_stations}
-            </label>
+            <label className="control-label">Max Stations: {config.max_stations}</label>
             <input
               type="range"
               min="1"
               max="10"
               value={config.max_stations}
-              onChange={(e) => updateConfig('max_stations', parseInt(e.target.value))}
+              onChange={e => updateConfig('max_stations', parseInt(e.target.value))}
               className="speed-slider"
             />
           </div>
@@ -59,7 +57,7 @@ export function OptimizationPanel({ onOptimize, isOptimizing, progress }: Optimi
               max="2000"
               step="100"
               value={config.coverage_radius}
-              onChange={(e) => updateConfig('coverage_radius', parseInt(e.target.value))}
+              onChange={e => updateConfig('coverage_radius', parseInt(e.target.value))}
               className="speed-slider"
             />
           </div>
@@ -74,7 +72,7 @@ export function OptimizationPanel({ onOptimize, isOptimizing, progress }: Optimi
               max="1000000"
               step="50000"
               value={config.max_budget}
-              onChange={(e) => updateConfig('max_budget', parseInt(e.target.value))}
+              onChange={e => updateConfig('max_budget', parseInt(e.target.value))}
               className="speed-slider"
             />
           </div>
@@ -89,22 +87,20 @@ export function OptimizationPanel({ onOptimize, isOptimizing, progress }: Optimi
               max="2.0"
               step="0.1"
               value={config.weight_coverage}
-              onChange={(e) => updateConfig('weight_coverage', parseFloat(e.target.value))}
+              onChange={e => updateConfig('weight_coverage', parseFloat(e.target.value))}
               className="speed-slider"
             />
           </div>
 
           <div className="control-group">
-            <label className="control-label">
-              Cost Weight: {config.weight_cost.toFixed(1)}
-            </label>
+            <label className="control-label">Cost Weight: {config.weight_cost.toFixed(1)}</label>
             <input
               type="range"
               min="0.1"
               max="1.0"
               step="0.1"
               value={config.weight_cost}
-              onChange={(e) => updateConfig('weight_cost', parseFloat(e.target.value))}
+              onChange={e => updateConfig('weight_cost', parseFloat(e.target.value))}
               className="speed-slider"
             />
           </div>

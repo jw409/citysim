@@ -8,7 +8,7 @@ export function createZoneLayer(zones: any[], timeOfDay: number = 12, visible: b
   return new PolygonLayer({
     id: 'zones',
     data: zones,
-    getPolygon: (d: any) => d.boundary ? convertPointsToLatLng(d.boundary) : [],
+    getPolygon: (d: any) => (d.boundary ? convertPointsToLatLng(d.boundary) : []),
     getFillColor: (d: any) => {
       const zoneType = getZoneTypeName(d.zone_type);
       const color = colors.zones[zoneType] || colors.zones.residential;
@@ -28,7 +28,7 @@ export function createZoneLayer(zones: any[], timeOfDay: number = 12, visible: b
     // Use polygon offset to prevent z-fighting
     parameters: {
       polygonOffsetUnits: 1,
-      polygonOffsetFactor: 1
+      polygonOffsetFactor: 1,
     },
     transitions: {
       getFillColor: 1000,

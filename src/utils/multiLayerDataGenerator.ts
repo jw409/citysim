@@ -38,7 +38,7 @@ export function generateMultiLayerCityData(cityModel: any): MultiLayerCityData {
     min_x: -2000,
     min_y: -2000,
     max_x: 2000,
-    max_y: 2000
+    max_y: 2000,
   };
 
   const buildings = cityModel?.buildings || [];
@@ -55,7 +55,7 @@ export function generateMultiLayerCityData(cityModel: any): MultiLayerCityData {
     sewers: sewers.length,
     utilities: utilities.length,
     subway: subway.length,
-    parking: parking.length
+    parking: parking.length,
   });
 
   // Generate elevated infrastructure
@@ -66,7 +66,7 @@ export function generateMultiLayerCityData(cityModel: any): MultiLayerCityData {
   console.log('Generated elevated infrastructure:', {
     elevatedRoads: elevatedRoads.length,
     skyBridges: skyBridges.length,
-    elevatedTransit: elevatedTransit.length
+    elevatedTransit: elevatedTransit.length,
   });
 
   // Generate aerial traffic
@@ -77,7 +77,7 @@ export function generateMultiLayerCityData(cityModel: any): MultiLayerCityData {
   console.log('Generated aerial traffic:', {
     helicopters: helicopters.length,
     aircraft: aircraft.length,
-    drones: drones.length
+    drones: drones.length,
   });
 
   return {
@@ -88,14 +88,14 @@ export function generateMultiLayerCityData(cityModel: any): MultiLayerCityData {
       parking,
       elevatedRoads,
       skyBridges,
-      elevatedTransit
+      elevatedTransit,
     },
     aerialTraffic: {
       helicopters,
       aircraft,
-      drones
+      drones,
     },
-    bounds
+    bounds,
   };
 }
 
@@ -106,6 +106,6 @@ export function enhanceSimulationDataWithLayers(simulationData: any, cityModel: 
     ...simulationData,
     infrastructure: multiLayerData.infrastructure,
     aerialTraffic: multiLayerData.aerialTraffic,
-    bounds: multiLayerData.bounds
+    bounds: multiLayerData.bounds,
   };
 }

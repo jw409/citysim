@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { SimulationProvider } from './contexts/SimulationContext';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { LoadingScreen } from './components/LoadingScreen';
@@ -22,30 +22,31 @@ function AppContent() {
   const { initialize, start, pause, setSpeed } = useSimulation();
   const [showPerformance, setShowPerformance] = useState(true);
   const [optimizationResult, setOptimizationResult] = useState<OptimizationResult | null>(null);
+  const [cameraState, setCameraState] = useState({ longitude: -74.006, latitude: 40.7128, zoom: 12, pitch: 0, bearing: 0 });
 
   // Performance adaptation system
   const {
     performanceState,
     isInitialized: perfInitialized,
     updateAgentCount,
-    currentLevel
+    currentLevel,
   } = usePerformanceAdaptation({
-    onProfileChange: (profile) => {
+    onProfileChange: profile => {
       console.log(`🎯 Performance adapted to ${currentLevel} profile:`, profile);
       dispatch({ type: 'UPDATE_PERFORMANCE_PROFILE', payload: profile });
     },
-    onMetricsUpdate: (metrics) => {
+    onMetricsUpdate: metrics => {
       if (state.performance) {
         dispatch({
           type: 'SET_PERFORMANCE_STATE',
-          payload: { ...state.performance, metrics }
+          payload: { ...state.performance, metrics },
         });
       }
-    }
+    },
   });
   const [isOptimizing, setIsOptimizing] = useState(false);
   const [optimizationProgress, setOptimizationProgress] = useState<SolverProgress>();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  // const [_sidebarOpen, _setSidebarOpen] = useState(false);
 
   useEffect(() => {
     initialize();
@@ -78,50 +79,57 @@ function AppContent() {
   }, []);
 
   // Add optimization handler
-  const handleOptimize = useCallback(async (config: OptimizationConfig) => {
-    if (!state.cityModel || state.agents.length === 0) return;
+  const handleOptimize = useCallback(
+    async (config: OptimizationConfig) => {
+      if (!state.cityModel || state.agents.length === 0) return;
 
-    setIsOptimizing(true);
-    setOptimizationProgress({ phase: 'preparing', progress: 0, message: 'Starting optimization...' });
+      setIsOptimizing(true);
+      setOptimizationProgress({
+        phase: 'preparing',
+        progress: 0,
+        message: 'Starting optimization...',
+      });
 
-    try {
-      const trafficPoints = processTrafficData(
-        {
-          congestion_points: [],
-          road_densities: {},
-          poi_popularity: {},
-          flow_matrix: []
-        }, // Simplified traffic data
-        state.cityModel.roads || [],
-        state.agents
-      );
+      try {
+        const trafficPoints = processTrafficData(
+          {
+            congestion_points: [],
+            road_densities: {},
+            poi_popularity: {},
+            flow_matrix: [],
+          }, // Simplified traffic data
+          state.cityModel.roads || [],
+          state.agents
+        );
 
-      const optimizationInput = {
-        traffic_data: trafficPoints,
-        roads: state.cityModel.roads || [],
-        pois: [],
-        existing_stations: [],
-        config,
-      };
+        const optimizationInput = {
+          traffic_data: trafficPoints,
+          roads: state.cityModel.roads || [],
+          pois: [],
+          existing_stations: [],
+          config,
+        };
 
-      const optimizer = new EVChargingOptimizer(setOptimizationProgress);
-      const result = await optimizer.optimize(optimizationInput);
+        const optimizer = new EVChargingOptimizer(setOptimizationProgress);
+        const result = await optimizer.optimize(optimizationInput);
 
-      setOptimizationResult(result);
-    } catch (error) {
-      console.error('Optimization failed:', error);
-      dispatch({ type: 'SET_ERROR', payload: `Optimization failed: ${error instanceof Error ? error.message : 'Unknown error'}` });
-    } finally {
-      setIsOptimizing(false);
-    }
-  }, [state.cityModel, state.agents, dispatch]);
+        setOptimizationResult(result);
+      } catch (error) {
+        console.error('Optimization failed:', error);
+        dispatch({
+          type: 'SET_ERROR',
+          payload: `Optimization failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        });
+      } finally {
+        setIsOptimizing(false);
+      }
+    },
+    [state.cityModel, state.agents, dispatch]
+  );
 
   return (
     <>
-      <LoadingScreen
-        isVisible={state.isLoading}
-        message="Loading city simulation"
-      />
+      <LoadingScreen isVisible={state.isLoading} message="Loading city simulation" />
 
       <div className="app">
         <header className="app-header">
@@ -140,22 +148,27 @@ function AppContent() {
 
         <main className="app-main">
           <div className="visualization-container">
-            <CityVisualization optimizationResult={optimizationResult} />
+            <CityVisualization
+              optimizationResult={optimizationResult}
+              onCameraUpdate={setCameraState}
+            />
           </div>
 
           {/* EMERGENCY TIME CONTROLS - ALWAYS VISIBLE */}
-          <div style={{
-            position: 'fixed',
-            top: '80px',
-            right: '20px',
-            background: '#ffffff',
-            border: '3px solid #ff0000',
-            padding: '20px',
-            borderRadius: '8px',
-            zIndex: 9999,
-            boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
-            minWidth: '250px'
-          }}>
+          <div
+            style={{
+              position: 'fixed',
+              top: '80px',
+              right: '20px',
+              background: '#ffffff',
+              border: '3px solid #ff0000',
+              padding: '20px',
+              borderRadius: '8px',
+              zIndex: 9999,
+              boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+              minWidth: '250px',
+            }}
+          >
             <h3 style={{ margin: '0 0 15px 0', color: '#000' }}>⏱️ TIME CONTROLS</h3>
 
             <div style={{ marginBottom: '15px' }}>
@@ -172,7 +185,7 @@ function AppContent() {
                   borderRadius: '4px',
                   cursor: 'pointer',
                   fontSize: '16px',
-                  width: '100%'
+                  width: '100%',
                 }}
               >
                 {state.isRunning ? '⏸️ PAUSE' : '▶️ PLAY'}
@@ -189,7 +202,7 @@ function AppContent() {
                 max="5"
                 step="0.1"
                 value={state.speed}
-                onChange={(e) => setSpeed(parseFloat(e.target.value))}
+                onChange={e => setSpeed(parseFloat(e.target.value))}
                 style={{ width: '100%' }}
               />
             </div>
@@ -198,7 +211,9 @@ function AppContent() {
               <label style={{ display: 'block', color: '#000', marginBottom: '5px' }}>Time</label>
               <div style={{ color: '#000', fontSize: '18px', fontWeight: 'bold' }}>
                 {Math.floor(state.currentTime).toString().padStart(2, '0')}:
-                {Math.floor((state.currentTime - Math.floor(state.currentTime)) * 60).toString().padStart(2, '0')}
+                {Math.floor((state.currentTime - Math.floor(state.currentTime)) * 60)
+                  .toString()
+                  .padStart(2, '0')}
                 <span style={{ marginLeft: '10px', fontSize: '14px' }}>Day {state.day + 1}</span>
               </div>
             </div>
@@ -234,7 +249,9 @@ function AppContent() {
                 </div>
                 <div className="stat-card">
                   <div className="stat-label">Congestion</div>
-                  <div className="stat-value">{(state.stats.congestionLevel * 100).toFixed(0)}%</div>
+                  <div className="stat-value">
+                    {(state.stats.congestionLevel * 100).toFixed(0)}%
+                  </div>
                 </div>
               </div>
             </div>
@@ -251,6 +268,7 @@ function AppContent() {
             agentCount: state.stats.totalAgents,
             simulationTime: state.currentTime,
             seed: 0,
+            camera: cameraState,
           }}
           onClose={() => setShowPerformance(false)}
         />

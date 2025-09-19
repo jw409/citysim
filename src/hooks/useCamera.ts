@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { assetManager } from '../utils/assetManager';
 
 export interface CameraState {
   longitude: number;
@@ -8,17 +9,24 @@ export interface CameraState {
   bearing: number;
 }
 
+export type ViewMode = 'free' | 'third-person' | 'first-person';
+
 export interface CameraControls {
   enableGyroscope: boolean;
   enableVR: boolean;
   followTarget: string | null;
   smoothTransitions: boolean;
+  viewMode: ViewMode;
+  followDistance: number; // For third-person view
+  cameraLag: number; // How much the camera lags behind in third-person
 }
 
 export interface FollowTarget {
   id: string;
   position: [number, number, number];
   type: 'agent' | 'vehicle' | 'aircraft';
+  heading?: number; // Agent's movement direction
+  agentType?: string; // pedestrian, car, bus, etc.
 }
 
 interface DeviceMotionState {
@@ -35,7 +43,10 @@ export function useCamera(initialState: CameraState) {
     enableGyroscope: false,
     enableVR: false,
     followTarget: null,
-    smoothTransitions: true
+    smoothTransitions: true,
+    viewMode: 'free',
+    followDistance: 15,
+    cameraLag: 0.1,
   });
 
   const [deviceMotion, setDeviceMotion] = useState<DeviceMotionState>({
@@ -43,7 +54,7 @@ export function useCamera(initialState: CameraState) {
     beta: null,
     gamma: null,
     supported: false,
-    permissionGranted: false
+    permissionGranted: false,
   });
 
   const [followTargets, setFollowTargets] = useState<Map<string, FollowTarget>>(new Map());
@@ -57,7 +68,7 @@ export function useCamera(initialState: CameraState) {
 
     setDeviceMotion(prev => ({
       ...prev,
-      supported: hasDeviceMotion
+      supported: hasDeviceMotion,
     }));
 
     // Auto-enable gyroscope on mobile devices if supported
@@ -134,7 +145,7 @@ export function useCamera(initialState: CameraState) {
           ...prev,
           alpha: event.rotationRate!.alpha,
           beta: event.rotationRate!.beta,
-          gamma: event.rotationRate!.gamma
+          gamma: event.rotationRate!.gamma,
         }));
 
         // Convert device orientation to camera rotation
@@ -142,7 +153,7 @@ export function useCamera(initialState: CameraState) {
           setViewState(prev => ({
             ...prev,
             bearing: prev.bearing + (event.rotationRate!.alpha || 0) * 0.1,
-            pitch: Math.max(0, Math.min(60, prev.pitch + (event.rotationRate!.beta || 0) * 0.1))
+            pitch: Math.max(0, Math.min(60, prev.pitch + (event.rotationRate!.beta || 0) * 0.1)),
           }));
         }
       }
@@ -152,9 +163,9 @@ export function useCamera(initialState: CameraState) {
     return () => window.removeEventListener('devicemotion', handleDeviceMotion);
   }, [controls.enableGyroscope, deviceMotion.permissionGranted]);
 
-  // Follow target animation
+  // Follow target animation with first/third person support
   useEffect(() => {
-    if (!controls.followTarget) {
+    if (!controls.followTarget || controls.viewMode === 'free') {
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
       }
@@ -166,23 +177,70 @@ export function useCamera(initialState: CameraState) {
 
     const animateFollow = () => {
       const [x, y, z] = target.position;
+      const targetHeading = target.heading || 0;
 
       // Convert world coordinates to lat/lng (rough approximation)
       const targetLongitude = x / 111320;
       const targetLatitude = y / 110540;
 
-      // Smooth camera movement toward target
       setViewState(prev => {
-        const lerpFactor = 0.05; // Smooth following
+        const lerpFactor = controls.cameraLag;
 
+        if (controls.viewMode === 'first-person') {
+          // First-person view: camera at agent's eye level
+          const eyeHeight = target.agentType
+            ? assetManager.getCameraHeight(target.agentType)
+            : 1.7;
+
+          // Convert eye height from meters to zoom-equivalent offset
+          const heightOffset = eyeHeight * 0.0001; // Rough conversion
+
+          return {
+            ...prev,
+            longitude: prev.longitude + (targetLongitude - prev.longitude) * (lerpFactor * 2),
+            latitude: prev.latitude + ((targetLatitude + heightOffset) - prev.latitude) * (lerpFactor * 2),
+            zoom: target.type === 'aircraft' ? 15 : 19, // Close zoom for first-person
+            pitch: 0, // Level horizon for first-person
+            bearing: prev.bearing + (targetHeading - prev.bearing) * lerpFactor * 3, // Smooth rotation
+          };
+        } else if (controls.viewMode === 'third-person') {
+          // Third-person view: camera behind and above agent
+          const followDistanceMeters = controls.followDistance;
+          const followHeightMeters = followDistanceMeters * 0.3; // 30% of distance for height
+
+          // Calculate offset position behind agent
+          const offsetRadians = (targetHeading + 180) * (Math.PI / 180); // Behind agent
+          const offsetX = Math.cos(offsetRadians) * followDistanceMeters;
+          const offsetY = Math.sin(offsetRadians) * followDistanceMeters;
+
+          // Convert offsets to lat/lng
+          const offsetLongitude = offsetX / 111320;
+          const offsetLatitude = offsetY / 110540;
+          const heightOffset = followHeightMeters * 0.0001;
+
+          const cameraLongitude = targetLongitude + offsetLongitude;
+          const cameraLatitude = targetLatitude + offsetLatitude + heightOffset;
+
+          // Calculate pitch to look at agent
+          const lookDownAngle = Math.atan2(followHeightMeters, followDistanceMeters) * (180 / Math.PI);
+
+          return {
+            ...prev,
+            longitude: prev.longitude + (cameraLongitude - prev.longitude) * lerpFactor,
+            latitude: prev.latitude + (cameraLatitude - prev.latitude) * lerpFactor,
+            zoom: target.type === 'aircraft' ? 14 : 17, // Medium zoom for third-person
+            pitch: prev.pitch + (lookDownAngle - prev.pitch) * lerpFactor,
+            bearing: prev.bearing + (targetHeading - prev.bearing) * lerpFactor,
+          };
+        }
+
+        // Fallback to original behavior
         return {
           ...prev,
           longitude: prev.longitude + (targetLongitude - prev.longitude) * lerpFactor,
           latitude: prev.latitude + (targetLatitude - prev.latitude) * lerpFactor,
-          // Adjust zoom based on target type and elevation
           zoom: target.type === 'aircraft' ? 12 : target.type === 'vehicle' ? 16 : 18,
-          // Adjust pitch to look down at target
-          pitch: z > 50 ? 60 : 45
+          pitch: z > 50 ? 60 : 45,
         };
       });
 
@@ -196,16 +254,22 @@ export function useCamera(initialState: CameraState) {
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
-  }, [controls.followTarget, followTargets]);
+  }, [controls.followTarget, controls.viewMode, controls.followDistance, controls.cameraLag, followTargets]);
 
-  const updateFollowTarget = useCallback((id: string, position: [number, number, number], type: 'agent' | 'vehicle' | 'aircraft') => {
-    setFollowTargets(prev => new Map(prev.set(id, { id, position, type })));
-  }, []);
+  const updateFollowTarget = useCallback(
+    (id: string, position: [number, number, number], type: 'agent' | 'vehicle' | 'aircraft', heading?: number, agentType?: string) => {
+      setFollowTargets(prev => new Map(prev.set(id, { id, position, type, heading, agentType })));
+    },
+    []
+  );
 
-  const startFollowing = useCallback((targetId: string) => {
-    setControls(prev => ({ ...prev, followTarget: targetId }));
-    baseViewState.current = viewState;
-  }, [viewState]);
+  const startFollowing = useCallback(
+    (targetId: string) => {
+      setControls(prev => ({ ...prev, followTarget: targetId }));
+      baseViewState.current = viewState;
+    },
+    [viewState]
+  );
 
   const stopFollowing = useCallback(() => {
     setControls(prev => ({ ...prev, followTarget: null }));
@@ -231,47 +295,75 @@ export function useCamera(initialState: CameraState) {
     }
   }, [controls.enableVR, requestVRSession]);
 
-  const smoothTransitionTo = useCallback((targetState: Partial<CameraState>, duration: number = 1000) => {
-    if (!controls.smoothTransitions) {
-      setViewState(prev => ({ ...prev, ...targetState }));
-      return Promise.resolve();
-    }
+  const smoothTransitionTo = useCallback(
+    (targetState: Partial<CameraState>, duration: number = 1000) => {
+      if (!controls.smoothTransitions) {
+        setViewState(prev => ({ ...prev, ...targetState }));
+        return Promise.resolve();
+      }
 
-    return new Promise<void>((resolve) => {
-      const startTime = Date.now();
-      const initialState = viewState;
+      return new Promise<void>(resolve => {
+        const startTime = Date.now();
+        const initialState = viewState;
 
-      const animate = () => {
-        const elapsed = Date.now() - startTime;
-        const progress = Math.min(elapsed / duration, 1);
+        const animate = () => {
+          const elapsed = Date.now() - startTime;
+          const progress = Math.min(elapsed / duration, 1);
 
-        // Easing function (ease-out cubic)
-        const eased = 1 - Math.pow(1 - progress, 3);
+          // Easing function (ease-out cubic)
+          const eased = 1 - Math.pow(1 - progress, 3);
 
-        setViewState(prev => {
-          const newState: CameraState = { ...prev };
+          setViewState(prev => {
+            const newState: CameraState = { ...prev };
 
-          Object.entries(targetState).forEach(([key, value]) => {
-            if (value !== undefined && key in initialState) {
-              const startValue = initialState[key as keyof CameraState];
-              const diff = value - startValue;
-              (newState as any)[key] = startValue + diff * eased;
-            }
+            Object.entries(targetState).forEach(([key, value]) => {
+              if (value !== undefined && key in initialState) {
+                const startValue = initialState[key as keyof CameraState];
+                const diff = value - startValue;
+                (newState as any)[key] = startValue + diff * eased;
+              }
+            });
+
+            return newState;
           });
 
-          return newState;
-        });
+          if (progress < 1) {
+            requestAnimationFrame(animate);
+          } else {
+            resolve();
+          }
+        };
 
-        if (progress < 1) {
-          requestAnimationFrame(animate);
-        } else {
-          resolve();
-        }
-      };
+        animate();
+      });
+    },
+    [viewState, controls.smoothTransitions]
+  );
 
-      animate();
-    });
-  }, [viewState, controls.smoothTransitions]);
+  // View mode controls
+  const setViewMode = useCallback((mode: ViewMode) => {
+    setControls(prev => ({ ...prev, viewMode: mode }));
+  }, []);
+
+  const toggleViewMode = useCallback(() => {
+    if (!controls.followTarget) {
+      setViewMode('free');
+      return;
+    }
+
+    const modes: ViewMode[] = ['third-person', 'first-person'];
+    const currentIndex = modes.indexOf(controls.viewMode);
+    const nextMode = modes[(currentIndex + 1) % modes.length];
+    setViewMode(nextMode);
+  }, [controls.viewMode, controls.followTarget, setViewMode]);
+
+  const setFollowDistance = useCallback((distance: number) => {
+    setControls(prev => ({ ...prev, followDistance: Math.max(5, Math.min(100, distance)) }));
+  }, []);
+
+  const setCameraLag = useCallback((lag: number) => {
+    setControls(prev => ({ ...prev, cameraLag: Math.max(0.01, Math.min(1, lag)) }));
+  }, []);
 
   // Preset camera positions
   const presets = {
@@ -279,7 +371,7 @@ export function useCamera(initialState: CameraState) {
     street: () => smoothTransitionTo({ zoom: 18, pitch: 0, bearing: 0 }),
     aerial: () => smoothTransitionTo({ zoom: 10, pitch: 75, bearing: 0 }),
     underground: () => smoothTransitionTo({ zoom: 16, pitch: 60, bearing: 0 }),
-    isometric: () => smoothTransitionTo({ zoom: 14, pitch: 45, bearing: 45 })
+    isometric: () => smoothTransitionTo({ zoom: 14, pitch: 45, bearing: 45 }),
   };
 
   return {
@@ -296,11 +388,16 @@ export function useCamera(initialState: CameraState) {
     toggleVR,
     smoothTransitionTo,
     presets,
+    // View mode controls
+    setViewMode,
+    toggleViewMode,
+    setFollowDistance,
+    setCameraLag,
     capabilities: {
       hasGyroscope: deviceMotion.supported,
       hasVR: 'xr' in navigator,
       gyroscopeEnabled: controls.enableGyroscope && deviceMotion.permissionGranted,
-      vrEnabled: controls.enableVR
-    }
+      vrEnabled: controls.enableVR,
+    },
   };
 }

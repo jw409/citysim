@@ -7,11 +7,11 @@ export interface PerformanceProfile {
 }
 
 export enum PerformanceLevel {
-  UltraLow = 0,    // 500 agents, 15fps, potato devices
-  Low = 1,         // 2000 agents, 30fps, entry phones
-  Medium = 2,      // 5000 agents, 60fps, mid-range
-  High = 3,        // 15000 agents, 120fps, gaming laptops
-  Ultra = 4,       // 50000+ agents, 240fps, ultra gaming
+  UltraLow = 0, // 500 agents, 15fps, potato devices
+  Low = 1, // 2000 agents, 30fps, entry phones
+  Medium = 2, // 5000 agents, 60fps, mid-range
+  High = 3, // 15000 agents, 120fps, gaming laptops
+  Ultra = 4, // 50000+ agents, 240fps, ultra gaming
 }
 
 export interface DeviceMetrics {

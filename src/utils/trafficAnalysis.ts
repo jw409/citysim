@@ -31,14 +31,14 @@ export function processTrafficData(
   }
 
   // Sort by density (highest first) and limit for performance
-  return densityPoints
-    .sort((a, b) => b.density - a.density)
-    .slice(0, 50);
+  return densityPoints.sort((a, b) => b.density - a.density).slice(0, 50);
 }
 
 function calculateBounds(roads: any[], agents: any[]) {
-  let minX = Infinity, minY = Infinity;
-  let maxX = -Infinity, maxY = -Infinity;
+  let minX = Infinity,
+    minY = Infinity;
+  let maxX = -Infinity,
+    maxY = -Infinity;
 
   // Include road bounds
   roads.forEach(road => {
@@ -66,7 +66,10 @@ function calculateBounds(roads: any[], agents: any[]) {
 
   // Fallback bounds if no data
   if (!isFinite(minX)) {
-    minX = -1000; minY = -1000; maxX = 1000; maxY = 1000;
+    minX = -1000;
+    minY = -1000;
+    maxX = 1000;
+    maxY = 1000;
   }
 
   return { minX, minY, maxX, maxY };
@@ -86,7 +89,7 @@ function calculateTrafficDensityAt(
 
     const distance = Math.sqrt(
       Math.pow((agent.position.x || 0) - position.x, 2) +
-      Math.pow((agent.position.y || 0) - position.y, 2)
+        Math.pow((agent.position.y || 0) - position.y, 2)
     );
 
     if (distance <= searchRadius) {
@@ -102,7 +105,7 @@ function calculateTrafficDensityAt(
 
     const roadDistance = distanceToRoad(position, road.path);
     if (roadDistance <= searchRadius) {
-      const weight = 1 - (roadDistance / searchRadius);
+      const weight = 1 - roadDistance / searchRadius;
       const lanes = road.lanes || 2;
       density += weight * lanes * 0.3;
     }
@@ -125,11 +128,11 @@ function calculateFlowVolumeAt(
 
     const distance = Math.sqrt(
       Math.pow((agent.position.x || 0) - position.x, 2) +
-      Math.pow((agent.position.y || 0) - position.y, 2)
+        Math.pow((agent.position.y || 0) - position.y, 2)
     );
 
     if (distance <= searchRadius) {
-      const weight = 1 - (distance / searchRadius);
+      const weight = 1 - distance / searchRadius;
       flowVolume += weight * (agent.speed || 0);
     }
   });
@@ -138,7 +141,7 @@ function calculateFlowVolumeAt(
   roads.forEach(road => {
     const roadDistance = distanceToRoad(position, road.path || []);
     if (roadDistance <= searchRadius) {
-      const weight = 1 - (roadDistance / searchRadius);
+      const weight = 1 - roadDistance / searchRadius;
       flowVolume += weight * (road.traffic_density || 10);
     }
   });
@@ -156,11 +159,11 @@ function distanceToRoad(point: { x: number; y: number }, roadPath: any[]): numbe
       point,
       {
         x: roadPath[i].x || roadPath[i][0] || 0,
-        y: roadPath[i].y || roadPath[i][1] || 0
+        y: roadPath[i].y || roadPath[i][1] || 0,
       },
       {
         x: roadPath[i + 1].x || roadPath[i + 1][0] || 0,
-        y: roadPath[i + 1].y || roadPath[i + 1][1] || 0
+        y: roadPath[i + 1].y || roadPath[i + 1][1] || 0,
       }
     );
     minDistance = Math.min(minDistance, segmentDistance);
@@ -184,9 +187,10 @@ function distanceToLineSegment(
     return Math.sqrt(dx2 * dx2 + dy2 * dy2);
   }
 
-  const t = Math.max(0, Math.min(1,
-    ((point.x - lineStart.x) * dx + (point.y - lineStart.y) * dy) / (dx * dx + dy * dy)
-  ));
+  const t = Math.max(
+    0,
+    Math.min(1, ((point.x - lineStart.x) * dx + (point.y - lineStart.y) * dy) / (dx * dx + dy * dy))
+  );
 
   const closestX = lineStart.x + t * dx;
   const closestY = lineStart.y + t * dy;
@@ -215,7 +219,7 @@ export function generateCandidateLocations(
     const tooClose = existingStations.some(station => {
       const distance = Math.sqrt(
         Math.pow((station.position?.x || 0) - point.position.x, 2) +
-        Math.pow((station.position?.y || 0) - point.position.y, 2)
+          Math.pow((station.position?.y || 0) - point.position.y, 2)
       );
       return distance < minDistance;
     });
@@ -245,10 +249,7 @@ function findNearestRoadPoint(
     road.path.forEach((point: any) => {
       const px = point.x || point[0] || 0;
       const py = point.y || point[1] || 0;
-      const distance = Math.sqrt(
-        Math.pow(px - position.x, 2) +
-        Math.pow(py - position.y, 2)
-      );
+      const distance = Math.sqrt(Math.pow(px - position.x, 2) + Math.pow(py - position.y, 2));
 
       if (distance < minDistance) {
         minDistance = distance;

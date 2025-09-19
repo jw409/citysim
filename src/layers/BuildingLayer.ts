@@ -5,10 +5,12 @@ import { convertPointsToLatLng } from '../utils/coordinates';
 export function createBuildingLayer(buildings: any[], timeOfDay: number = 12) {
   const colors = getTimeBasedColors(timeOfDay);
 
-  console.log('Building layer data:', {
+  console.log('🏢 Building layer data:', {
     count: buildings.length,
-    sample: buildings.slice(0, 3),
-    firstBuilding: buildings[0]
+    sample: buildings.slice(0, 2),
+    firstBuilding: buildings[0],
+    hasFootprints: buildings.filter(b => b.footprint && b.footprint.length > 0).length,
+    footprintSample: buildings[0]?.footprint?.slice(0, 3)
   });
 
   return new PolygonLayer({
@@ -20,18 +22,27 @@ export function createBuildingLayer(buildings: any[], timeOfDay: number = 12) {
       if (buildings.indexOf(d) === 0) {
         console.log('First building polygon conversion:', {
           original: d.footprint,
-          converted: converted
+          converted: converted,
         });
       }
       return converted;
     },
     getElevation: (d: any) => {
-      const height = d.height || d.stories * 3.5 || (50 + Math.random() * 200);
-      console.log('Building elevation:', height, 'extruded:', true, 'id:', d.id);
+      const height = d.height || d.stories * 3.5 || 50 + Math.random() * 200;
+      if (buildings.indexOf(d) < 3) {
+        console.log('🏢 Building elevation debug:', {
+          id: d.id,
+          height: height,
+          elevationScale: 5.0,
+          finalHeight: height * 5.0,
+          extruded: true,
+          footprint: d.footprint?.length || 0
+        });
+      }
       return height;
     },
     getFillColor: (d: any) => {
-      const height = d.height || d.stories * 3.5 || (20 + Math.random() * 80);
+      const height = d.height || d.stories * 3.5 || 20 + Math.random() * 80;
       const buildingType = getBuildingTypeName(d.building_type);
       return getHeightBasedBuildingColor(buildingType, height, timeOfDay, colors);
     },
@@ -41,7 +52,7 @@ export function createBuildingLayer(buildings: any[], timeOfDay: number = 12) {
     wireframe: false, // Disabled for professional solid buildings
     filled: true,
     stroked: true,
-    elevationScale: 2.0, // Increased for more prominent 3D buildings
+    elevationScale: 1.0, // Realistic scale now that lighting works
     pickable: true,
     material: {
       ambient: 0.4,
@@ -55,7 +66,7 @@ export function createBuildingLayer(buildings: any[], timeOfDay: number = 12) {
       diffuseRatio: 0.6,
       specularRatio: 0.2,
       lightsStrength: [2.0, 0.0, 0.8, 0.0],
-      numberOfLights: 2
+      numberOfLights: 2,
     },
     transitions: {
       getFillColor: 1000,
@@ -70,7 +81,12 @@ function getBuildingTypeName(buildingType: number): string {
 }
 
 // Height-based building colors for realistic urban density visualization
-function getHeightBasedBuildingColor(buildingType: string, height: number, timeOfDay: number, colors: any): number[] {
+function getHeightBasedBuildingColor(
+  buildingType: string,
+  height: number,
+  timeOfDay: number,
+  colors: any
+): number[] {
   // Get base color for building type
   const baseColor = colors.buildings[buildingType] || colors.buildings.residential;
 

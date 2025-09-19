@@ -93,10 +93,12 @@ function simulationReducer(state: SimulationState, action: SimulationAction): Si
     case 'UPDATE_PERFORMANCE_PROFILE':
       return {
         ...state,
-        performance: state.performance ? {
-          ...state.performance,
-          current_profile: action.payload
-        } : null
+        performance: state.performance
+          ? {
+              ...state.performance,
+              current_profile: action.payload,
+            }
+          : null,
       };
     default:
       return state;
@@ -114,9 +116,7 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(simulationReducer, initialState);
 
   return (
-    <SimulationContext.Provider value={{ state, dispatch }}>
-      {children}
-    </SimulationContext.Provider>
+    <SimulationContext.Provider value={{ state, dispatch }}>{children}</SimulationContext.Provider>
   );
 }
 

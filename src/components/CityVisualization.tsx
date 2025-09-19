@@ -1,22 +1,23 @@
-import { useState, useCallback, useMemo, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useSimulationContext } from '../contexts/SimulationContext';
 import { Cityscape } from './Cityscape';
 import { enhanceSimulationDataWithLayers } from '../utils/multiLayerDataGenerator';
 import { OptimizationResult } from '../types/optimization';
 
-const INITIAL_VIEW_STATE = {
-  longitude: 0,
-  latitude: 0,
-  zoom: 15,
-  pitch: 60,
-  bearing: 0,
-};
+// const INITIAL_VIEW_STATE = {
+//   longitude: 0,
+//   latitude: 0,
+//   zoom: 15,
+//   pitch: 60,
+//   bearing: 0,
+// };
 
 interface CityVisualizationProps {
   optimizationResult?: OptimizationResult | null;
+  onCameraUpdate?: (camera: { longitude: number; latitude: number; zoom: number; pitch: number; bearing: number }) => void;
 }
 
-export function CityVisualization({ optimizationResult }: CityVisualizationProps) {
+export function CityVisualization({ optimizationResult, onCameraUpdate }: CityVisualizationProps) {
   const { state, dispatch } = useSimulationContext();
   const [enhancedData, setEnhancedData] = useState<any>(null);
 
@@ -24,12 +25,15 @@ export function CityVisualization({ optimizationResult }: CityVisualizationProps
   useEffect(() => {
     if (state.cityModel) {
       console.log('Enhancing simulation data with multi-layer infrastructure...');
-      const enhanced = enhanceSimulationDataWithLayers({
-        buildings: state.cityModel.buildings || [],
-        roads: state.cityModel.roads || [],
-        agents: state.agents || [],
-        pois: state.cityModel.pois || []
-      }, state.cityModel);
+      const enhanced = enhanceSimulationDataWithLayers(
+        {
+          buildings: state.cityModel.buildings || [],
+          roads: state.cityModel.roads || [],
+          agents: state.agents || [],
+          pois: state.cityModel.pois || [],
+        },
+        state.cityModel
+      );
 
       setEnhancedData(enhanced);
       console.log('Enhanced data generated:', enhanced);
@@ -49,6 +53,7 @@ export function CityVisualization({ optimizationResult }: CityVisualizationProps
         width={window.innerWidth}
         height={window.innerHeight}
         optimizationResult={optimizationResult}
+        onCameraUpdate={onCameraUpdate}
       />
 
       {state.selectedTool && (

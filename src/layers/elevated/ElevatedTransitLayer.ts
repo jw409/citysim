@@ -17,11 +17,16 @@ export function createElevatedTransitLayer(transitData: any[]) {
       getColor: (d: any) => {
         // Color by transit type
         switch (d.transit_type) {
-          case 'monorail': return [255, 100, 100, 240];
-          case 'light_rail': return [100, 255, 100, 240];
-          case 'bullet_train': return [100, 100, 255, 240];
-          case 'maglev': return [255, 100, 255, 240];
-          default: return layerConfig.color;
+          case 'monorail':
+            return [255, 100, 100, 240];
+          case 'light_rail':
+            return [100, 255, 100, 240];
+          case 'bullet_train':
+            return [100, 100, 255, 240];
+          case 'maglev':
+            return [255, 100, 255, 240];
+          default:
+            return layerConfig.color;
         }
       },
       opacity: layerConfig.opacity,
@@ -34,12 +39,12 @@ export function createElevatedTransitLayer(transitData: any[]) {
         ambient: 0.3,
         diffuse: 0.7,
         shininess: 64,
-        specularColor: [255, 255, 255]
+        specularColor: [255, 255, 255],
       },
       transitions: {
         getColor: 600,
-        getWidth: 400
-      }
+        getWidth: 400,
+      },
     }),
 
     // Elevated transit stations
@@ -57,9 +62,9 @@ export function createElevatedTransitLayer(transitData: any[]) {
       material: {
         ambient: 0.4,
         diffuse: 0.8,
-        shininess: 32
-      }
-    })
+        shininess: 32,
+      },
+    }),
   ];
 }
 
@@ -86,13 +91,15 @@ export function generateElevatedTransit(bounds: any, lineCount: number = 3): any
       if (lineIndex % 2 === 0) {
         // Curved east-west line
         x = min_x + progress * (max_x - min_x);
-        y = min_y + (max_y - min_y) * 0.5 +
-            Math.sin(progress * Math.PI * 2) * (max_y - min_y) * 0.2;
+        y =
+          min_y + (max_y - min_y) * 0.5 + Math.sin(progress * Math.PI * 2) * (max_y - min_y) * 0.2;
       } else {
         // Curved north-south line
         y = min_y + progress * (max_y - min_y);
-        x = min_x + (max_x - min_x) * 0.5 +
-            Math.cos(progress * Math.PI * 1.5) * (max_x - min_x) * 0.2;
+        x =
+          min_x +
+          (max_x - min_x) * 0.5 +
+          Math.cos(progress * Math.PI * 1.5) * (max_x - min_x) * 0.2;
       }
 
       const station = {
@@ -105,7 +112,7 @@ export function generateElevatedTransit(bounds: any, lineCount: number = 3): any
         name: `${transitType.replace('_', ' ').toUpperCase()} Station ${stationIndex + 1}`,
         passenger_capacity: 300 + Math.random() * 700,
         daily_passengers: Math.random() * 5000,
-        platforms: transitType === 'bullet_train' ? 2 : 1
+        platforms: transitType === 'bullet_train' ? 2 : 1,
       };
 
       stations.push(station);
@@ -131,19 +138,17 @@ export function generateElevatedTransit(bounds: any, lineCount: number = 3): any
         // Add curve deviation
         const deviation = 20 + Math.random() * 30;
         const perpX = -(endStation.y - startStation.y);
-        const perpY = (endStation.x - startStation.x);
+        const perpY = endStation.x - startStation.x;
         const length = Math.sqrt(perpX * perpX + perpY * perpY);
 
         if (length > 0) {
           const curveX = controlX + (perpX / length) * deviation * Math.sin(t * Math.PI);
           const curveY = controlY + (perpY / length) * deviation * Math.sin(t * Math.PI);
 
-          const x = startStation.x * (1 - t) * (1 - t) +
-                   2 * curveX * (1 - t) * t +
-                   endStation.x * t * t;
-          const y = startStation.y * (1 - t) * (1 - t) +
-                   2 * curveY * (1 - t) * t +
-                   endStation.y * t * t;
+          const x =
+            startStation.x * (1 - t) * (1 - t) + 2 * curveX * (1 - t) * t + endStation.x * t * t;
+          const y =
+            startStation.y * (1 - t) * (1 - t) + 2 * curveY * (1 - t) * t + endStation.y * t * t;
 
           pathPoints.push([x, y]);
         } else {
@@ -162,12 +167,11 @@ export function generateElevatedTransit(bounds: any, lineCount: number = 3): any
         elevation: elevation,
         transit_type: transitType,
         length: Math.sqrt(
-          Math.pow(endStation.x - startStation.x, 2) +
-          Math.pow(endStation.y - startStation.y, 2)
+          Math.pow(endStation.x - startStation.x, 2) + Math.pow(endStation.y - startStation.y, 2)
         ),
         max_speed: getMaxSpeed(transitType),
         capacity: getTrainCapacity(transitType),
-        frequency: 5 + Math.random() * 10 // minutes between trains
+        frequency: 5 + Math.random() * 10, // minutes between trains
       });
     }
   }
@@ -177,20 +181,30 @@ export function generateElevatedTransit(bounds: any, lineCount: number = 3): any
 
 function getMaxSpeed(transitType: string): number {
   switch (transitType) {
-    case 'monorail': return 80;
-    case 'light_rail': return 60;
-    case 'bullet_train': return 200;
-    case 'maglev': return 300;
-    default: return 50;
+    case 'monorail':
+      return 80;
+    case 'light_rail':
+      return 60;
+    case 'bullet_train':
+      return 200;
+    case 'maglev':
+      return 300;
+    default:
+      return 50;
   }
 }
 
 function getTrainCapacity(transitType: string): number {
   switch (transitType) {
-    case 'monorail': return 200;
-    case 'light_rail': return 300;
-    case 'bullet_train': return 800;
-    case 'maglev': return 400;
-    default: return 150;
+    case 'monorail':
+      return 200;
+    case 'light_rail':
+      return 300;
+    case 'bullet_train':
+      return 800;
+    case 'maglev':
+      return 400;
+    default:
+      return 150;
   }
 }

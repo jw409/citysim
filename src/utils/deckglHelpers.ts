@@ -10,7 +10,7 @@ export function calculateViewBounds(cityBounds: any) {
   return {
     longitude: centerX / 111320, // Rough conversion to degrees
     latitude: centerY / 110540,
-    zoom: Math.log2(360 / Math.max(width, height) * 111320) - 1,
+    zoom: Math.log2((360 / Math.max(width, height)) * 111320) - 1,
   };
 }
 
@@ -19,7 +19,7 @@ export function smoothViewTransition(
   targetView: any,
   duration: number = 1000
 ): Promise<void> {
-  return new Promise((resolve) => {
+  return new Promise(resolve => {
     const startTime = Date.now();
     const initialView = { ...currentView };
 

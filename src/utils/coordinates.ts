@@ -2,19 +2,26 @@
 // This is a simplified conversion - in reality you'd use proper map projections
 
 const CITY_CENTER_LAT = 40.7128; // NYC latitude as default
-const CITY_CENTER_LNG = -74.0060; // NYC longitude as default
+const CITY_CENTER_LNG = -74.006; // NYC longitude as default
 const METERS_PER_DEGREE_LAT = 111000; // Approximate
 const METERS_PER_DEGREE_LNG = 85000; // Approximate at NYC latitude
 
 export function localToLatLng(x: number, y: number): [number, number] {
   // Convert meters to degrees
-  const lat = CITY_CENTER_LAT + (y / METERS_PER_DEGREE_LAT);
-  const lng = CITY_CENTER_LNG + (x / METERS_PER_DEGREE_LNG);
+  const lat = CITY_CENTER_LAT + y / METERS_PER_DEGREE_LAT;
+  const lng = CITY_CENTER_LNG + x / METERS_PER_DEGREE_LNG;
+
+  // Debug coordinate conversion for key points
+  if (x === 0 && y === 0) {
+    console.log(`🗺️  LOCAL ORIGIN [0, 0] → lat/lng [${lng.toFixed(6)}, ${lat.toFixed(6)}]`);
+  }
 
   return [lng, lat]; // deck.gl expects [longitude, latitude]
 }
 
-export function convertPointsToLatLng(points: Array<{x: number, y: number}>): Array<[number, number]> {
+export function convertPointsToLatLng(
+  points: Array<{ x: number; y: number }>
+): Array<[number, number]> {
   return points.map(p => localToLatLng(p.x, p.y));
 }
 
@@ -33,7 +40,7 @@ export function getBoundsFromCityModel(cityModel: any): {
     console.log('No bounds found in city model, calculating from zones/buildings...');
 
     // Calculate bounds from zones and buildings if bounds are missing
-    const allPoints: {x: number, y: number}[] = [];
+    const allPoints: { x: number; y: number }[] = [];
 
     // Add points from zones
     if (cityModel.zones) {
@@ -60,7 +67,7 @@ export function getBoundsFromCityModel(cityModel: any): {
         latitude: CITY_CENTER_LAT,
         zoom: 12,
         pitch: 45,
-        bearing: 0
+        bearing: 0,
       };
     }
 
@@ -69,7 +76,7 @@ export function getBoundsFromCityModel(cityModel: any): {
       min_x: Math.min(...allPoints.map(p => p.x)),
       min_y: Math.min(...allPoints.map(p => p.y)),
       max_x: Math.max(...allPoints.map(p => p.x)),
-      max_y: Math.max(...allPoints.map(p => p.y))
+      max_y: Math.max(...allPoints.map(p => p.y)),
     };
 
     console.log('Calculated bounds from geometry:', calculatedBounds);
@@ -104,6 +111,6 @@ export function getBoundsFromCityModel(cityModel: any): {
     latitude: centerLat,
     zoom,
     pitch: 45,
-    bearing: 0
+    bearing: 0,
   };
 }

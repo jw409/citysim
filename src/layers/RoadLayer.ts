@@ -8,7 +8,7 @@ export function createRoadLayer(roads: any[], timeOfDay: number = 12) {
   return new PathLayer({
     id: 'roads',
     data: roads,
-    getPath: (d: any) => d.path ? convertPointsToLatLng(d.path) : [],
+    getPath: (d: any) => (d.path ? convertPointsToLatLng(d.path) : []),
     getWidth: (d: any) => getRoadWidth(d.type, d.width),
     getColor: (d: any) => getRoadColor(d.type, d.id, colors),
     widthUnits: 'meters',

@@ -16,14 +16,16 @@ export function ControlPanel() {
     isRunning: state.isRunning,
     isLoading: state.isLoading,
     currentTime: state.currentTime,
-    speed: state.speed
+    speed: state.speed,
   });
 
   return (
     <div className="control-panel">
       <h3 className="toolbar-title">⏱️ Time Controls</h3>
       <div className="control-group">
-        <label className="control-label">Simulation Status: {state.isInitialized ? '✅ Ready' : '⏳ Loading'}</label>
+        <label className="control-label">
+          Simulation Status: {state.isInitialized ? '✅ Ready' : '⏳ Loading'}
+        </label>
         <div className="control-buttons">
           <button
             className="button button-primary"
@@ -36,16 +38,14 @@ export function ControlPanel() {
       </div>
 
       <div className="control-group">
-        <label className="control-label">
-          Speed: {state.speed.toFixed(1)}x
-        </label>
+        <label className="control-label">Speed: {state.speed.toFixed(1)}x</label>
         <input
           type="range"
           min="0.1"
           max="5"
           step="0.1"
           value={state.speed}
-          onChange={(e) => setSpeed(parseFloat(e.target.value))}
+          onChange={e => setSpeed(parseFloat(e.target.value))}
           className="speed-slider"
           style={{ width: '100%' }}
         />

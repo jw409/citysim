@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>DeckGL Test</title>
+  <script src="https://unpkg.com/deck.gl@latest/dist.min.js"></script>
+  <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+  <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet">
+  <style>
+    body { margin: 0; font-family: Arial; }
+    #container { width: 100vw; height: 100vh; position: relative; background: #1a1a2e; }
+    #info { position: absolute; top: 10px; left: 10px; color: white; z-index: 100; background: rgba(0,0,0,0.7); padding: 10px; border-radius: 5px; }
+  </style>
+</head>
+<body>
+  <div id="container"></div>
+  <div id="info">
+    <div>DeckGL Test Status: <span id="status">Initializing...</span></div>
+    <div>WebGL: <span id="webgl-status">Checking...</span></div>
+    <div>Camera: lng=-74.006, lat=40.7128, zoom=12</div>
+    <div>Test Layers: Red polygon + Green dots</div>
+  </div>
+
+  <script>
+    // Test WebGL support
+    const canvas = document.createElement('canvas');
+    const gl = canvas.getContext('webgl2') || canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+    document.getElementById('webgl-status').textContent = gl ? 'Supported ✅' : 'Not Supported ❌';
+
+    if (gl) {
+      console.log('WebGL Version:', gl.getParameter(gl.VERSION));
+      console.log('WebGL Vendor:', gl.getParameter(gl.VENDOR));
+      console.log('WebGL Renderer:', gl.getParameter(gl.RENDERER));
+    }
+
+    // Initialize DeckGL
+    try {
+      const deckgl = new deck.Deck({
+        container: 'container',
+        initialViewState: {
+          longitude: -74.006,
+          latitude: 40.7128,
+          zoom: 12,
+          pitch: 0,
+          bearing: 0
+        },
+        controller: true,
+        layers: [
+          // Red test polygon
+          new deck.PolygonLayer({
+            id: 'test-polygon',
+            data: [{
+              polygon: [
+                [-74.010, 40.710], // Bottom left
+                [-74.000, 40.710], // Bottom right
+                [-74.000, 40.720], // Top right
+                [-74.010, 40.720], // Top left
+                [-74.010, 40.710]  // Close
+              ]
+            }],
+            getPolygon: d => d.polygon,
+            getFillColor: [255, 0, 0, 128],
+            getLineColor: [255, 255, 255, 255],
+            getLineWidth: 10,
+            filled: true,
+            stroked: true
+          }),
+          // Green test dots
+          new deck.ScatterplotLayer({
+            id: 'test-dots',
+            data: [
+              { pos: [-74.006, 40.7128] }, // NYC center
+              { pos: [-74.007, 40.713] },  // Nearby
+              { pos: [-74.005, 40.712] }   // Nearby
+            ],
+            getPosition: d => d.pos,
+            getRadius: 500,
+            getFillColor: [0, 255, 0, 255],
+            radiusMinPixels: 20
+          })
+        ],
+        onWebGLInitialized: (gl) => {
+          console.log('✅ DeckGL WebGL initialized');
+          document.getElementById('status').textContent = 'WebGL Initialized ✅';
+        },
+        onError: (error) => {
+          console.error('❌ DeckGL Error:', error);
+          document.getElementById('status').textContent = 'Error ❌';
+        },
+        onLoad: () => {
+          console.log('✅ DeckGL loaded successfully');
+          document.getElementById('status').textContent = 'Loaded ✅';
+        }
+      });
+
+      console.log('DeckGL instance created:', deckgl);
+
+    } catch (error) {
+      console.error('❌ Failed to create DeckGL:', error);
+      document.getElementById('status').textContent = 'Failed ❌';
+    }
+  </script>
+</body>
+</html>

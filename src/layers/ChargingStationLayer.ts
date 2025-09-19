@@ -100,7 +100,8 @@ export class ChargingStationLayer extends CompositeLayer<ChargingStationLayerPro
     }
 
     // Station ID labels (smaller text below icon)
-    if (showLabels && stations.length <= 10) { // Only show IDs when not too cluttered
+    if (showLabels && stations.length <= 10) {
+      // Only show IDs when not too cluttered
       layers.push(
         new TextLayer({
           id: 'charging-station-ids',
@@ -139,9 +140,7 @@ export function createChargingStationLayer(
 }
 
 // Helper function to create coverage areas from stations
-export function createCoverageAreasFromStations(
-  stations: ChargingStation[]
-): CoverageArea[] {
+export function createCoverageAreasFromStations(stations: ChargingStation[]): CoverageArea[] {
   return stations.map(station => ({
     center: station.position,
     radius: station.coverage_radius,

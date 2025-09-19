@@ -7,15 +7,23 @@ export function createSkyBridgeLayer(bridgeData: any[]) {
   return new PathLayer({
     id: 'sky_bridges',
     data: bridgeData,
-    getPath: (d: any) => d.path || [[d.start_x, d.start_y], [d.end_x, d.end_y]],
+    getPath: (d: any) =>
+      d.path || [
+        [d.start_x, d.start_y],
+        [d.end_x, d.end_y],
+      ],
     getWidth: (d: any) => d.width || 3,
     getColor: (d: any) => {
       // Color by bridge type
       switch (d.bridge_type) {
-        case 'pedestrian': return [200, 200, 255, 220];
-        case 'enclosed': return [180, 180, 220, 240];
-        case 'glass': return [150, 200, 255, 180];
-        default: return layerConfig.color;
+        case 'pedestrian':
+          return [200, 200, 255, 220];
+        case 'enclosed':
+          return [180, 180, 220, 240];
+        case 'glass':
+          return [150, 200, 255, 180];
+        default:
+          return layerConfig.color;
       }
     },
     opacity: layerConfig.opacity,
@@ -28,12 +36,12 @@ export function createSkyBridgeLayer(bridgeData: any[]) {
       ambient: 0.4,
       diffuse: 0.8,
       shininess: 64,
-      specularColor: [255, 255, 255]
+      specularColor: [255, 255, 255],
     },
     transitions: {
       getColor: 600,
-      getWidth: 400
-    }
+      getWidth: 400,
+    },
   });
 }
 
@@ -75,7 +83,7 @@ export function generateSkyBridges(buildings: any[], density: number = 0.2): any
           building_1: building1.id || i,
           building_2: building2.id || j,
           capacity: 50 + Math.random() * 100,
-          daily_users: Math.random() * 500
+          daily_users: Math.random() * 500,
         });
       }
     }
@@ -90,13 +98,13 @@ function calculateBuildingCenter(footprint: any[]): { x: number; y: number } {
   const sum = footprint.reduce(
     (acc, point) => ({
       x: acc.x + (point.x || 0),
-      y: acc.y + (point.y || 0)
+      y: acc.y + (point.y || 0),
     }),
     { x: 0, y: 0 }
   );
 
   return {
     x: sum.x / footprint.length,
-    y: sum.y / footprint.length
+    y: sum.y / footprint.length,
   };
 }

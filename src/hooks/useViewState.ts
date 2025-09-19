@@ -30,33 +30,36 @@ export function useViewState(initialViewState: Partial<ViewState> = {}) {
     setViewState({ ...INITIAL_VIEW_STATE, ...initialViewState });
   }, [initialViewState]);
 
-  const flyTo = useCallback((targetView: Partial<ViewState>, duration: number = 1000) => {
-    const startTime = Date.now();
-    const startView = { ...viewState };
-    const endView = { ...startView, ...targetView };
+  const flyTo = useCallback(
+    (targetView: Partial<ViewState>, duration: number = 1000) => {
+      const startTime = Date.now();
+      const startView = { ...viewState };
+      const endView = { ...startView, ...targetView };
 
-    function animate() {
-      const elapsed = Date.now() - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3);
+      function animate() {
+        const elapsed = Date.now() - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
 
-      const interpolatedView = {
-        longitude: startView.longitude + (endView.longitude - startView.longitude) * eased,
-        latitude: startView.latitude + (endView.latitude - startView.latitude) * eased,
-        zoom: startView.zoom + (endView.zoom - startView.zoom) * eased,
-        pitch: startView.pitch + (endView.pitch - startView.pitch) * eased,
-        bearing: startView.bearing + (endView.bearing - startView.bearing) * eased,
-      };
+        const interpolatedView = {
+          longitude: startView.longitude + (endView.longitude - startView.longitude) * eased,
+          latitude: startView.latitude + (endView.latitude - startView.latitude) * eased,
+          zoom: startView.zoom + (endView.zoom - startView.zoom) * eased,
+          pitch: startView.pitch + (endView.pitch - startView.pitch) * eased,
+          bearing: startView.bearing + (endView.bearing - startView.bearing) * eased,
+        };
 
-      setViewState(interpolatedView);
+        setViewState(interpolatedView);
 
-      if (progress < 1) {
-        requestAnimationFrame(animate);
+        if (progress < 1) {
+          requestAnimationFrame(animate);
+        }
       }
-    }
 
-    animate();
-  }, [viewState]);
+      animate();
+    },
+    [viewState]
+  );
 
   return {
     viewState,

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Planetary Scale Controls</title>
+    <style>
+        body { margin: 0; font-family: Arial; background: #000; color: white; }
+        .test-controls { position: fixed; top: 20px; left: 20px; z-index: 1000; background: rgba(0,0,0,0.8); padding: 20px; border-radius: 8px; }
+        button { margin: 5px; padding: 10px 15px; font-size: 14px; cursor: pointer; }
+        .current-scale { font-size: 18px; font-weight: bold; color: #4CAF50; margin-bottom: 15px; }
+    </style>
+</head>
+<body>
+    <div class="test-controls">
+        <div class="current-scale">Current Scale: <span id="scale-display">1x</span></div>
+        <div>Quick Scale Tests:</div>
+        <button onclick="setScale(1)">City (1x)</button>
+        <button onclick="setScale(10)">Regional (10x)</button>
+        <button onclick="setScale(100)">Continental (100x)</button>
+        <button onclick="setScale(1000)">Global (1000x)</button>
+        <br><br>
+        <button onclick="openMainApp()">Open Main App</button>
+    </div>
+
+    <script>
+        function setScale(scale) {
+            document.getElementById('scale-display').textContent = scale + 'x';
+            // This would interface with the main app's planetary controls
+            console.log('Setting planetary scale to:', scale);
+
+            // For testing, we'll manipulate the main app
+            try {
+                const mainWindow = window.opener || window.parent;
+                if (mainWindow && mainWindow.setPlanetaryScale) {
+                    mainWindow.setPlanetaryScale(scale);
+                } else {
+                    console.log('Main app not found, opening new window...');
+                    openMainApp();
+                }
+            } catch (e) {
+                console.log('Cannot access main app, opening new window...');
+                openMainApp();
+            }
+        }
+
+        function openMainApp() {
+            window.open('http://localhost:5174', '_blank');
+        }
+
+        // Auto-open main app
+        setTimeout(openMainApp, 1000);
+    </script>
+</body>
+</html>

@@ -7,6 +7,13 @@ interface PerformanceMetrics {
   agentCount: number;
   simulationTime: number;
   seed: number;
+  camera?: {
+    longitude: number;
+    latitude: number;
+    zoom: number;
+    pitch: number;
+    bearing: number;
+  };
 }
 
 interface PerformanceMonitorProps {
@@ -19,7 +26,9 @@ export function PerformanceMonitor({ metrics, onClose }: PerformanceMonitorProps
     <div style={containerStyle}>
       <div style={headerStyle}>
         <span style={titleStyle}>Performance Monitor</span>
-        <button onClick={onClose} style={closeButtonStyle}>×</button>
+        <button onClick={onClose} style={closeButtonStyle}>
+          ×
+        </button>
       </div>
       <div style={metricsStyle}>
         <div style={metricRowStyle}>
@@ -46,25 +55,57 @@ export function PerformanceMonitor({ metrics, onClose }: PerformanceMonitorProps
           <span style={labelStyle}>Seed:</span>
           <span style={valueStyle}>{metrics.seed}</span>
         </div>
+        {metrics.camera && (
+          <>
+            <div style={separatorStyle}>Camera Debug</div>
+            <div style={metricRowStyle}>
+              <span style={labelStyle}>Lng:</span>
+              <span style={valueStyle}>{metrics.camera.longitude.toFixed(6)}</span>
+            </div>
+            <div style={metricRowStyle}>
+              <span style={labelStyle}>Lat:</span>
+              <span style={valueStyle}>{metrics.camera.latitude.toFixed(6)}</span>
+            </div>
+            <div style={metricRowStyle}>
+              <span style={labelStyle}>Zoom:</span>
+              <span style={valueStyle}>{metrics.camera.zoom.toFixed(2)}</span>
+            </div>
+            <div style={metricRowStyle}>
+              <span style={labelStyle}>Pitch:</span>
+              <span style={valueStyle}>{metrics.camera.pitch.toFixed(1)}°</span>
+            </div>
+            <div style={metricRowStyle}>
+              <span style={labelStyle}>Bearing:</span>
+              <span style={valueStyle}>{metrics.camera.bearing.toFixed(1)}°</span>
+            </div>
+          </>
+        )}
       </div>
-      <div style={hintStyle}>
-        Press Ctrl+P to toggle this monitor
-      </div>
+      <div style={hintStyle}>Press Ctrl+P to toggle this monitor</div>
     </div>
   );
 }
 
 // Helper function to get colored value style based on thresholds
-function getValueStyle(value: number, goodThreshold: number, badThreshold: number, inverse = false) {
+function getValueStyle(
+  value: number,
+  goodThreshold: number,
+  badThreshold: number,
+  inverse = false
+) {
   const base = { ...valueStyle };
 
   if (inverse) {
-    if (value <= goodThreshold) base.color = '#4ade80'; // green
-    else if (value <= badThreshold) base.color = '#fbbf24'; // yellow
+    if (value <= goodThreshold)
+      base.color = '#4ade80'; // green
+    else if (value <= badThreshold)
+      base.color = '#fbbf24'; // yellow
     else base.color = '#f87171'; // red
   } else {
-    if (value >= goodThreshold) base.color = '#4ade80'; // green
-    else if (value >= badThreshold) base.color = '#fbbf24'; // yellow
+    if (value >= goodThreshold)
+      base.color = '#4ade80'; // green
+    else if (value >= badThreshold)
+      base.color = '#fbbf24'; // yellow
     else base.color = '#f87171'; // red
   }
 
@@ -74,7 +115,7 @@ function getValueStyle(value: number, goodThreshold: number, badThreshold: numbe
 const containerStyle: React.CSSProperties = {
   position: 'fixed',
   top: '10px',
-  right: '10px',
+  left: '10px',  // Changed from right to left to avoid time controls
   backgroundColor: 'rgba(0, 0, 0, 0.85)',
   color: 'white',
   padding: '12px',
@@ -137,6 +178,16 @@ const valueStyle: React.CSSProperties = {
   fontWeight: 'bold',
   fontSize: '11px',
   textAlign: 'right',
+};
+
+const separatorStyle: React.CSSProperties = {
+  marginTop: '8px',
+  marginBottom: '4px',
+  fontSize: '10px',
+  color: '#4ade80',
+  fontWeight: 'bold',
+  borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+  paddingTop: '4px',
 };
 
 const hintStyle: React.CSSProperties = {

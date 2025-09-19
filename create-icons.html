@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create Agent Icons</title>
+</head>
+<body>
+    <canvas id="iconCanvas" width="128" height="16" style="border: 1px solid black; image-rendering: pixelated;"></canvas>
+    <br>
+    <button onclick="downloadIcon()">Download agent-icons.png</button>
+
+    <script>
+        const canvas = document.getElementById('iconCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Clear with transparent background
+        ctx.clearRect(0, 0, 128, 16);
+
+        const icons = {
+            'car': {x: 0, color: '#ff6464'},
+            'bus': {x: 16, color: '#ffc832'},
+            'truck': {x: 32, color: '#969696'},
+            'person': {x: 48, color: '#6496ff'},
+            'plane': {x: 64, color: '#ffffff'},
+            'helicopter': {x: 80, color: '#c8c8ff'},
+            'drone': {x: 96, color: '#64ff64'}
+        };
+
+        Object.entries(icons).forEach(([name, info]) => {
+            ctx.fillStyle = info.color;
+            const x = info.x;
+
+            if (name === 'person') {
+                // Draw person as circle
+                ctx.beginPath();
+                ctx.arc(x + 8, 8, 6, 0, Math.PI * 2);
+                ctx.fill();
+            } else if (name === 'plane' || name === 'helicopter') {
+                // Draw aircraft as triangle
+                ctx.beginPath();
+                ctx.moveTo(x + 8, 2);
+                ctx.lineTo(x + 2, 14);
+                ctx.lineTo(x + 14, 14);
+                ctx.closePath();
+                ctx.fill();
+            } else {
+                // Draw vehicles as rectangles
+                ctx.fillRect(x + 2, 4, 12, 8);
+            }
+        });
+
+        function downloadIcon() {
+            const link = document.createElement('a');
+            link.download = 'agent-icons.png';
+            link.href = canvas.toDataURL();
+            link.click();
+        }
+    </script>
+</body>
+</html>
