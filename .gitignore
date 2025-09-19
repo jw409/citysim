@@ -31,3 +31,13 @@ src/wasm/
 public/model.pbf
 *.log
 
+# Build outputs
+dist/
+build/
+.vite/
+
+# WASM build artifacts
+src/wasm/
+wasm/pkg/
+wasm/target/
+

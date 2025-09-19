@@ -10,6 +10,7 @@ class CityGenerator {
   constructor(seed = GENERATION_SEED) {
     this.seed = seed;
     this.noise = createNoise2D(() => this.hashSeed(seed));
+    this.rngState = this.hashSeed(seed + '_rng') * 2147483647; // Initialize RNG state
     this.zones = [];
     this.roads = [];
     this.pois = [];
@@ -24,6 +25,12 @@ class CityGenerator {
       hash = hash & hash; // Convert to 32-bit integer
     }
     return Math.abs(hash) / 2147483647;
+  }
+
+  // Seeded random number generator using Linear Congruential Generator
+  random() {
+    this.rngState = (this.rngState * 1664525 + 1013904223) % 4294967296;
+    return this.rngState / 4294967296;
   }
 
   generateCity() {
@@ -317,14 +324,54 @@ class CityGenerator {
   }
 }
 
+function parseArgs() {
+  const args = process.argv.slice(2);
+  const options = {
+    seed: GENERATION_SEED,
+    output: './public/model.pbf'
+  };
+
+  for (let i = 0; i < args.length; i++) {
+    switch (args[i]) {
+      case '--seed':
+        if (i + 1 < args.length) {
+          options.seed = args[i + 1];
+          i++; // Skip next argument
+        }
+        break;
+      case '--output':
+        if (i + 1 < args.length) {
+          options.output = args[i + 1];
+          i++; // Skip next argument
+        }
+        break;
+      case '--help':
+        console.log(`Usage: node generate_city.cjs [options]
+Options:
+  --seed <value>     Seed for deterministic generation (default: "${GENERATION_SEED}")
+  --output <path>    Output file path (default: "./public/model.pbf")
+  --help             Show this help message
+
+Examples:
+  node generate_city.cjs --seed 12345 --output ./test_city.pbf
+  node generate_city.cjs --seed "my-custom-seed"`);
+        process.exit(0);
+    }
+  }
+
+  return options;
+}
+
 async function main() {
   try {
+    const options = parseArgs();
+
     // Load protobuf schema
     const root = await protobuf.load('./src/data/city_model.proto');
     const City = root.lookupType('urbansynth.City');
 
-    // Generate city
-    const generator = new CityGenerator();
+    // Generate city with specified seed
+    const generator = new CityGenerator(options.seed);
     const cityData = generator.generateCity();
 
     // Validate the message
@@ -336,17 +383,17 @@ async function main() {
     const buffer = City.encode(message).finish();
 
     // Write to file
-    const outputPath = './public/model.pbf';
-    fs.writeFileSync(outputPath, buffer);
+    fs.writeFileSync(options.output, buffer);
 
     console.log(`✅ City model generated successfully!`);
     console.log(`📊 Stats:`);
+    console.log(`   - Seed: ${options.seed}`);
     console.log(`   - Zones: ${cityData.zones.length}`);
     console.log(`   - Roads: ${cityData.roads.length}`);
     console.log(`   - POIs: ${cityData.pois.length}`);
     console.log(`   - Buildings: ${cityData.buildings.length}`);
     console.log(`   - File size: ${(buffer.length / 1024).toFixed(1)} KB`);
-    console.log(`   - Output: ${outputPath}`);
+    console.log(`   - Output: ${options.output}`);
 
   } catch (error) {
     console.error('❌ City generation failed:', error);
