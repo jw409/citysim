@@ -9,6 +9,7 @@ export interface SimulationState {
   agents: Agent[];
   trafficData: TrafficData | null;
   cityModel: CityModel | null;
+  simulationData: any | null;
   currentTime: number;
   day: number;
   speed: number;
@@ -29,6 +30,7 @@ type SimulationAction =
   | { type: 'SET_AGENTS'; payload: Agent[] }
   | { type: 'SET_TRAFFIC_DATA'; payload: TrafficData }
   | { type: 'SET_CITY_MODEL'; payload: CityModel }
+  | { type: 'SET_SIMULATION_DATA'; payload: any }
   | { type: 'SET_TIME'; payload: { time: number; day: number } }
   | { type: 'SET_SPEED'; payload: number }
   | { type: 'SET_TOOL'; payload: string | null }
@@ -42,6 +44,7 @@ const initialState: SimulationState = {
   agents: [],
   trafficData: null,
   cityModel: null,
+  simulationData: null,
   currentTime: 0,
   day: 0,
   speed: 1.0,
@@ -70,6 +73,8 @@ function simulationReducer(state: SimulationState, action: SimulationAction): Si
       return { ...state, trafficData: action.payload };
     case 'SET_CITY_MODEL':
       return { ...state, cityModel: action.payload };
+    case 'SET_SIMULATION_DATA':
+      return { ...state, simulationData: action.payload };
     case 'SET_TIME':
       return { ...state, currentTime: action.payload.time, day: action.payload.day };
     case 'SET_SPEED':
