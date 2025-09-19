@@ -1,5 +1,6 @@
 import { PolygonLayer } from '@deck.gl/layers';
 import { getTimeBasedColors } from '../utils/colorSchemes';
+import { convertPointsToLatLng } from '../utils/coordinates';
 
 export function createBuildingLayer(buildings: any[], timeOfDay: number = 12) {
   const colors = getTimeBasedColors(timeOfDay);
@@ -7,7 +8,7 @@ export function createBuildingLayer(buildings: any[], timeOfDay: number = 12) {
   return new PolygonLayer({
     id: 'buildings',
     data: buildings,
-    getPolygon: (d: any) => d.footprint?.map((p: any) => [p.x, p.y]) || [],
+    getPolygon: (d: any) => d.footprint ? convertPointsToLatLng(d.footprint) : [],
     getElevation: (d: any) => d.height || 10,
     getFillColor: (d: any) => {
       const buildingType = getBuildingTypeName(d.building_type);

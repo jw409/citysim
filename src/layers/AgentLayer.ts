@@ -1,5 +1,6 @@
 import { ScatterplotLayer } from '@deck.gl/layers';
 import { getTimeBasedColors } from '../utils/colorSchemes';
+import { localToLatLng } from '../utils/coordinates';
 
 export function createAgentLayer(agents: any[], timeOfDay: number = 12) {
   const colors = getTimeBasedColors(timeOfDay);
@@ -7,7 +8,11 @@ export function createAgentLayer(agents: any[], timeOfDay: number = 12) {
   return new ScatterplotLayer({
     id: 'agents',
     data: agents,
-    getPosition: (d: any) => [d.position?.x || 0, d.position?.y || 0, 5],
+    getPosition: (d: any) => {
+      if (!d.position) return [0, 0, 5];
+      const [lng, lat] = localToLatLng(d.position.x, d.position.y);
+      return [lng, lat, 5];
+    },
     getRadius: (d: any) => getAgentSize(d.agent_type),
     getFillColor: (d: any) => {
       const agentType = d.agent_type?.toLowerCase() || 'car';

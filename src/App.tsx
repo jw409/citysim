@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { SimulationProvider } from './contexts/SimulationContext';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { LoadingScreen } from './components/LoadingScreen';
@@ -6,15 +6,23 @@ import { Toolbar } from './components/Toolbar';
 import { ControlPanel } from './components/ControlPanel';
 import { PerformanceMonitor } from './components/PerformanceMonitor';
 import { CityVisualization } from './components/CityVisualization';
+import { OptimizationPanel } from './components/OptimizationPanel';
+import { OptimizationResults } from './components/OptimizationResults';
 import { useSimulation } from './hooks/useSimulation';
 import { useSimulationContext } from './contexts/SimulationContext';
+import { EVChargingOptimizer } from './solver/evOptimization';
+import { processTrafficData } from './utils/trafficAnalysis';
+import { OptimizationResult, OptimizationConfig, SolverProgress } from './types/optimization';
 import './styles/globals.css';
 import './styles/components.css';
 
 function AppContent() {
-  const { state } = useSimulationContext();
+  const { state, dispatch } = useSimulationContext();
   const { initialize } = useSimulation();
-  const [showPerformance, setShowPerformance] = React.useState(true);
+  const [showPerformance, setShowPerformance] = useState(true);
+  const [optimizationResult, setOptimizationResult] = useState<OptimizationResult | null>(null);
+  const [isOptimizing, setIsOptimizing] = useState(false);
+  const [optimizationProgress, setOptimizationProgress] = useState<SolverProgress>();
 
   useEffect(() => {
     initialize();
@@ -31,6 +39,45 @@ function AppContent() {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
+
+  // Add optimization handler
+  const handleOptimize = useCallback(async (config: OptimizationConfig) => {
+    if (!state.cityModel || state.agents.length === 0) return;
+
+    setIsOptimizing(true);
+    setOptimizationProgress({ phase: 'preparing', progress: 0, message: 'Starting optimization...' });
+
+    try {
+      const trafficPoints = processTrafficData(
+        {
+          congestion_points: [],
+          road_densities: {},
+          poi_popularity: {},
+          flow_matrix: []
+        }, // Simplified traffic data
+        state.cityModel.roads || [],
+        state.agents
+      );
+
+      const optimizationInput = {
+        traffic_data: trafficPoints,
+        roads: state.cityModel.roads || [],
+        pois: [],
+        existing_stations: [],
+        config,
+      };
+
+      const optimizer = new EVChargingOptimizer(setOptimizationProgress);
+      const result = await optimizer.optimize(optimizationInput);
+
+      setOptimizationResult(result);
+    } catch (error) {
+      console.error('Optimization failed:', error);
+      dispatch({ type: 'SET_ERROR', payload: `Optimization failed: ${error instanceof Error ? error.message : 'Unknown error'}` });
+    } finally {
+      setIsOptimizing(false);
+    }
+  }, [state.cityModel, state.agents, dispatch]);
 
   return (
     <>
@@ -56,12 +103,21 @@ function AppContent() {
 
         <main className="app-main">
           <div className="visualization-container">
-            <CityVisualization />
+            <CityVisualization optimizationResult={optimizationResult} />
           </div>
 
           <aside className="sidebar">
             <Toolbar />
             <ControlPanel />
+            <OptimizationPanel
+              onOptimize={handleOptimize}
+              isOptimizing={isOptimizing}
+              progress={optimizationProgress}
+            />
+            <OptimizationResults
+              result={optimizationResult}
+              onClear={() => setOptimizationResult(null)}
+            />
 
             <div className="stats-panel">
               <h3 className="toolbar-title">Statistics</h3>

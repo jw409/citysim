@@ -1,22 +1,20 @@
 /*eslint-disable block-scoped-var, id-length, no-control-regex, no-magic-numbers, no-prototype-builtins, no-redeclare, no-shadow, no-var, sort-vars*/
-"use strict";
-
-var $protobuf = require("protobufjs/minimal");
+import * as $protobuf from "protobufjs/minimal";
 
 // Common aliases
-var $Reader = $protobuf.Reader, $Writer = $protobuf.Writer, $util = $protobuf.util;
+const $Reader = $protobuf.Reader, $Writer = $protobuf.Writer, $util = $protobuf.util;
 
 // Exported root namespace
-var $root = $protobuf.roots["default"] || ($protobuf.roots["default"] = {});
+const $root = $protobuf.roots["default"] || ($protobuf.roots["default"] = {});
 
-$root.urbansynth = (function() {
+export const urbansynth = $root.urbansynth = (() => {
 
     /**
      * Namespace urbansynth.
      * @exports urbansynth
      * @namespace
      */
-    var urbansynth = {};
+    const urbansynth = {};
 
     urbansynth.City = (function() {
 
@@ -47,7 +45,7 @@ $root.urbansynth = (function() {
             this.pois = [];
             this.buildings = [];
             if (properties)
-                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                for (let keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                     if (properties[keys[i]] != null)
                         this[keys[i]] = properties[keys[i]];
         }
@@ -137,16 +135,16 @@ $root.urbansynth = (function() {
             if (message.bounds != null && Object.hasOwnProperty.call(message, "bounds"))
                 $root.urbansynth.BoundingBox.encode(message.bounds, writer.uint32(/* id 2, wireType 2 =*/18).fork()).ldelim();
             if (message.zones != null && message.zones.length)
-                for (var i = 0; i < message.zones.length; ++i)
+                for (let i = 0; i < message.zones.length; ++i)
                     $root.urbansynth.Zone.encode(message.zones[i], writer.uint32(/* id 3, wireType 2 =*/26).fork()).ldelim();
             if (message.roads != null && message.roads.length)
-                for (var i = 0; i < message.roads.length; ++i)
+                for (let i = 0; i < message.roads.length; ++i)
                     $root.urbansynth.Road.encode(message.roads[i], writer.uint32(/* id 4, wireType 2 =*/34).fork()).ldelim();
             if (message.pois != null && message.pois.length)
-                for (var i = 0; i < message.pois.length; ++i)
+                for (let i = 0; i < message.pois.length; ++i)
                     $root.urbansynth.POI.encode(message.pois[i], writer.uint32(/* id 5, wireType 2 =*/42).fork()).ldelim();
             if (message.buildings != null && message.buildings.length)
-                for (var i = 0; i < message.buildings.length; ++i)
+                for (let i = 0; i < message.buildings.length; ++i)
                     $root.urbansynth.Building.encode(message.buildings[i], writer.uint32(/* id 6, wireType 2 =*/50).fork()).ldelim();
             if (message.metadata != null && Object.hasOwnProperty.call(message, "metadata"))
                 $root.urbansynth.CityMetadata.encode(message.metadata, writer.uint32(/* id 7, wireType 2 =*/58).fork()).ldelim();
@@ -180,9 +178,9 @@ $root.urbansynth = (function() {
         City.decode = function decode(reader, length, error) {
             if (!(reader instanceof $Reader))
                 reader = $Reader.create(reader);
-            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.urbansynth.City();
+            let end = length === undefined ? reader.len : reader.pos + length, message = new $root.urbansynth.City();
             while (reader.pos < end) {
-                var tag = reader.uint32();
+                let tag = reader.uint32();
                 if (tag === error)
                     break;
                 switch (tag >>> 3) {
@@ -261,15 +259,15 @@ $root.urbansynth = (function() {
                 if (!$util.isString(message.name))
                     return "name: string expected";
             if (message.bounds != null && message.hasOwnProperty("bounds")) {
-                var error = $root.urbansynth.BoundingBox.verify(message.bounds);
+                let error = $root.urbansynth.BoundingBox.verify(message.bounds);
                 if (error)
                     return "bounds." + error;
             }
             if (message.zones != null && message.hasOwnProperty("zones")) {
                 if (!Array.isArray(message.zones))
                     return "zones: array expected";
-                for (var i = 0; i < message.zones.length; ++i) {
-                    var error = $root.urbansynth.Zone.verify(message.zones[i]);
+                for (let i = 0; i < message.zones.length; ++i) {
+                    let error = $root.urbansynth.Zone.verify(message.zones[i]);
                     if (error)
                         return "zones." + error;
                 }
@@ -277,8 +275,8 @@ $root.urbansynth = (function() {
             if (message.roads != null && message.hasOwnProperty("roads")) {
                 if (!Array.isArray(message.roads))
                     return "roads: array expected";
-                for (var i = 0; i < message.roads.length; ++i) {
-                    var error = $root.urbansynth.Road.verify(message.roads[i]);
+                for (let i = 0; i < message.roads.length; ++i) {
+                    let error = $root.urbansynth.Road.verify(message.roads[i]);
                     if (error)
                         return "roads." + error;
                 }
@@ -286,8 +284,8 @@ $root.urbansynth = (function() {
             if (message.pois != null && message.hasOwnProperty("pois")) {
                 if (!Array.isArray(message.pois))
                     return "pois: array expected";
-                for (var i = 0; i < message.pois.length; ++i) {
-                    var error = $root.urbansynth.POI.verify(message.pois[i]);
+                for (let i = 0; i < message.pois.length; ++i) {
+                    let error = $root.urbansynth.POI.verify(message.pois[i]);
                     if (error)
                         return "pois." + error;
                 }
@@ -295,14 +293,14 @@ $root.urbansynth = (function() {
             if (message.buildings != null && message.hasOwnProperty("buildings")) {
                 if (!Array.isArray(message.buildings))
                     return "buildings: array expected";
-                for (var i = 0; i < message.buildings.length; ++i) {
-                    var error = $root.urbansynth.Building.verify(message.buildings[i]);
+                for (let i = 0; i < message.buildings.length; ++i) {
+                    let error = $root.urbansynth.Building.verify(message.buildings[i]);
                     if (error)
                         return "buildings." + error;
                 }
             }
             if (message.metadata != null && message.hasOwnProperty("metadata")) {
-                var error = $root.urbansynth.CityMetadata.verify(message.metadata);
+                let error = $root.urbansynth.CityMetadata.verify(message.metadata);
                 if (error)
                     return "metadata." + error;
             }
@@ -320,7 +318,7 @@ $root.urbansynth = (function() {
         City.fromObject = function fromObject(object) {
             if (object instanceof $root.urbansynth.City)
                 return object;
-            var message = new $root.urbansynth.City();
+            let message = new $root.urbansynth.City();
             if (object.name != null)
                 message.name = String(object.name);
             if (object.bounds != null) {
@@ -332,7 +330,7 @@ $root.urbansynth = (function() {
                 if (!Array.isArray(object.zones))
                     throw TypeError(".urbansynth.City.zones: array expected");
                 message.zones = [];
-                for (var i = 0; i < object.zones.length; ++i) {
+                for (let i = 0; i < object.zones.length; ++i) {
                     if (typeof object.zones[i] !== "object")
                         throw TypeError(".urbansynth.City.zones: object expected");
                     message.zones[i] = $root.urbansynth.Zone.fromObject(object.zones[i]);
@@ -342,7 +340,7 @@ $root.urbansynth = (function() {
                 if (!Array.isArray(object.roads))
                     throw TypeError(".urbansynth.City.roads: array expected");
                 message.roads = [];
-                for (var i = 0; i < object.roads.length; ++i) {
+                for (let i = 0; i < object.roads.length; ++i) {
                     if (typeof object.roads[i] !== "object")
                         throw TypeError(".urbansynth.City.roads: object expected");
                     message.roads[i] = $root.urbansynth.Road.fromObject(object.roads[i]);
@@ -352,7 +350,7 @@ $root.urbansynth = (function() {
                 if (!Array.isArray(object.pois))
                     throw TypeError(".urbansynth.City.pois: array expected");
                 message.pois = [];
-                for (var i = 0; i < object.pois.length; ++i) {
+                for (let i = 0; i < object.pois.length; ++i) {
                     if (typeof object.pois[i] !== "object")
                         throw TypeError(".urbansynth.City.pois: object expected");
                     message.pois[i] = $root.urbansynth.POI.fromObject(object.pois[i]);
@@ -362,7 +360,7 @@ $root.urbansynth = (function() {
                 if (!Array.isArray(object.buildings))
                     throw TypeError(".urbansynth.City.buildings: array expected");
                 message.buildings = [];
-                for (var i = 0; i < object.buildings.length; ++i) {
+                for (let i = 0; i < object.buildings.length; ++i) {
                     if (typeof object.buildings[i] !== "object")
                         throw TypeError(".urbansynth.City.buildings: object expected");
                     message.buildings[i] = $root.urbansynth.Building.fromObject(object.buildings[i]);
@@ -388,7 +386,7 @@ $root.urbansynth = (function() {
         City.toObject = function toObject(message, options) {
             if (!options)
                 options = {};
-            var object = {};
+            let object = {};
             if (options.arrays || options.defaults) {
                 object.zones = [];
                 object.roads = [];
@@ -406,22 +404,22 @@ $root.urbansynth = (function() {
                 object.bounds = $root.urbansynth.BoundingBox.toObject(message.bounds, options);
             if (message.zones && message.zones.length) {
                 object.zones = [];
-                for (var j = 0; j < message.zones.length; ++j)
+                for (let j = 0; j < message.zones.length; ++j)
                     object.zones[j] = $root.urbansynth.Zone.toObject(message.zones[j], options);
             }
             if (message.roads && message.roads.length) {
                 object.roads = [];
-                for (var j = 0; j < message.roads.length; ++j)
+                for (let j = 0; j < message.roads.length; ++j)
                     object.roads[j] = $root.urbansynth.Road.toObject(message.roads[j], options);
             }
             if (message.pois && message.pois.length) {
                 object.pois = [];
-                for (var j = 0; j < message.pois.length; ++j)
+                for (let j = 0; j < message.pois.length; ++j)
                     object.pois[j] = $root.urbansynth.POI.toObject(message.pois[j], options);
             }
             if (message.buildings && message.buildings.length) {
                 object.buildings = [];
-                for (var j = 0; j < message.buildings.length; ++j)
+                for (let j = 0; j < message.buildings.length; ++j)
                     object.buildings[j] = $root.urbansynth.Building.toObject(message.buildings[j], options);
             }
             if (message.metadata != null && message.hasOwnProperty("metadata"))
@@ -480,7 +478,7 @@ $root.urbansynth = (function() {
          */
         function BoundingBox(properties) {
             if (properties)
-                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                for (let keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                     if (properties[keys[i]] != null)
                         this[keys[i]] = properties[keys[i]];
         }
@@ -579,9 +577,9 @@ $root.urbansynth = (function() {
         BoundingBox.decode = function decode(reader, length, error) {
             if (!(reader instanceof $Reader))
                 reader = $Reader.create(reader);
-            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.urbansynth.BoundingBox();
+            let end = length === undefined ? reader.len : reader.pos + length, message = new $root.urbansynth.BoundingBox();
             while (reader.pos < end) {
-                var tag = reader.uint32();
+                let tag = reader.uint32();
                 if (tag === error)
                     break;
                 switch (tag >>> 3) {
@@ -662,7 +660,7 @@ $root.urbansynth = (function() {
         BoundingBox.fromObject = function fromObject(object) {
             if (object instanceof $root.urbansynth.BoundingBox)
                 return object;
-            var message = new $root.urbansynth.BoundingBox();
+            let message = new $root.urbansynth.BoundingBox();
             if (object.minX != null)
                 message.minX = Number(object.minX);
             if (object.minY != null)
@@ -686,7 +684,7 @@ $root.urbansynth = (function() {
         BoundingBox.toObject = function toObject(message, options) {
             if (!options)
                 options = {};
-            var object = {};
+            let object = {};
             if (options.defaults) {
                 object.minX = 0;
                 object.minY = 0;
@@ -757,7 +755,7 @@ $root.urbansynth = (function() {
         function Zone(properties) {
             this.boundary = [];
             if (properties)
-                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                for (let keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                     if (properties[keys[i]] != null)
                         this[keys[i]] = properties[keys[i]];
         }
@@ -831,7 +829,7 @@ $root.urbansynth = (function() {
             if (message.type != null && Object.hasOwnProperty.call(message, "type"))
                 writer.uint32(/* id 2, wireType 0 =*/16).int32(message.type);
             if (message.boundary != null && message.boundary.length)
-                for (var i = 0; i < message.boundary.length; ++i)
+                for (let i = 0; i < message.boundary.length; ++i)
                     $root.urbansynth.Point2D.encode(message.boundary[i], writer.uint32(/* id 3, wireType 2 =*/26).fork()).ldelim();
             if (message.density != null && Object.hasOwnProperty.call(message, "density"))
                 writer.uint32(/* id 4, wireType 5 =*/37).float(message.density);
@@ -867,9 +865,9 @@ $root.urbansynth = (function() {
         Zone.decode = function decode(reader, length, error) {
             if (!(reader instanceof $Reader))
                 reader = $Reader.create(reader);
-            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.urbansynth.Zone();
+            let end = length === undefined ? reader.len : reader.pos + length, message = new $root.urbansynth.Zone();
             while (reader.pos < end) {
-                var tag = reader.uint32();
+                let tag = reader.uint32();
                 if (tag === error)
                     break;
                 switch (tag >>> 3) {
@@ -948,8 +946,8 @@ $root.urbansynth = (function() {
             if (message.boundary != null && message.hasOwnProperty("boundary")) {
                 if (!Array.isArray(message.boundary))
                     return "boundary: array expected";
-                for (var i = 0; i < message.boundary.length; ++i) {
-                    var error = $root.urbansynth.Point2D.verify(message.boundary[i]);
+                for (let i = 0; i < message.boundary.length; ++i) {
+                    let error = $root.urbansynth.Point2D.verify(message.boundary[i]);
                     if (error)
                         return "boundary." + error;
                 }
@@ -958,7 +956,7 @@ $root.urbansynth = (function() {
                 if (typeof message.density !== "number")
                     return "density: number expected";
             if (message.properties != null && message.hasOwnProperty("properties")) {
-                var error = $root.urbansynth.ZoneProperties.verify(message.properties);
+                let error = $root.urbansynth.ZoneProperties.verify(message.properties);
                 if (error)
                     return "properties." + error;
             }
@@ -976,7 +974,7 @@ $root.urbansynth = (function() {
         Zone.fromObject = function fromObject(object) {
             if (object instanceof $root.urbansynth.Zone)
                 return object;
-            var message = new $root.urbansynth.Zone();
+            let message = new $root.urbansynth.Zone();
             if (object.id != null)
                 message.id = String(object.id);
             switch (object.type) {
@@ -1015,7 +1013,7 @@ $root.urbansynth = (function() {
                 if (!Array.isArray(object.boundary))
                     throw TypeError(".urbansynth.Zone.boundary: array expected");
                 message.boundary = [];
-                for (var i = 0; i < object.boundary.length; ++i) {
+                for (let i = 0; i < object.boundary.length; ++i) {
                     if (typeof object.boundary[i] !== "object")
                         throw TypeError(".urbansynth.Zone.boundary: object expected");
                     message.boundary[i] = $root.urbansynth.Point2D.fromObject(object.boundary[i]);
@@ -1043,7 +1041,7 @@ $root.urbansynth = (function() {
         Zone.toObject = function toObject(message, options) {
             if (!options)
                 options = {};
-            var object = {};
+            let object = {};
             if (options.arrays || options.defaults)
                 object.boundary = [];
             if (options.defaults) {
@@ -1058,7 +1056,7 @@ $root.urbansynth = (function() {
                 object.type = options.enums === String ? $root.urbansynth.ZoneType[message.type] === undefined ? message.type : $root.urbansynth.ZoneType[message.type] : message.type;
             if (message.boundary && message.boundary.length) {
                 object.boundary = [];
-                for (var j = 0; j < message.boundary.length; ++j)
+                for (let j = 0; j < message.boundary.length; ++j)
                     object.boundary[j] = $root.urbansynth.Point2D.toObject(message.boundary[j], options);
             }
             if (message.density != null && message.hasOwnProperty("density"))
@@ -1122,7 +1120,7 @@ $root.urbansynth = (function() {
         function Road(properties) {
             this.path = [];
             if (properties)
-                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                for (let keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                     if (properties[keys[i]] != null)
                         this[keys[i]] = properties[keys[i]];
         }
@@ -1204,7 +1202,7 @@ $root.urbansynth = (function() {
             if (message.type != null && Object.hasOwnProperty.call(message, "type"))
                 writer.uint32(/* id 2, wireType 0 =*/16).int32(message.type);
             if (message.path != null && message.path.length)
-                for (var i = 0; i < message.path.length; ++i)
+                for (let i = 0; i < message.path.length; ++i)
                     $root.urbansynth.Point2D.encode(message.path[i], writer.uint32(/* id 3, wireType 2 =*/26).fork()).ldelim();
             if (message.width != null && Object.hasOwnProperty.call(message, "width"))
                 writer.uint32(/* id 4, wireType 5 =*/37).float(message.width);
@@ -1242,9 +1240,9 @@ $root.urbansynth = (function() {
         Road.decode = function decode(reader, length, error) {
             if (!(reader instanceof $Reader))
                 reader = $Reader.create(reader);
-            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.urbansynth.Road();
+            let end = length === undefined ? reader.len : reader.pos + length, message = new $root.urbansynth.Road();
             while (reader.pos < end) {
-                var tag = reader.uint32();
+                let tag = reader.uint32();
                 if (tag === error)
                     break;
                 switch (tag >>> 3) {
@@ -1325,8 +1323,8 @@ $root.urbansynth = (function() {
             if (message.path != null && message.hasOwnProperty("path")) {
                 if (!Array.isArray(message.path))
                     return "path: array expected";
-                for (var i = 0; i < message.path.length; ++i) {
-                    var error = $root.urbansynth.Point2D.verify(message.path[i]);
+                for (let i = 0; i < message.path.length; ++i) {
+                    let error = $root.urbansynth.Point2D.verify(message.path[i]);
                     if (error)
                         return "path." + error;
                 }
@@ -1354,7 +1352,7 @@ $root.urbansynth = (function() {
         Road.fromObject = function fromObject(object) {
             if (object instanceof $root.urbansynth.Road)
                 return object;
-            var message = new $root.urbansynth.Road();
+            let message = new $root.urbansynth.Road();
             if (object.id != null)
                 message.id = String(object.id);
             switch (object.type) {
@@ -1385,7 +1383,7 @@ $root.urbansynth = (function() {
                 if (!Array.isArray(object.path))
                     throw TypeError(".urbansynth.Road.path: array expected");
                 message.path = [];
-                for (var i = 0; i < object.path.length; ++i) {
+                for (let i = 0; i < object.path.length; ++i) {
                     if (typeof object.path[i] !== "object")
                         throw TypeError(".urbansynth.Road.path: object expected");
                     message.path[i] = $root.urbansynth.Point2D.fromObject(object.path[i]);
@@ -1412,7 +1410,7 @@ $root.urbansynth = (function() {
         Road.toObject = function toObject(message, options) {
             if (!options)
                 options = {};
-            var object = {};
+            let object = {};
             if (options.arrays || options.defaults)
                 object.path = [];
             if (options.defaults) {
@@ -1428,7 +1426,7 @@ $root.urbansynth = (function() {
                 object.type = options.enums === String ? $root.urbansynth.RoadType[message.type] === undefined ? message.type : $root.urbansynth.RoadType[message.type] : message.type;
             if (message.path && message.path.length) {
                 object.path = [];
-                for (var j = 0; j < message.path.length; ++j)
+                for (let j = 0; j < message.path.length; ++j)
                     object.path[j] = $root.urbansynth.Point2D.toObject(message.path[j], options);
             }
             if (message.width != null && message.hasOwnProperty("width"))
@@ -1493,7 +1491,7 @@ $root.urbansynth = (function() {
          */
         function POI(properties) {
             if (properties)
-                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                for (let keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                     if (properties[keys[i]] != null)
                         this[keys[i]] = properties[keys[i]];
         }
@@ -1612,9 +1610,9 @@ $root.urbansynth = (function() {
         POI.decode = function decode(reader, length, error) {
             if (!(reader instanceof $Reader))
                 reader = $Reader.create(reader);
-            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.urbansynth.POI();
+            let end = length === undefined ? reader.len : reader.pos + length, message = new $root.urbansynth.POI();
             while (reader.pos < end) {
-                var tag = reader.uint32();
+                let tag = reader.uint32();
                 if (tag === error)
                     break;
                 switch (tag >>> 3) {
@@ -1695,7 +1693,7 @@ $root.urbansynth = (function() {
                     break;
                 }
             if (message.position != null && message.hasOwnProperty("position")) {
-                var error = $root.urbansynth.Point2D.verify(message.position);
+                let error = $root.urbansynth.Point2D.verify(message.position);
                 if (error)
                     return "position." + error;
             }
@@ -1706,7 +1704,7 @@ $root.urbansynth = (function() {
                 if (!$util.isInteger(message.capacity))
                     return "capacity: integer expected";
             if (message.properties != null && message.hasOwnProperty("properties")) {
-                var error = $root.urbansynth.POIProperties.verify(message.properties);
+                let error = $root.urbansynth.POIProperties.verify(message.properties);
                 if (error)
                     return "properties." + error;
             }
@@ -1724,7 +1722,7 @@ $root.urbansynth = (function() {
         POI.fromObject = function fromObject(object) {
             if (object instanceof $root.urbansynth.POI)
                 return object;
-            var message = new $root.urbansynth.POI();
+            let message = new $root.urbansynth.POI();
             if (object.id != null)
                 message.id = String(object.id);
             switch (object.type) {
@@ -1796,7 +1794,7 @@ $root.urbansynth = (function() {
         POI.toObject = function toObject(message, options) {
             if (!options)
                 options = {};
-            var object = {};
+            let object = {};
             if (options.defaults) {
                 object.id = "";
                 object.type = options.enums === String ? "HOME" : 0;
@@ -1873,7 +1871,7 @@ $root.urbansynth = (function() {
         function Building(properties) {
             this.footprint = [];
             if (properties)
-                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                for (let keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                     if (properties[keys[i]] != null)
                         this[keys[i]] = properties[keys[i]];
         }
@@ -1945,7 +1943,7 @@ $root.urbansynth = (function() {
             if (message.id != null && Object.hasOwnProperty.call(message, "id"))
                 writer.uint32(/* id 1, wireType 2 =*/10).string(message.id);
             if (message.footprint != null && message.footprint.length)
-                for (var i = 0; i < message.footprint.length; ++i)
+                for (let i = 0; i < message.footprint.length; ++i)
                     $root.urbansynth.Point2D.encode(message.footprint[i], writer.uint32(/* id 2, wireType 2 =*/18).fork()).ldelim();
             if (message.height != null && Object.hasOwnProperty.call(message, "height"))
                 writer.uint32(/* id 3, wireType 5 =*/29).float(message.height);
@@ -1983,9 +1981,9 @@ $root.urbansynth = (function() {
         Building.decode = function decode(reader, length, error) {
             if (!(reader instanceof $Reader))
                 reader = $Reader.create(reader);
-            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.urbansynth.Building();
+            let end = length === undefined ? reader.len : reader.pos + length, message = new $root.urbansynth.Building();
             while (reader.pos < end) {
-                var tag = reader.uint32();
+                let tag = reader.uint32();
                 if (tag === error)
                     break;
                 switch (tag >>> 3) {
@@ -2052,8 +2050,8 @@ $root.urbansynth = (function() {
             if (message.footprint != null && message.hasOwnProperty("footprint")) {
                 if (!Array.isArray(message.footprint))
                     return "footprint: array expected";
-                for (var i = 0; i < message.footprint.length; ++i) {
-                    var error = $root.urbansynth.Point2D.verify(message.footprint[i]);
+                for (let i = 0; i < message.footprint.length; ++i) {
+                    let error = $root.urbansynth.Point2D.verify(message.footprint[i]);
                     if (error)
                         return "footprint." + error;
                 }
@@ -2089,14 +2087,14 @@ $root.urbansynth = (function() {
         Building.fromObject = function fromObject(object) {
             if (object instanceof $root.urbansynth.Building)
                 return object;
-            var message = new $root.urbansynth.Building();
+            let message = new $root.urbansynth.Building();
             if (object.id != null)
                 message.id = String(object.id);
             if (object.footprint) {
                 if (!Array.isArray(object.footprint))
                     throw TypeError(".urbansynth.Building.footprint: array expected");
                 message.footprint = [];
-                for (var i = 0; i < object.footprint.length; ++i) {
+                for (let i = 0; i < object.footprint.length; ++i) {
                     if (typeof object.footprint[i] !== "object")
                         throw TypeError(".urbansynth.Building.footprint: object expected");
                     message.footprint[i] = $root.urbansynth.Point2D.fromObject(object.footprint[i]);
@@ -2149,7 +2147,7 @@ $root.urbansynth = (function() {
         Building.toObject = function toObject(message, options) {
             if (!options)
                 options = {};
-            var object = {};
+            let object = {};
             if (options.arrays || options.defaults)
                 object.footprint = [];
             if (options.defaults) {
@@ -2162,7 +2160,7 @@ $root.urbansynth = (function() {
                 object.id = message.id;
             if (message.footprint && message.footprint.length) {
                 object.footprint = [];
-                for (var j = 0; j < message.footprint.length; ++j)
+                for (let j = 0; j < message.footprint.length; ++j)
                     object.footprint[j] = $root.urbansynth.Point2D.toObject(message.footprint[j], options);
             }
             if (message.height != null && message.hasOwnProperty("height"))
@@ -2223,7 +2221,7 @@ $root.urbansynth = (function() {
          */
         function Point2D(properties) {
             if (properties)
-                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                for (let keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                     if (properties[keys[i]] != null)
                         this[keys[i]] = properties[keys[i]];
         }
@@ -2302,9 +2300,9 @@ $root.urbansynth = (function() {
         Point2D.decode = function decode(reader, length, error) {
             if (!(reader instanceof $Reader))
                 reader = $Reader.create(reader);
-            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.urbansynth.Point2D();
+            let end = length === undefined ? reader.len : reader.pos + length, message = new $root.urbansynth.Point2D();
             while (reader.pos < end) {
-                var tag = reader.uint32();
+                let tag = reader.uint32();
                 if (tag === error)
                     break;
                 switch (tag >>> 3) {
@@ -2371,7 +2369,7 @@ $root.urbansynth = (function() {
         Point2D.fromObject = function fromObject(object) {
             if (object instanceof $root.urbansynth.Point2D)
                 return object;
-            var message = new $root.urbansynth.Point2D();
+            let message = new $root.urbansynth.Point2D();
             if (object.x != null)
                 message.x = Number(object.x);
             if (object.y != null)
@@ -2391,7 +2389,7 @@ $root.urbansynth = (function() {
         Point2D.toObject = function toObject(message, options) {
             if (!options)
                 options = {};
-            var object = {};
+            let object = {};
             if (options.defaults) {
                 object.x = 0;
                 object.y = 0;
@@ -2453,7 +2451,7 @@ $root.urbansynth = (function() {
          */
         function ZoneProperties(properties) {
             if (properties)
-                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                for (let keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                     if (properties[keys[i]] != null)
                         this[keys[i]] = properties[keys[i]];
         }
@@ -2542,9 +2540,9 @@ $root.urbansynth = (function() {
         ZoneProperties.decode = function decode(reader, length, error) {
             if (!(reader instanceof $Reader))
                 reader = $Reader.create(reader);
-            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.urbansynth.ZoneProperties();
+            let end = length === undefined ? reader.len : reader.pos + length, message = new $root.urbansynth.ZoneProperties();
             while (reader.pos < end) {
-                var tag = reader.uint32();
+                let tag = reader.uint32();
                 if (tag === error)
                     break;
                 switch (tag >>> 3) {
@@ -2618,7 +2616,7 @@ $root.urbansynth = (function() {
         ZoneProperties.fromObject = function fromObject(object) {
             if (object instanceof $root.urbansynth.ZoneProperties)
                 return object;
-            var message = new $root.urbansynth.ZoneProperties();
+            let message = new $root.urbansynth.ZoneProperties();
             if (object.residentialDensity != null)
                 message.residentialDensity = Number(object.residentialDensity);
             if (object.commercialDensity != null)
@@ -2640,7 +2638,7 @@ $root.urbansynth = (function() {
         ZoneProperties.toObject = function toObject(message, options) {
             if (!options)
                 options = {};
-            var object = {};
+            let object = {};
             if (options.defaults) {
                 object.residentialDensity = 0;
                 object.commercialDensity = 0;
@@ -2705,7 +2703,7 @@ $root.urbansynth = (function() {
         function POIProperties(properties) {
             this.tags = [];
             if (properties)
-                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                for (let keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                     if (properties[keys[i]] != null)
                         this[keys[i]] = properties[keys[i]];
         }
@@ -2753,7 +2751,7 @@ $root.urbansynth = (function() {
             if (message.name != null && Object.hasOwnProperty.call(message, "name"))
                 writer.uint32(/* id 1, wireType 2 =*/10).string(message.name);
             if (message.tags != null && message.tags.length)
-                for (var i = 0; i < message.tags.length; ++i)
+                for (let i = 0; i < message.tags.length; ++i)
                     writer.uint32(/* id 2, wireType 2 =*/18).string(message.tags[i]);
             return writer;
         };
@@ -2785,9 +2783,9 @@ $root.urbansynth = (function() {
         POIProperties.decode = function decode(reader, length, error) {
             if (!(reader instanceof $Reader))
                 reader = $Reader.create(reader);
-            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.urbansynth.POIProperties();
+            let end = length === undefined ? reader.len : reader.pos + length, message = new $root.urbansynth.POIProperties();
             while (reader.pos < end) {
-                var tag = reader.uint32();
+                let tag = reader.uint32();
                 if (tag === error)
                     break;
                 switch (tag >>> 3) {
@@ -2842,7 +2840,7 @@ $root.urbansynth = (function() {
             if (message.tags != null && message.hasOwnProperty("tags")) {
                 if (!Array.isArray(message.tags))
                     return "tags: array expected";
-                for (var i = 0; i < message.tags.length; ++i)
+                for (let i = 0; i < message.tags.length; ++i)
                     if (!$util.isString(message.tags[i]))
                         return "tags: string[] expected";
             }
@@ -2860,14 +2858,14 @@ $root.urbansynth = (function() {
         POIProperties.fromObject = function fromObject(object) {
             if (object instanceof $root.urbansynth.POIProperties)
                 return object;
-            var message = new $root.urbansynth.POIProperties();
+            let message = new $root.urbansynth.POIProperties();
             if (object.name != null)
                 message.name = String(object.name);
             if (object.tags) {
                 if (!Array.isArray(object.tags))
                     throw TypeError(".urbansynth.POIProperties.tags: array expected");
                 message.tags = [];
-                for (var i = 0; i < object.tags.length; ++i)
+                for (let i = 0; i < object.tags.length; ++i)
                     message.tags[i] = String(object.tags[i]);
             }
             return message;
@@ -2885,7 +2883,7 @@ $root.urbansynth = (function() {
         POIProperties.toObject = function toObject(message, options) {
             if (!options)
                 options = {};
-            var object = {};
+            let object = {};
             if (options.arrays || options.defaults)
                 object.tags = [];
             if (options.defaults)
@@ -2894,7 +2892,7 @@ $root.urbansynth = (function() {
                 object.name = message.name;
             if (message.tags && message.tags.length) {
                 object.tags = [];
-                for (var j = 0; j < message.tags.length; ++j)
+                for (let j = 0; j < message.tags.length; ++j)
                     object.tags[j] = message.tags[j];
             }
             return object;
@@ -2951,7 +2949,7 @@ $root.urbansynth = (function() {
          */
         function CityMetadata(properties) {
             if (properties)
-                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                for (let keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                     if (properties[keys[i]] != null)
                         this[keys[i]] = properties[keys[i]];
         }
@@ -3050,9 +3048,9 @@ $root.urbansynth = (function() {
         CityMetadata.decode = function decode(reader, length, error) {
             if (!(reader instanceof $Reader))
                 reader = $Reader.create(reader);
-            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.urbansynth.CityMetadata();
+            let end = length === undefined ? reader.len : reader.pos + length, message = new $root.urbansynth.CityMetadata();
             while (reader.pos < end) {
-                var tag = reader.uint32();
+                let tag = reader.uint32();
                 if (tag === error)
                     break;
                 switch (tag >>> 3) {
@@ -3133,7 +3131,7 @@ $root.urbansynth = (function() {
         CityMetadata.fromObject = function fromObject(object) {
             if (object instanceof $root.urbansynth.CityMetadata)
                 return object;
-            var message = new $root.urbansynth.CityMetadata();
+            let message = new $root.urbansynth.CityMetadata();
             if (object.generationTimestamp != null)
                 if ($util.Long)
                     (message.generationTimestamp = $util.Long.fromValue(object.generationTimestamp)).unsigned = false;
@@ -3164,10 +3162,10 @@ $root.urbansynth = (function() {
         CityMetadata.toObject = function toObject(message, options) {
             if (!options)
                 options = {};
-            var object = {};
+            let object = {};
             if (options.defaults) {
                 if ($util.Long) {
-                    var long = new $util.Long(0, 0, false);
+                    let long = new $util.Long(0, 0, false);
                     object.generationTimestamp = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
                 } else
                     object.generationTimestamp = options.longs === String ? "0" : 0;
@@ -3230,7 +3228,7 @@ $root.urbansynth = (function() {
      * @property {number} WATER=5 WATER value
      */
     urbansynth.ZoneType = (function() {
-        var valuesById = {}, values = Object.create(valuesById);
+        const valuesById = {}, values = Object.create(valuesById);
         values[valuesById[0] = "RESIDENTIAL"] = 0;
         values[valuesById[1] = "COMMERCIAL"] = 1;
         values[valuesById[2] = "INDUSTRIAL"] = 2;
@@ -3250,7 +3248,7 @@ $root.urbansynth = (function() {
      * @property {number} LOCAL=3 LOCAL value
      */
     urbansynth.RoadType = (function() {
-        var valuesById = {}, values = Object.create(valuesById);
+        const valuesById = {}, values = Object.create(valuesById);
         values[valuesById[0] = "HIGHWAY"] = 0;
         values[valuesById[1] = "ARTERIAL"] = 1;
         values[valuesById[2] = "COLLECTOR"] = 2;
@@ -3272,7 +3270,7 @@ $root.urbansynth = (function() {
      * @property {number} FACTORY=7 FACTORY value
      */
     urbansynth.POIType = (function() {
-        var valuesById = {}, values = Object.create(valuesById);
+        const valuesById = {}, values = Object.create(valuesById);
         values[valuesById[0] = "HOME"] = 0;
         values[valuesById[1] = "OFFICE"] = 1;
         values[valuesById[2] = "SHOP"] = 2;
@@ -3295,7 +3293,7 @@ $root.urbansynth = (function() {
      * @property {number} WAREHOUSE=4 WAREHOUSE value
      */
     urbansynth.BuildingType = (function() {
-        var valuesById = {}, values = Object.create(valuesById);
+        const valuesById = {}, values = Object.create(valuesById);
         values[valuesById[0] = "HOUSE"] = 0;
         values[valuesById[1] = "APARTMENT"] = 1;
         values[valuesById[2] = "OFFICE_BUILDING"] = 2;
@@ -3307,4 +3305,4 @@ $root.urbansynth = (function() {
     return urbansynth;
 })();
 
-module.exports = $root;
+export { $root as default };

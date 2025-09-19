@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import DeckGL from '@deck.gl/react';
 import { LightingEffect, AmbientLight, DirectionalLight } from '@deck.gl/core';
 import { useSimulationContext } from '../contexts/SimulationContext';
@@ -8,8 +8,11 @@ import { createBuildingLayer } from '../layers/BuildingLayer';
 import { createRoadLayer } from '../layers/RoadLayer';
 import { createAgentLayer } from '../layers/AgentLayer';
 import { createZoneLayer } from '../layers/ZoneLayer';
-import { calculateViewBounds, createPickingInfoTooltip } from '../utils/deckglHelpers';
+import { createChargingStationLayer } from '../layers/ChargingStationLayer';
+import { createPickingInfoTooltip } from '../utils/deckglHelpers';
 import { getTimeBasedColors } from '../utils/colorSchemes';
+import { getBoundsFromCityModel } from '../utils/coordinates';
+import { OptimizationResult } from '../types/optimization';
 
 const INITIAL_VIEW_STATE = {
   longitude: 0,
@@ -19,9 +22,22 @@ const INITIAL_VIEW_STATE = {
   bearing: 0,
 };
 
-export function CityVisualization() {
+interface CityVisualizationProps {
+  optimizationResult?: OptimizationResult | null;
+}
+
+export function CityVisualization({ optimizationResult }: CityVisualizationProps) {
   const { state } = useSimulationContext();
-  const { viewState, handleViewStateChange, resetView } = useViewState(INITIAL_VIEW_STATE);
+
+  // Calculate initial view state from city model
+  const initialViewState = useMemo(() => {
+    if (state.cityModel) {
+      return getBoundsFromCityModel(state.cityModel);
+    }
+    return INITIAL_VIEW_STATE;
+  }, [state.cityModel]);
+
+  const { viewState, handleViewStateChange, resetView } = useViewState(initialViewState);
   const [showZones, setShowZones] = useState(false);
   const [isNight, setIsNight] = useState(false);
   const [tooltip, setTooltip] = useState<any>(null);
@@ -36,33 +52,45 @@ export function CityVisualization() {
     const colors = getTimeBasedColors(timeOfDay);
     const sunIntensity = timeOfDay >= 6 && timeOfDay <= 18 ? 1.0 : 0.3;
 
+    const directionalLight = new DirectionalLight({
+      color: [255, 255, 255],
+      intensity: sunIntensity,
+      direction: [-1, -1, -2],
+      _shadow: true,
+    });
+
     return new LightingEffect({
       ambientLight: new AmbientLight({
-        color: colors.sky,
+        color: [colors.sky[0], colors.sky[1], colors.sky[2]] as [number, number, number],
         intensity: 0.4 + sunIntensity * 0.3,
       }),
-      directionalLights: [
-        new DirectionalLight({
-          color: [255, 255, 255],
-          intensity: sunIntensity,
-          direction: [-1, -1, -2],
-          _shadow: true,
-        }),
-      ],
+      directionalLights: [directionalLight],
     });
   }, [timeOfDay]);
 
   // Create layers
   const layers = useMemo(() => {
     const cityData = state.cityModel || { zones: [], roads: [], pois: [], buildings: [] };
-
-    return [
+    const layerList: any[] = [
       createZoneLayer(cityData.zones || [], timeOfDay, showZones),
       createRoadLayer(cityData.roads || [], timeOfDay),
       createBuildingLayer(cityData.buildings || [], timeOfDay),
       createAgentLayer(state.agents, timeOfDay),
     ];
-  }, [state.agents, state.cityModel, timeOfDay, showZones]);
+
+    // Add charging station layer if optimization result exists
+    if (optimizationResult) {
+      layerList.push(
+        createChargingStationLayer(
+          optimizationResult.stations,
+          optimizationResult.coverage_map,
+          true
+        )
+      );
+    }
+
+    return layerList;
+  }, [state.agents, state.cityModel, timeOfDay, showZones, optimizationResult]);
 
   // Handle clicks for tool interactions
   const handleClick = useCallback((info: any) => {

@@ -1,5 +1,6 @@
 import { PolygonLayer } from '@deck.gl/layers';
 import { getTimeBasedColors } from '../utils/colorSchemes';
+import { convertPointsToLatLng } from '../utils/coordinates';
 
 export function createZoneLayer(zones: any[], timeOfDay: number = 12, visible: boolean = false) {
   const colors = getTimeBasedColors(timeOfDay);
@@ -7,7 +8,7 @@ export function createZoneLayer(zones: any[], timeOfDay: number = 12, visible: b
   return new PolygonLayer({
     id: 'zones',
     data: zones,
-    getPolygon: (d: any) => d.boundary?.map((p: any) => [p.x, p.y]) || [],
+    getPolygon: (d: any) => d.boundary ? convertPointsToLatLng(d.boundary) : [],
     getFillColor: (d: any) => {
       const zoneType = getZoneTypeName(d.zone_type);
       return colors.zones[zoneType] || colors.zones.residential;

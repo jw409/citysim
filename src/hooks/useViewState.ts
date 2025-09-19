@@ -22,8 +22,8 @@ export function useViewState(initialViewState: Partial<ViewState> = {}) {
     ...initialViewState,
   });
 
-  const handleViewStateChange = useCallback(({ viewState: newViewState }: { viewState: ViewState }) => {
-    setViewState(newViewState);
+  const handleViewStateChange = useCallback((params: any) => {
+    setViewState(params.viewState);
   }, []);
 
   const resetView = useCallback(() => {
