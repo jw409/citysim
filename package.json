@@ -12,6 +12,7 @@
     "prebuild": "npm run build:city && npm run build:wasm",
     "build:wasm": "cd wasm && wasm-pack build --target web --out-dir ../src/wasm",
     "build:city": "node scripts/generate_city.cjs",
+    "deploy": "npm run build && node scripts/deploy-pages.js",
     "protoc": "npx pbjs -t static-module -w commonjs -o src/data/city_model.js src/data/city_model.proto && npx pbts -o src/data/city_model.d.ts src/data/city_model.js"
   },
   "dependencies": {

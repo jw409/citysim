@@ -39,3 +39,23 @@ npm run build
 ```
 
 This creates a static build in the `dist/` directory that can be deployed anywhere.
+
+## Deployment
+
+To deploy to GitHub Pages:
+
+```bash
+# Using npm script
+npm run deploy
+
+# Or using Makefile
+make deploy
+```
+
+This will:
+1. Build the production version
+2. Switch to the `gh-pages` branch
+3. Copy build files and push to GitHub
+4. Switch back to your original branch
+
+The live demo will be updated at https://jw409.github.io/citysim/
