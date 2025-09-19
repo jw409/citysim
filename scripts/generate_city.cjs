@@ -215,24 +215,24 @@ class CityGenerator {
       const poiCount = Math.floor(zone.density * 50);
 
       for (let i = 0; i < poiCount; i++) {
-        const angle = Math.random() * Math.PI * 2;
-        const distance = Math.random() * 500;
+        const angle = this.random() * Math.PI * 2;
+        const distance = this.random() * 500;
         const x = centerX + Math.cos(angle) * distance;
         const y = centerY + Math.sin(angle) * distance;
 
         let poiType;
         switch (zone.type) {
           case 0: // RESIDENTIAL
-            poiType = Math.random() < 0.8 ? 0 : 2; // HOME or SHOP
+            poiType = this.random() < 0.8 ? 0 : 2; // HOME or SHOP
             break;
           case 1: // COMMERCIAL
-            poiType = Math.random() < 0.6 ? 2 : 3; // SHOP or RESTAURANT
+            poiType = this.random() < 0.6 ? 2 : 3; // SHOP or RESTAURANT
             break;
           case 2: // INDUSTRIAL
             poiType = 7; // FACTORY
             break;
           case 3: // DOWNTOWN
-            poiType = Math.random() < 0.5 ? 1 : 2; // OFFICE or SHOP
+            poiType = this.random() < 0.5 ? 1 : 2; // OFFICE or SHOP
             break;
           case 4: // PARK
             poiType = 6; // PARK_POI
@@ -246,7 +246,7 @@ class CityGenerator {
           type: poiType,
           position: { x, y },
           zone_id: zone.id,
-          capacity: Math.floor(Math.random() * 100) + 10,
+          capacity: Math.floor(this.random() * 100) + 10,
           properties: {
             name: this.generatePOIName(poiType),
             tags: []
@@ -268,7 +268,7 @@ class CityGenerator {
       7: ['Factory', 'Plant', 'Facility']
     };
     const typeNames = names[type] || ['Location'];
-    return typeNames[Math.floor(Math.random() * typeNames.length)];
+    return typeNames[Math.floor(this.random() * typeNames.length)];
   }
 
   generateBuildings() {
@@ -278,7 +278,7 @@ class CityGenerator {
     this.pois.forEach((poi, i) => {
       if (poi.capacity > 50) {
         const footprint = this.generatePolygon(poi.position.x, poi.position.y, 50, 4);
-        const height = 30 + Math.random() * 100;
+        const height = 30 + this.random() * 100;
 
         this.buildings.push({
           id: `building_${i}`,
@@ -315,7 +315,7 @@ class CityGenerator {
       pois: this.pois,
       buildings: this.buildings,
       metadata: {
-        generationTimestamp: Date.now(),
+        generationTimestamp: 1700000000000 + Math.floor(this.hashSeed(this.seed + '_timestamp') * 86400000), // Deterministic timestamp
         generationSeed: this.seed,
         totalPopulation: this.pois.filter(p => p.type === 0).length * 3,
         totalArea: CITY_SIZE * CITY_SIZE
