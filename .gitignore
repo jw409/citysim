@@ -31,5 +31,3 @@ src/wasm/
 public/model.pbf
 *.log
 
-# Plan files
-PLAN*.md
