@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useReducer, ReactNode } from 'react';
-import { Agent, TrafficData } from '../types/simulation';
+import { Agent, TrafficData, CityModel } from '../types/simulation';
 
 export interface SimulationState {
   isInitialized: boolean;
@@ -8,6 +8,7 @@ export interface SimulationState {
   error: string | null;
   agents: Agent[];
   trafficData: TrafficData | null;
+  cityModel: CityModel | null;
   currentTime: number;
   day: number;
   speed: number;

@@ -1,4 +1,5 @@
 import { SimulationConfig } from '../types/simulation';
+import { urbansynth } from '../data/city_model';
 
 let wasmModule: any = null;
 
@@ -46,18 +47,33 @@ export async function loadCityModel(): Promise<any> {
       throw new Error(`Failed to fetch city model: ${response.statusText}`);
     }
 
-    await response.arrayBuffer();
+    const buffer = await response.arrayBuffer();
+    const uint8Array = new Uint8Array(buffer);
 
-    // For now, we'll use a simplified approach
-    // In a real implementation, we'd decode the protobuf here
+    // Decode the protobuf data
+    const city = urbansynth.City.decode(uint8Array);
+
     return {
+      name: city.name || 'Generated City',
+      bounds: city.bounds || { min_x: 0, min_y: 0, max_x: 1000, max_y: 1000 },
+      zones: city.zones || [],
+      roads: city.roads || [],
+      pois: city.pois || [],
+      buildings: city.buildings || [],
+      metadata: city.metadata || null,
+    };
+  } catch (error) {
+    console.error('Failed to load city model:', error);
+
+    // Return a default empty city model if loading fails
+    return {
+      name: 'Default City',
+      bounds: { min_x: 0, min_y: 0, max_x: 1000, max_y: 1000 },
       zones: [],
       roads: [],
       pois: [],
       buildings: [],
+      metadata: null,
     };
-  } catch (error) {
-    console.error('Failed to load city model:', error);
-    throw error;
   }
 }

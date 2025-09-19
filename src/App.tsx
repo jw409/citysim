@@ -5,6 +5,7 @@ import { LoadingScreen } from './components/LoadingScreen';
 import { Toolbar } from './components/Toolbar';
 import { ControlPanel } from './components/ControlPanel';
 import { PerformanceMonitor } from './components/PerformanceMonitor';
+import { CityVisualization } from './components/CityVisualization';
 import { useSimulation } from './hooks/useSimulation';
 import { useSimulationContext } from './contexts/SimulationContext';
 import './styles/globals.css';
@@ -55,22 +56,7 @@ function AppContent() {
 
         <main className="app-main">
           <div className="visualization-container">
-            {/* Visualization will be added in PLAN5 */}
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              height: '100%',
-              color: 'white',
-              fontSize: '1.5rem'
-            }}>
-              🏙️ City Visualization Coming Soon
-              {state.selectedTool && (
-                <div style={{ position: 'absolute', top: '1rem', left: '1rem' }}>
-                  Selected Tool: {state.selectedTool}
-                </div>
-              )}
-            </div>
+            <CityVisualization />
           </div>
 
           <aside className="sidebar">
