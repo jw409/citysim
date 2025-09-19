@@ -25,17 +25,58 @@ export function getBoundsFromCityModel(cityModel: any): {
   pitch: number;
   bearing: number;
 } {
-  if (!cityModel.bounds) {
-    return {
-      longitude: CITY_CENTER_LNG,
-      latitude: CITY_CENTER_LAT,
-      zoom: 12,
-      pitch: 45,
-      bearing: 0
-    };
-  }
+  console.log('Raw city model bounds:', cityModel.bounds);
 
-  const { min_x, min_y, max_x, max_y } = cityModel.bounds;
+  let min_x: number, min_y: number, max_x: number, max_y: number;
+
+  if (!cityModel.bounds) {
+    console.log('No bounds found in city model, calculating from zones/buildings...');
+
+    // Calculate bounds from zones and buildings if bounds are missing
+    const allPoints: {x: number, y: number}[] = [];
+
+    // Add points from zones
+    if (cityModel.zones) {
+      cityModel.zones.forEach((zone: any) => {
+        if (zone.boundary) {
+          allPoints.push(...zone.boundary);
+        }
+      });
+    }
+
+    // Add points from buildings
+    if (cityModel.buildings) {
+      cityModel.buildings.forEach((building: any) => {
+        if (building.footprint) {
+          allPoints.push(...building.footprint);
+        }
+      });
+    }
+
+    if (allPoints.length === 0) {
+      console.log('No coordinate data found, using default view');
+      return {
+        longitude: CITY_CENTER_LNG,
+        latitude: CITY_CENTER_LAT,
+        zoom: 12,
+        pitch: 45,
+        bearing: 0
+      };
+    }
+
+    // Calculate bounds from all points
+    const calculatedBounds = {
+      min_x: Math.min(...allPoints.map(p => p.x)),
+      min_y: Math.min(...allPoints.map(p => p.y)),
+      max_x: Math.max(...allPoints.map(p => p.x)),
+      max_y: Math.max(...allPoints.map(p => p.y))
+    };
+
+    console.log('Calculated bounds from geometry:', calculatedBounds);
+    ({ min_x, min_y, max_x, max_y } = calculatedBounds);
+  } else {
+    ({ min_x, min_y, max_x, max_y } = cityModel.bounds);
+  }
 
   // Get center point
   const centerX = (min_x + max_x) / 2;

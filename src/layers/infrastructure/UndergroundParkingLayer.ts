@@ -1,5 +1,6 @@
 import { PolygonLayer } from '@deck.gl/layers';
 import { LAYER_DEFINITIONS } from '../../types/layers';
+import { convertPointsToLatLng } from '../../utils/coordinates';
 
 export function createUndergroundParkingLayer(parkingData: any[]) {
   const layerConfig = LAYER_DEFINITIONS.underground_parking;
@@ -7,7 +8,19 @@ export function createUndergroundParkingLayer(parkingData: any[]) {
   return new PolygonLayer({
     id: 'underground_parking',
     data: parkingData,
-    getPolygon: (d: any) => d.footprint || d.polygon,
+    getPolygon: (d: any) => {
+      const polygon = d.footprint || d.polygon;
+      if (!polygon || !Array.isArray(polygon)) return [];
+      // Convert {x, y} objects to [lng, lat] arrays for deck.gl
+      const points = polygon.map((point: any) => {
+        if (Array.isArray(point)) return { x: point[0], y: point[1] };
+        if (point && typeof point === 'object' && 'x' in point && 'y' in point) {
+          return point;
+        }
+        return { x: 0, y: 0 };
+      });
+      return convertPointsToLatLng(points);
+    },
     getElevation: (d: any) => Math.abs(d.depth || 3), // Height of parking level
     getPosition: (d: any) => [d.x || 0, d.y || 0, d.elevation || -8],
     getFillColor: (d: any) => {

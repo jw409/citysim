@@ -65,6 +65,12 @@ export function useSimulation() {
       const agents = wasmModuleRef.current.getAgentStates();
       dispatch({ type: 'SET_AGENTS', payload: agents });
 
+      // Get current simulation time
+      const currentTime = wasmModuleRef.current.getSimulationTime();
+      const day = Math.floor(currentTime / 24);
+      const timeOfDay = currentTime % 24;
+      dispatch({ type: 'SET_TIME', payload: { time: timeOfDay, day } });
+
       // Get traffic data (less frequently)
       if (Math.random() < 0.1) { // 10% of frames
         const trafficData = wasmModuleRef.current.getTrafficData();

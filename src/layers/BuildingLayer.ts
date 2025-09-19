@@ -5,10 +5,26 @@ import { convertPointsToLatLng } from '../utils/coordinates';
 export function createBuildingLayer(buildings: any[], timeOfDay: number = 12) {
   const colors = getTimeBasedColors(timeOfDay);
 
+  console.log('Building layer data:', {
+    count: buildings.length,
+    sample: buildings.slice(0, 3),
+    firstBuilding: buildings[0]
+  });
+
   return new PolygonLayer({
     id: 'buildings',
     data: buildings,
-    getPolygon: (d: any) => d.footprint ? convertPointsToLatLng(d.footprint) : [],
+    getPolygon: (d: any) => {
+      if (!d.footprint) return [];
+      const converted = convertPointsToLatLng(d.footprint);
+      if (buildings.indexOf(d) === 0) {
+        console.log('First building polygon conversion:', {
+          original: d.footprint,
+          converted: converted
+        });
+      }
+      return converted;
+    },
     getElevation: (d: any) => d.height || 10,
     getFillColor: (d: any) => {
       const buildingType = getBuildingTypeName(d.building_type);

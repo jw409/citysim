@@ -42,7 +42,7 @@ export function createAgentLayer(agents: any[], timeOfDay: number = 12) {
 }
 
 function getAgentSize(agentType: string): number {
-  const sizes = {
+  const sizes: { [key: string]: number } = {
     'Pedestrian': 1.5,
     'Car': 3,
     'Bus': 6,

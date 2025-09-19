@@ -15,8 +15,8 @@ async function testVisualization() {
   });
 
   try {
-    console.log('Navigating to localhost:5174...');
-    await page.goto('http://localhost:5174', { waitUntil: 'networkidle' });
+    console.log('Navigating to localhost:5175...');
+    await page.goto('http://localhost:5175', { waitUntil: 'networkidle' });
 
     // Wait a bit for the app to initialize
     await page.waitForTimeout(3000);
