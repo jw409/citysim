@@ -54,7 +54,7 @@ export function CityVisualization() {
 
   // Create layers
   const layers = useMemo(() => {
-    const cityData = state.trafficData || { zones: [], roads: [], pois: [], buildings: [] };
+    const cityData = state.cityModel || { zones: [], roads: [], pois: [], buildings: [] };
 
     return [
       createZoneLayer(cityData.zones || [], timeOfDay, showZones),
@@ -62,7 +62,7 @@ export function CityVisualization() {
       createBuildingLayer(cityData.buildings || [], timeOfDay),
       createAgentLayer(state.agents, timeOfDay),
     ];
-  }, [state.agents, state.trafficData, timeOfDay, showZones]);
+  }, [state.agents, state.cityModel, timeOfDay, showZones]);
 
   // Handle clicks for tool interactions
   const handleClick = useCallback((info: any) => {

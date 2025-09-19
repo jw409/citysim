@@ -15,6 +15,7 @@ export function useSimulation() {
 
       // Load city model
       const cityModel = await loadCityModel();
+      dispatch({ type: 'SET_CITY_MODEL', payload: cityModel });
 
       // Load and initialize WASM module
       const wasmModule = await loadWasmModule();

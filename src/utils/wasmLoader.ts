@@ -1,5 +1,5 @@
 import { SimulationConfig } from '../types/simulation';
-import { urbansynth } from '../data/city_model';
+import * as protobuf from '../data/city_model';
 
 let wasmModule: any = null;
 
@@ -51,7 +51,7 @@ export async function loadCityModel(): Promise<any> {
     const uint8Array = new Uint8Array(buffer);
 
     // Decode the protobuf data
-    const city = urbansynth.City.decode(uint8Array);
+    const city = protobuf.urbansynth.City.decode(uint8Array);
 
     return {
       name: city.name || 'Generated City',
