@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { SimulationProvider } from './contexts/SimulationContext';
+import { TerrainProvider } from './contexts/TerrainContext';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { LoadingScreen } from './components/LoadingScreen';
 import { Toolbar } from './components/Toolbar';
@@ -8,6 +9,7 @@ import { PerformanceMonitor } from './components/PerformanceMonitor';
 import { CityVisualization } from './components/CityVisualization';
 import { OptimizationPanel } from './components/OptimizationPanel';
 import { OptimizationResults } from './components/OptimizationResults';
+import { TerrainControlPanel } from './components/TerrainControlPanel';
 import { useSimulation } from './hooks/useSimulation';
 import { useSimulationContext } from './contexts/SimulationContext';
 import { usePerformanceAdaptation } from './hooks/usePerformanceAdaptation';
@@ -143,6 +145,9 @@ function AppContent() {
             <CityVisualization optimizationResult={optimizationResult} />
           </div>
 
+          {/* Terrain Control Panel */}
+          <TerrainControlPanel />
+
           {/* EMERGENCY TIME CONTROLS - ALWAYS VISIBLE */}
           <div style={{
             position: 'fixed',
@@ -262,9 +267,11 @@ function AppContent() {
 function App() {
   return (
     <ErrorBoundary>
-      <SimulationProvider>
-        <AppContent />
-      </SimulationProvider>
+      <TerrainProvider>
+        <SimulationProvider>
+          <AppContent />
+        </SimulationProvider>
+      </TerrainProvider>
     </ErrorBoundary>
   );
 }

@@ -1,7 +1,9 @@
 import { useState, useCallback, useMemo, useEffect } from 'react';
 import { useSimulationContext } from '../contexts/SimulationContext';
+import { useTerrainContext } from '../contexts/TerrainContext';
 import { Cityscape } from './Cityscape';
 import { enhanceSimulationDataWithLayers } from '../utils/multiLayerDataGenerator';
+import { enhanceCityWithGeography } from '../utils/geographicCityGenerator';
 import { OptimizationResult } from '../types/optimization';
 
 const INITIAL_VIEW_STATE = {
@@ -18,23 +20,40 @@ interface CityVisualizationProps {
 
 export function CityVisualization({ optimizationResult }: CityVisualizationProps) {
   const { state, dispatch } = useSimulationContext();
+  const { state: terrainState } = useTerrainContext();
   const [enhancedData, setEnhancedData] = useState<any>(null);
 
   // Generate multi-layer data when city model is available
   useEffect(() => {
     if (state.cityModel) {
       console.log('Enhancing simulation data with multi-layer infrastructure...');
+
+      // First enhance with geographic features if terrain is enabled
+      let cityModelToUse = state.cityModel;
+      if (terrainState.isEnabled) {
+        console.log('Enhancing city model with geographic features...');
+        cityModelToUse = enhanceCityWithGeography(state.cityModel, terrainState);
+        console.log('Geographic enhancement completed:', {
+          originalZones: state.cityModel.zones?.length || 0,
+          enhancedZones: cityModelToUse.zones?.length || 0,
+          originalPOIs: state.cityModel.pois?.length || 0,
+          enhancedPOIs: cityModelToUse.pois?.length || 0,
+          geographicFeatures: cityModelToUse.geographic_metadata?.geographic_features || 0
+        });
+      }
+
+      // Then enhance with multi-layer infrastructure
       const enhanced = enhanceSimulationDataWithLayers({
-        buildings: state.cityModel.buildings || [],
-        roads: state.cityModel.roads || [],
+        buildings: cityModelToUse.buildings || [],
+        roads: cityModelToUse.roads || [],
         agents: state.agents || [],
-        pois: state.cityModel.pois || []
-      }, state.cityModel);
+        pois: cityModelToUse.pois || []
+      }, cityModelToUse);
 
       setEnhancedData(enhanced);
       console.log('Enhanced data generated:', enhanced);
     }
-  }, [state.cityModel, state.agents]);
+  }, [state.cityModel, state.agents, terrainState.isEnabled, terrainState.seed, terrainState.terrainProfile]);
 
   // Pass enhanced data to the simulation context
   useEffect(() => {

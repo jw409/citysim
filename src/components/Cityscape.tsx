@@ -2,6 +2,7 @@ import React, { useMemo, useCallback, useState, useEffect } from 'react';
 import DeckGL from '@deck.gl/react';
 import { OrbitView } from '@deck.gl/core';
 import { useSimulationContext } from '../contexts/SimulationContext';
+import { useTerrainContext } from '../contexts/TerrainContext';
 import { useCamera } from '../hooks/useCamera';
 import { createBuildingLayer } from '../layers/BuildingLayer';
 import { createAgentLayer } from '../layers/AgentLayer';
@@ -9,7 +10,7 @@ import { createRoadLayer } from '../layers/RoadLayer';
 import { createZoneLayer } from '../layers/ZoneLayer';
 import { getBoundsFromCityModel } from '../utils/coordinates';
 import { PolygonLayer } from '@deck.gl/layers';
-import { generateTerrainLayers } from '../utils/terrainGenerator';
+import { createEnhancedTerrainLayer } from '../layers/EnhancedTerrainLayer';
 
 // Infrastructure layers
 import { createSewerLayer } from '../layers/infrastructure/SewerLayer';
@@ -37,6 +38,7 @@ interface CityscapeProps {
 
 export function Cityscape({ width = 800, height = 600, optimizationResult }: CityscapeProps) {
   const { state } = useSimulationContext();
+  const { state: terrainState } = useTerrainContext();
   const [showZones, setShowZones] = useState(false);
 
   // Initialize camera with proper 3D perspective
@@ -89,14 +91,21 @@ export function Cityscape({ width = 800, height = 600, optimizationResult }: Cit
     // Layer ordering for professional 3D visualization:
     // 1. Terrain (base) 2. River 3. Roads 4. Zones 5. Buildings 6. Agents
 
+    // Add enhanced terrain layers as base
     if (state.cityModel?.bounds) {
-      // Generate deterministic seed from city bounds
-      const { min_x, min_y, max_x, max_y } = state.cityModel.bounds;
-      const terrainSeed = Math.abs(min_x + min_y + max_x + max_y) % 100000;
-
-      // Add terrain layers as base (continuous mesh replaces ground layer)
-      const terrainLayers = generateTerrainLayers(state.cityModel.bounds, state.currentTime || 12, terrainSeed);
+      const terrainLayers = createEnhancedTerrainLayer({
+        bounds: state.cityModel.bounds,
+        terrainState,
+        cityData
+      });
       activeLayers.push(...terrainLayers);
+
+      console.log('Enhanced terrain layers created:', {
+        layerCount: terrainLayers.length,
+        terrainEnabled: terrainState.isEnabled,
+        activeTerrainLayer: terrainState.activeLayer,
+        terrainProfile: terrainState.terrainProfile
+      });
     }
 
     // Roads layer (above terrain, below buildings)
@@ -170,7 +179,7 @@ export function Cityscape({ width = 800, height = 600, optimizationResult }: Cit
     console.log(`Rendering ${activeLayers.length} layers (${activeLayers.map(l => l.id).join(', ')})`);
 
     return activeLayers;
-  }, [state.cityModel, state.agents, state.currentTime, state.simulationData, showZones]);
+  }, [state.cityModel, state.agents, state.currentTime, state.simulationData, showZones, terrainState, optimizationResult]);
 
   const handleViewStateChange = useCallback(({ viewState: newViewState }: any) => {
     camera.setViewState(newViewState);
@@ -248,7 +257,7 @@ export function Cityscape({ width = 800, height = 600, optimizationResult }: Cit
         views={new OrbitView({
           orbitAxis: 'Z',
           fov: 50,
-          minZoom: 10,
+          minZoom: 3,    // Allow much wider zoom for large city
           maxZoom: 20,
           minPitch: 0,
           maxPitch: 85
