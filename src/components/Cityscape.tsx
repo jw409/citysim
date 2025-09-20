@@ -41,23 +41,24 @@ export function Cityscape({ width = 800, height = 600, optimizationResult }: Cit
   const { state: terrainState } = useTerrainContext();
   const [showZones, setShowZones] = useState(false);
 
-  // Initialize camera with proper 3D perspective
+  // GEMINI'S FIX: Proper 3D camera positioning above ground
   const camera = useCamera({
     longitude: -74.0060,
     latitude: 40.7128,
-    zoom: 14,      // Closer zoom for building detail
-    pitch: 60,     // More angle for 3D effect
-    bearing: -30   // Slight rotation for depth
+    zoom: 12,      // Good zoom for city detail
+    pitch: 45,     // 3D angle to see building tops
+    bearing: 0,    // No rotation
+    target: [0, 0, 0]  // Look at ground level, camera will be above
   });
 
-  // Update view state when city model is available
-  useEffect(() => {
-    if (state.cityModel) {
-      console.log('Updating view state based on city model bounds...');
-      const bounds = getBoundsFromCityModel(state.cityModel);
-      camera.smoothTransitionTo(bounds, 1500);
-    }
-  }, [state.cityModel]);
+  // GEMINI'S FIX: Temporarily disable automatic camera updates for debugging
+  // useEffect(() => {
+  //   if (state.cityModel) {
+  //     console.log('Updating view state based on city model bounds...');
+  //     const bounds = getBoundsFromCityModel(state.cityModel);
+  //     camera.smoothTransitionTo(bounds, 1500);
+  //   }
+  // }, [state.cityModel]);
 
   // Update camera follow targets when agents move
   useEffect(() => {
@@ -176,7 +177,30 @@ export function Cityscape({ width = 800, height = 600, optimizationResult }: Cit
       );
     }
 
+    // GEMINI'S FINAL TEST: Add guaranteed visible layer
+    const testLayer = new PolygonLayer({
+      id: 'visibility-test',
+      data: [
+        {
+          polygon: [
+            [-74.008, 40.710], [-74.004, 40.710],
+            [-74.004, 40.715], [-74.008, 40.715]
+          ],
+          height: 100
+        }
+      ],
+      getPolygon: d => d.polygon,
+      getElevation: d => d.height,
+      getFillColor: [255, 255, 0, 255], // Bright yellow
+      extruded: true,
+      stroked: true,
+      getLineColor: [255, 0, 255, 255], // Bright magenta outline
+      getLineWidth: 5
+    });
+    activeLayers.push(testLayer);
+
     console.log(`Rendering ${activeLayers.length} layers (${activeLayers.map(l => l.id).join(', ')})`);
+    console.log('🔍 VISIBILITY TEST: Added bright yellow test building at NYC coordinates');
 
     return activeLayers;
   }, [state.cityModel, state.agents, state.currentTime, state.simulationData, showZones, terrainState, optimizationResult]);
@@ -257,22 +281,12 @@ export function Cityscape({ width = 800, height = 600, optimizationResult }: Cit
         views={new OrbitView({
           orbitAxis: 'Z',
           fov: 50,
-          minZoom: 3,    // Allow much wider zoom for large city
+          minZoom: 3,
           maxZoom: 20,
           minPitch: 0,
           maxPitch: 85
         })}
-        controller={{
-          dragRotate: true,
-          dragPan: true,
-          scrollZoom: true,
-          touchZoom: true,
-          touchRotate: true,
-          keyboard: true,
-          inertia: true,
-          scrollZoomSpeed: 0.5,
-          dragRotateSpeed: 0.01
-        }}
+        controller={true}
         getCursor={() => camera.controls.followTarget ? 'crosshair' : 'grab'}
         getTooltip={({ object, layer }) => {
           if (!object) return null;

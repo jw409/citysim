@@ -77,6 +77,7 @@ export function TerrainControlPanel() {
       isCollapsible={true}
       initiallyCollapsed={false}
       storageKey="terrain-controls"
+      panelType="terrain"
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
 

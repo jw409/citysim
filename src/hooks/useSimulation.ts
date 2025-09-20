@@ -18,22 +18,19 @@ export function useSimulation() {
       const cityModel = await loadCityModel();
       dispatch({ type: 'SET_CITY_MODEL', payload: cityModel });
 
-      // Try to load and initialize WASM module
+      // Always generate fallback agents first for immediate visualization
+      console.log('🎮 Starting fallback agent generation (always runs)...');
+      generateFallbackAgents(cityModel);
+
+      // Try to load and initialize WASM module (optional enhancement)
       try {
         console.log('Attempting to load WASM module...');
         const wasmModule = await loadWasmModule();
         await initializeSimulation(cityModel);
         wasmModuleRef.current = wasmModule;
-        console.log('WASM module loaded successfully');
-
-        // Generate fallback agents if WASM doesn't provide them
-        generateFallbackAgents(cityModel);
+        console.log('WASM module loaded successfully - will replace fallback agents');
       } catch (wasmError) {
-        console.warn('WASM module failed to load, using fallback mode:', wasmError);
-        dispatch({ type: 'SET_ERROR', payload: `WASM unavailable: ${wasmError instanceof Error ? wasmError.message : 'Unknown error'}` });
-
-        // Generate fallback agents for visualization
-        generateFallbackAgents(cityModel);
+        console.warn('WASM module failed to load, continuing with fallback mode:', wasmError);
       }
 
       dispatch({ type: 'SET_INITIALIZED', payload: true });
@@ -74,25 +71,25 @@ export function useSimulation() {
 
   // Generate fallback buildings and agents for testing when WASM is unavailable
   const generateFallbackAgents = useCallback((cityModel: any) => {
-    // Always ensure we have buildings
-    const buildings = generateTestBuildings();
-
-    console.log('Setting persistent test buildings:', buildings.length);
-
-    // Update city model with persistent buildings
-    const updatedCityModel = { ...cityModel, buildings };
-    dispatch({ type: 'SET_CITY_MODEL', payload: updatedCityModel });
+    console.log('🤖 generateFallbackAgents called with cityModel:', {
+      name: cityModel?.name,
+      buildings: cityModel?.buildings?.length || 0,
+      pois: cityModel?.pois?.length || 0,
+      roads: cityModel?.roads?.length || 0
+    });
 
     const agents: any[] = [];
-    const pois = updatedCityModel.pois || [];
-    const buildingsForAgents = updatedCityModel.buildings || [];
+    const pois = cityModel?.pois || [];
+    const buildings = cityModel?.buildings || [];
 
-    console.log('Generating fallback agents...', { pois: pois.length, buildings: buildingsForAgents.length });
+    console.log('🏗️ Starting agent generation...', { pois: pois.length, buildings: buildings.length });
 
     // Generate agents from POIs
+    let agentsFromPOIs = 0;
     pois.forEach((poi: any, index: number) => {
       if (poi.type === 0 && agents.length < 20) { // HOME POIs, limit to 20 agents
         const numAgents = Math.min(3, Math.floor((poi.capacity || 50) / 20));
+        agentsFromPOIs += numAgents;
 
         for (let i = 0; i < numAgents; i++) {
           const agentId = agents.length;
@@ -125,12 +122,15 @@ export function useSimulation() {
       }
     });
 
-    // If no POIs, generate agents from buildings
-    if (agents.length === 0 && buildingsForAgents.length > 0) {
-      buildingsForAgents.slice(0, 10).forEach((building: any, index: number) => {
-        if (building.footprint && building.footprint.length > 0) {
-          const centerX = building.footprint.reduce((sum: number, p: any) => sum + p.x, 0) / building.footprint.length;
-          const centerY = building.footprint.reduce((sum: number, p: any) => sum + p.y, 0) / building.footprint.length;
+    console.log('👥 Created agents from POIs:', agentsFromPOIs);
+
+    // If no POIs or few agents, generate agents from buildings
+    if (agents.length < 5 && buildings.length > 0) {
+      console.log('🏢 Generating agents from buildings since POI agents are insufficient...');
+      buildings.slice(0, 15).forEach((building: any, index: number) => {
+        if (building.footprint && building.footprint.length > 0 && agents.length < 20) {
+          const centerX = building.footprint.reduce((sum: number, p: any) => sum + (p.x || p[0]), 0) / building.footprint.length;
+          const centerY = building.footprint.reduce((sum: number, p: any) => sum + (p.y || p[1]), 0) / building.footprint.length;
 
           const agentId = agents.length;
           const agent = {
@@ -147,6 +147,7 @@ export function useSimulation() {
           agents.push(agent);
         }
       });
+      console.log('🏢 Created additional agents from buildings:', agents.length - agentsFromPOIs);
     }
 
     console.log(`Generated ${agents.length} fallback agents`);

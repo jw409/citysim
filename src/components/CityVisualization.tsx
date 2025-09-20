@@ -1,9 +1,15 @@
-import { useState, useCallback, useMemo, useEffect } from 'react';
+import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { useSimulationContext } from '../contexts/SimulationContext';
 import { useTerrainContext } from '../contexts/TerrainContext';
+import { useCamera } from '../hooks/useCamera';
 import { Cityscape } from './Cityscape';
+import { CameraControlPanel } from './CameraControlPanel';
+import { TimeControlPanel } from './TimeControlPanel';
+import { TerrainControlPanel } from './TerrainControlPanel';
+import { PerformanceMonitor } from './PerformanceMonitor';
 import { enhanceSimulationDataWithLayers } from '../utils/multiLayerDataGenerator';
 import { enhanceCityWithGeography } from '../utils/geographicCityGenerator';
+import { getBoundsFromCityModel } from '../utils/coordinates';
 import { OptimizationResult } from '../types/optimization';
 
 const INITIAL_VIEW_STATE = {
@@ -16,12 +22,67 @@ const INITIAL_VIEW_STATE = {
 
 interface CityVisualizationProps {
   optimizationResult?: OptimizationResult | null;
+  onStart: () => void;
+  onPause: () => void;
+  onSetSpeed: (speed: number) => void;
+  isInitialized: boolean;
+  showPerformance: boolean;
+  onTogglePerformance: () => void;
 }
 
-export function CityVisualization({ optimizationResult }: CityVisualizationProps) {
+export function CityVisualization({ optimizationResult, onStart, onPause, onSetSpeed, isInitialized, showPerformance, onTogglePerformance }: CityVisualizationProps) {
   const { state, dispatch } = useSimulationContext();
   const { state: terrainState } = useTerrainContext();
   const [enhancedData, setEnhancedData] = useState<any>(null);
+  const [showZones, setShowZones] = useState(false);
+
+  // Initialize camera with working 3D view
+  const camera = useCamera({
+    longitude: -74.0060,
+    latitude: 40.7128,
+    zoom: 12,
+    pitch: 45,
+    bearing: 0
+  });
+
+  const toggleZones = useCallback(() => {
+    setShowZones(prev => !prev);
+  }, []);
+
+  // Update view state when city model becomes available (run only once)
+  const [hasUpdatedCamera, setHasUpdatedCamera] = useState(false);
+  useEffect(() => {
+    if (state.cityModel && !hasUpdatedCamera) {
+      console.log('Updating view state based on city model bounds...');
+      const bounds = getBoundsFromCityModel(state.cityModel);
+      // Override with working view that shows content
+      const workingBounds = {
+        longitude: bounds.longitude,
+        latitude: bounds.latitude,
+        zoom: 12,
+        pitch: 45,
+        bearing: 0
+      };
+      console.log('Setting camera to working bounds:', workingBounds);
+      camera.setViewState(workingBounds);
+      setHasUpdatedCamera(true);
+    }
+  }, [state.cityModel, hasUpdatedCamera]);
+
+  // Update camera follow targets when agents move
+  useEffect(() => {
+    if (state.agents && state.agents.length > 0) {
+      state.agents.forEach((agent: any) => {
+        if (agent.position && agent.id) {
+          camera.updateFollowTarget(
+            agent.id,
+            [agent.position.x, agent.position.y, agent.position.z || 5],
+            'agent'
+          );
+        }
+      });
+    }
+  }, [state.agents]);
 
   // Generate multi-layer data when city model is available
   useEffect(() => {
@@ -63,12 +124,42 @@ export function CityVisualization({ optimizationResult }: CityVisualizationProps
   }, [enhancedData, dispatch]);
 
   return (
-    <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+    <div style={{ position: 'relative', width: '100%', height: '100%', minHeight: '100vh' }}>
       <Cityscape
-        width={window.innerWidth}
-        height={window.innerHeight}
         optimizationResult={optimizationResult}
+        showZones={showZones}
+        onToggleZones={toggleZones}
+        camera={camera}
       />
+
+      <CameraControlPanel
+        camera={camera}
+        showZones={showZones}
+        onToggleZones={toggleZones}
+      />
+
+      <TimeControlPanel
+        onStart={onStart}
+        onPause={onPause}
+        onSetSpeed={onSetSpeed}
+        isInitialized={isInitialized}
+      />
+
+      <TerrainControlPanel />
+
+      {showPerformance && (
+        <PerformanceMonitor
+          metrics={{
+            fps: 60,
+            tps: state.isRunning ? 60 : 0,
+            memoryUsage: state.stats.totalAgents * 0.1,
+            agentCount: state.stats.totalAgents,
+            simulationTime: state.currentTime,
+            seed: 0,
+          }}
+          onClose={onTogglePerformance}
+        />
+      )}
 
       {state.selectedTool && (
         <div

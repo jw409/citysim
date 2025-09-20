@@ -30,7 +30,16 @@ interface DeviceMotionState {
 }
 
 export function useCamera(initialState: CameraState) {
-  const [viewState, setViewState] = useState<CameraState>(initialState);
+  // Ensure initial state has all required properties
+  const safeInitialState: CameraState = {
+    longitude: initialState.longitude ?? -74.0060,
+    latitude: initialState.latitude ?? 40.7128,
+    zoom: initialState.zoom ?? 12,
+    pitch: initialState.pitch ?? 45,
+    bearing: initialState.bearing ?? 0
+  };
+
+  const [viewState, setViewState] = useState<CameraState>(safeInitialState);
   const [controls, setControls] = useState<CameraControls>({
     enableGyroscope: false,
     enableVR: false,
@@ -273,17 +282,51 @@ export function useCamera(initialState: CameraState) {
     });
   }, [viewState, controls.smoothTransitions]);
 
-  // Preset camera positions
+  // Preset camera positions - preserve current lat/lng
   const presets = {
-    overview: () => smoothTransitionTo({ zoom: 12, pitch: 45, bearing: 0 }),
-    street: () => smoothTransitionTo({ zoom: 18, pitch: 0, bearing: 0 }),
-    aerial: () => smoothTransitionTo({ zoom: 10, pitch: 75, bearing: 0 }),
-    underground: () => smoothTransitionTo({ zoom: 16, pitch: 60, bearing: 0 }),
-    isometric: () => smoothTransitionTo({ zoom: 14, pitch: 45, bearing: 45 })
+    overview: () => smoothTransitionTo({
+      ...viewState,
+      zoom: 12,
+      pitch: 45,
+      bearing: 0
+    }),
+    street: () => smoothTransitionTo({
+      ...viewState,
+      zoom: 18,
+      pitch: 0,
+      bearing: 0
+    }),
+    aerial: () => smoothTransitionTo({
+      ...viewState,
+      zoom: 10,
+      pitch: 75,
+      bearing: 0
+    }),
+    underground: () => smoothTransitionTo({
+      ...viewState,
+      zoom: 16,
+      pitch: 60,
+      bearing: 0
+    }),
+    isometric: () => smoothTransitionTo({
+      ...viewState,
+      zoom: 14,
+      pitch: 45,
+      bearing: 45
+    })
+  };
+
+  // Always return valid viewState with defaults
+  const safeViewState: CameraState = {
+    longitude: viewState.longitude ?? -74.0060,
+    latitude: viewState.latitude ?? 40.7128,
+    zoom: viewState.zoom ?? 12,
+    pitch: viewState.pitch ?? 45,
+    bearing: viewState.bearing ?? 0
   };
 
   return {
-    viewState,
+    viewState: safeViewState,
     setViewState,
     controls,
     setControls,

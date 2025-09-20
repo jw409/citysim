@@ -11,6 +11,25 @@ export function localToLatLng(x: number, y: number): [number, number] {
   const lat = CITY_CENTER_LAT + (y / METERS_PER_DEGREE_LAT);
   const lng = CITY_CENTER_LNG + (x / METERS_PER_DEGREE_LNG);
 
+  // 💡 GEMINI'S FIX: Validate coordinates and log details
+  if (isNaN(lng) || isNaN(lat) || !isFinite(lng) || !isFinite(lat)) {
+    console.error("❌ Generated invalid coordinates for point:", {
+      input: { x, y },
+      output: { lng, lat },
+      constants: { CITY_CENTER_LAT, CITY_CENTER_LNG, METERS_PER_DEGREE_LAT, METERS_PER_DEGREE_LNG }
+    });
+    return [-74.0060, 40.7128]; // Return NYC center as default
+  }
+
+  // Log first few conversions for debugging
+  if (Math.random() < 0.01) { // 1% sampling
+    console.log('📍 Coordinate conversion sample:', {
+      local: { x, y },
+      latLng: { lat, lng },
+      distance_from_center: Math.sqrt(x*x + y*y)
+    });
+  }
+
   return [lng, lat]; // deck.gl expects [longitude, latitude]
 }
 

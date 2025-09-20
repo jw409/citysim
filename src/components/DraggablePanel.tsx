@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, ReactNode } from 'react';
+import { getPanelZIndex, panelZIndexManager, PanelType } from '../utils/zIndexManager';
 
 interface DraggablePanelProps {
   title: string;
@@ -9,6 +10,7 @@ interface DraggablePanelProps {
   initiallyCollapsed?: boolean;
   zIndex?: number;
   storageKey?: string; // For persisting position/size
+  panelType?: PanelType; // For z-index management
 }
 
 export function DraggablePanel({
@@ -18,8 +20,9 @@ export function DraggablePanel({
   defaultSize = { width: 320, height: 400 },
   isCollapsible = true,
   initiallyCollapsed = false,
-  zIndex = 1000,
-  storageKey
+  zIndex,
+  storageKey,
+  panelType
 }: DraggablePanelProps) {
   // Load saved position/size from localStorage if storageKey provided
   const loadSavedState = () => {
@@ -45,8 +48,25 @@ export function DraggablePanel({
   const [isResizing, setIsResizing] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [resizeStart, setResizeStart] = useState({ x: 0, y: 0, width: 0, height: 0 });
+  const [isActive, setIsActive] = useState(false);
 
   const panelRef = useRef<HTMLDivElement>(null);
+  const panelId = storageKey || `panel-${title.replace(/\s+/g, '-').toLowerCase()}`;
+
+  // Calculate z-index
+  const calculatedZIndex = zIndex || (panelType ? getPanelZIndex(panelType, isActive) : 1000);
+
+  // Handle panel focus management
+  useEffect(() => {
+    const unsubscribe = panelZIndexManager.subscribe((activePanelId) => {
+      setIsActive(activePanelId === panelId);
+    });
+    return unsubscribe;
+  }, [panelId]);
+
+  const handlePanelFocus = () => {
+    panelZIndexManager.setActivePanel(panelId);
+  };
 
   // Save state to localStorage
   const saveState = (newPosition?: { x: number; y: number }, newSize?: { width: number; height: number }, newCollapsed?: boolean) => {
@@ -65,6 +85,7 @@ export function DraggablePanel({
   };
 
   const handleMouseDown = (e: React.MouseEvent) => {
+    handlePanelFocus(); // Bring panel to front when clicked
     const target = e.target as HTMLElement;
     // Only drag if clicking on header or title
     if (target.classList.contains('panel-header') || target.classList.contains('panel-title')) {
@@ -140,19 +161,21 @@ export function DraggablePanel({
     <div
       ref={panelRef}
       className="floating-panel"
+      onClick={handlePanelFocus}
       style={{
         position: 'fixed',
         left: position.x,
         top: position.y,
         width: size.width,
         height: isCollapsed ? 'auto' : size.height,
-        zIndex,
+        zIndex: calculatedZIndex,
         background: 'var(--surface-color)',
-        border: '1px solid var(--border-color)',
+        border: isActive ? '2px solid var(--primary-color)' : '1px solid var(--border-color)',
         borderRadius: 'var(--border-radius)',
-        boxShadow: 'var(--shadow-lg)',
+        boxShadow: isActive ? 'var(--shadow-xl)' : 'var(--shadow-lg)',
         userSelect: 'none',
-        fontFamily: 'inherit'
+        fontFamily: 'inherit',
+        transition: 'border-color 0.2s ease, box-shadow 0.2s ease'
       }}
     >
       <div

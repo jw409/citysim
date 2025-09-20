@@ -18,9 +18,25 @@ export function createBuildingLayer(buildings: any[], timeOfDay: number = 12) {
       if (!d.footprint) return [];
       const converted = convertPointsToLatLng(d.footprint);
       if (buildings.indexOf(d) === 0) {
-        console.log('First building polygon conversion:', {
-          original: d.footprint,
-          converted: converted
+        const center = {
+          lat: converted.reduce((sum, p) => sum + p[1], 0) / converted.length,
+          lng: converted.reduce((sum, p) => sum + p[0], 0) / converted.length
+        };
+        console.log('🏢 COORDINATE DEBUG - First building position:', {
+          id: d.id,
+          originalFootprint: d.footprint.slice(0, 2),
+          convertedLatLng: converted.slice(0, 2),
+          buildingCenter: center,
+          height: d.height,
+          distanceFromCamera: Math.sqrt(
+            Math.pow(center.lng - (-74.0060), 2) +
+            Math.pow(center.lat - 40.7128, 2)
+          )
+        });
+        console.log('🎯 CAMERA vs BUILDING CENTER:', {
+          camera: { lng: -74.0060, lat: 40.7128 },
+          building: center,
+          same_hemisphere: Math.abs(center.lng + 74) < 1 && Math.abs(center.lat - 40) < 1
         });
       }
       return converted;
@@ -31,14 +47,24 @@ export function createBuildingLayer(buildings: any[], timeOfDay: number = 12) {
       return height;
     },
     getFillColor: (d: any) => {
+      // GEMINI'S FIX: Force bright visible colors for debugging
       const height = d.height || d.stories * 3.5 || (20 + Math.random() * 80);
-      const buildingType = getBuildingTypeName(d.building_type);
-      return getHeightBasedBuildingColor(buildingType, height, timeOfDay, colors);
+
+      if (buildings.indexOf(d) < 5) {
+        console.log('🎨 Building color debug:', {
+          id: d.id,
+          height,
+          color: [100, 150, 200, 255] // Bright blue for visibility
+        });
+      }
+
+      // Return bright colors to ensure visibility
+      return height > 100 ? [255, 100, 100, 255] : [100, 150, 200, 255]; // Red for tall, blue for short
     },
-    getLineColor: [0, 0, 0, 100],
-    getLineWidth: 1,
+    getLineColor: [255, 255, 255, 255], // Bright white lines
+    getLineWidth: 2,
     extruded: true,
-    wireframe: false, // Disabled for professional solid buildings
+    wireframe: false,
     filled: true,
     stroked: true,
     elevationScale: 2.0, // Increased for more prominent 3D buildings

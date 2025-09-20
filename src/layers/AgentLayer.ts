@@ -5,13 +5,31 @@ import { localToLatLng } from '../utils/coordinates';
 export function createAgentLayer(agents: any[], timeOfDay: number = 12) {
   const colors = getTimeBasedColors(timeOfDay);
 
+  console.log('🎯 Creating agent layer with:', {
+    agentCount: agents.length,
+    firstAgent: agents[0],
+    colors: colors.agents
+  });
+
   return new IconLayer({
     id: 'agents',
     data: agents,
     getPosition: (d: any) => {
-      if (!d.position) return [0, 0, 5];
+      if (!d.position) {
+        console.log('⚠️ Agent missing position:', d);
+        return [0, 0, 5];
+      }
       const [lng, lat] = localToLatLng(d.position.x, d.position.y);
-      return [lng, lat, 5];
+      const position = [lng, lat, 5];
+      if (d.id === 0) { // Log first agent for debugging
+        console.log('🎯 Agent 0 position:', {
+          original: d.position,
+          converted: position,
+          localCoords: [d.position.x, d.position.y],
+          worldCoords: [lng, lat]
+        });
+      }
+      return position;
     },
     getIcon: (d: any) => getAgentIcon(d.agent_type),
     getSize: (d: any) => getAgentSize(d.agent_type),

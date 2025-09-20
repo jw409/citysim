@@ -33,14 +33,17 @@
 .visualization-container {
   flex: 1;
   position: relative;
-  background: #1a1a1a;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  min-height: 100%;
+  min-width: 100%;
+  overflow: hidden;
 }
 
 .sidebar {
   width: 320px;
-  background: #ff0000 !important; /* Bright red for debugging */
-  border-left: 3px solid #00ff00 !important; /* Bright green border */
-  display: flex !important;
+  background: var(--surface-color);
+  border-left: 1px solid var(--border-color);
+  display: flex;
   flex-direction: column;
   box-shadow: var(--shadow-lg);
   min-height: 100vh;

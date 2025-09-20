@@ -3,13 +3,12 @@ import { SimulationProvider } from './contexts/SimulationContext';
 import { TerrainProvider } from './contexts/TerrainContext';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { LoadingScreen } from './components/LoadingScreen';
+import { StatusBar } from './components/StatusBar';
 import { Toolbar } from './components/Toolbar';
 import { ControlPanel } from './components/ControlPanel';
-import { PerformanceMonitor } from './components/PerformanceMonitor';
 import { CityVisualization } from './components/CityVisualization';
 import { OptimizationPanel } from './components/OptimizationPanel';
 import { OptimizationResults } from './components/OptimizationResults';
-import { TerrainControlPanel } from './components/TerrainControlPanel';
 import { useSimulation } from './hooks/useSimulation';
 import { useSimulationContext } from './contexts/SimulationContext';
 import { usePerformanceAdaptation } from './hooks/usePerformanceAdaptation';
@@ -125,88 +124,27 @@ function AppContent() {
         message="Loading city simulation"
       />
 
-      <div className="app">
-        <header className="app-header">
-          <h1 className="app-title">UrbanSynth</h1>
-          <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-            <span style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
-              {state.stats.totalAgents} agents
-            </span>
-            {state.error && (
-              <span style={{ color: 'var(--error-color)', fontSize: '0.875rem' }}>
-                Error: {state.error}
-              </span>
-            )}
+      <StatusBar />
+
+      <div className="app" style={{ paddingTop: '60px' }}>
+        <header className="app-header" style={{ height: '50px', padding: '0.5rem 1.5rem' }}>
+          <h1 className="app-title" style={{ fontSize: '1.25rem' }}>UrbanSynth</h1>
+          <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+            City Simulation Platform
           </div>
         </header>
 
         <main className="app-main">
           <div className="visualization-container">
-            <CityVisualization optimizationResult={optimizationResult} />
-          </div>
-
-          {/* Terrain Control Panel */}
-          <TerrainControlPanel />
-
-          {/* EMERGENCY TIME CONTROLS - ALWAYS VISIBLE */}
-          <div style={{
-            position: 'fixed',
-            top: '80px',
-            right: '20px',
-            background: '#ffffff',
-            border: '3px solid #ff0000',
-            padding: '20px',
-            borderRadius: '8px',
-            zIndex: 9999,
-            boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
-            minWidth: '250px'
-          }}>
-            <h3 style={{ margin: '0 0 15px 0', color: '#000' }}>⏱️ TIME CONTROLS</h3>
-
-            <div style={{ marginBottom: '15px' }}>
-              <label style={{ display: 'block', color: '#000', marginBottom: '5px' }}>
-                Status: {state.isInitialized ? '✅ Ready' : '⏳ Loading'}
-              </label>
-              <button
-                onClick={state.isRunning ? pause : start}
-                style={{
-                  background: '#007bff',
-                  color: 'white',
-                  border: 'none',
-                  padding: '10px 20px',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                  fontSize: '16px',
-                  width: '100%'
-                }}
-              >
-                {state.isRunning ? '⏸️ PAUSE' : '▶️ PLAY'}
-              </button>
-            </div>
-
-            <div style={{ marginBottom: '15px' }}>
-              <label style={{ display: 'block', color: '#000', marginBottom: '5px' }}>
-                Speed: {state.speed.toFixed(1)}x
-              </label>
-              <input
-                type="range"
-                min="0.1"
-                max="5"
-                step="0.1"
-                value={state.speed}
-                onChange={(e) => setSpeed(parseFloat(e.target.value))}
-                style={{ width: '100%' }}
-              />
-            </div>
-
-            <div>
-              <label style={{ display: 'block', color: '#000', marginBottom: '5px' }}>Time</label>
-              <div style={{ color: '#000', fontSize: '18px', fontWeight: 'bold' }}>
-                {Math.floor(state.currentTime).toString().padStart(2, '0')}:
-                {Math.floor((state.currentTime - Math.floor(state.currentTime)) * 60).toString().padStart(2, '0')}
-                <span style={{ marginLeft: '10px', fontSize: '14px' }}>Day {state.day + 1}</span>
-              </div>
-            </div>
+            <CityVisualization
+              optimizationResult={optimizationResult}
+              onStart={start}
+              onPause={pause}
+              onSetSpeed={setSpeed}
+              isInitialized={state.isInitialized}
+              showPerformance={showPerformance}
+              onTogglePerformance={() => setShowPerformance(prev => !prev)}
+            />
           </div>
 
           <aside className="sidebar">
@@ -246,20 +184,6 @@ function AppContent() {
           </aside>
         </main>
       </div>
-
-      {showPerformance && (
-        <PerformanceMonitor
-          metrics={{
-            fps: 60,
-            tps: state.isRunning ? 60 : 0,
-            memoryUsage: state.stats.totalAgents * 0.1,
-            agentCount: state.stats.totalAgents,
-            simulationTime: state.currentTime,
-            seed: 0,
-          }}
-          onClose={() => setShowPerformance(false)}
-        />
-      )}
     </>
   );
 }
