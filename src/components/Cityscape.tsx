@@ -44,7 +44,7 @@ export function Cityscape({ optimizationResult, showZones = false, onToggleZones
   const camera = useCamera({
     longitude: -74.0060,
     latitude: 40.7128,
-    zoom: 11,      // Zoomed out to see the full city spread
+    zoom: 14,      // Closer zoom to see building details
     pitch: 60,     // Good 3D perspective without being too extreme
     bearing: 30,   // Slight rotation for better 3D view
     target: [0, 0, 0]  // Look at ground level, camera will be above
@@ -183,8 +183,12 @@ export function Cityscape({ optimizationResult, showZones = false, onToggleZones
   }, [state.cityModel, state.agents, state.currentTime, state.simulationData, showZones, terrainState, optimizationResult]);
 
   const handleViewStateChange = useCallback(({ viewState: newViewState }: any) => {
+    console.log('🎥 ViewState changing:', newViewState);
     camera.setViewState(newViewState);
   }, [camera.setViewState]);
+
+  // DEBUG: Log current viewState
+  console.log('🎥 Current camera viewState:', camera.viewState);
 
   const handleClick = useCallback((info: any) => {
     if (info.object) {
@@ -255,7 +259,11 @@ export function Cityscape({ optimizationResult, showZones = false, onToggleZones
       <DeckGL
         width="100%"
         height="100%"
-        viewState={camera.viewState}
+        viewState={{
+          ...camera.viewState,
+          pitch: camera.viewState.pitch || 60,
+          bearing: camera.viewState.bearing || 30
+        }}
         onViewStateChange={handleViewStateChange}
         onClick={handleClick}
         layers={layers}
