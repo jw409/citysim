@@ -22,7 +22,7 @@ export function PerformanceMonitor({ metrics, onClose }: PerformanceMonitorProps
       defaultPosition={{ x: window.innerWidth - 250, y: 80 }}
       defaultSize={{ width: 220, height: 280 }}
       isCollapsible={true}
-      initiallyCollapsed={false}
+      initiallyCollapsed={true}
       storageKey="performance-monitor"
       panelType="performance"
     >

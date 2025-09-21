@@ -72,10 +72,10 @@ export function TerrainControlPanel() {
   return (
     <DraggablePanel
       title="🏔️ Terrain Controls"
-      defaultPosition={{ x: 350, y: 20 }}
-      defaultSize={{ width: 340, height: 650 }}
+      defaultPosition={{ x: window.innerWidth - 360, y: 20 }}
+      defaultSize={{ width: 340, height: 500 }}
       isCollapsible={true}
-      initiallyCollapsed={false}
+      initiallyCollapsed={true}
       storageKey="terrain-controls"
       panelType="terrain"
     >
