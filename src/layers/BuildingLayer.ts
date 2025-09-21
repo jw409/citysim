@@ -10,8 +10,17 @@ export function createBuildingLayer(buildings: any[], timeOfDay: number = 12) {
     id: 'buildings',
     data: buildings,
 
-    // DIRECTLY use the footprint data, which is already in the correct format
-    getPolygon: (d: any) => d.footprint,
+    // Ensure the footprint is a valid polygon array
+    getPolygon: (d: any) => {
+      if (!d.footprint) return null;
+      // If footprint is already an array of coordinates, return it
+      if (Array.isArray(d.footprint) && Array.isArray(d.footprint[0])) {
+        return d.footprint;
+      }
+      // If it's a different format, try to convert it
+      console.warn('Invalid footprint format for building:', d.id, d.footprint);
+      return null;
+    },
 
     // DIRECTLY use the height property
     getElevation: (d: any) => d.height || 0,
