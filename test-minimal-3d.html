@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Minimal 3D Building Test</title>
+    <script src="https://unpkg.com/deck.gl@latest/dist.min.js"></script>
+    <style>
+        body { margin: 0; font-family: Arial, sans-serif; }
+        #map { position: absolute; top: 0; bottom: 0; width: 100%; }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+    <script>
+        console.log('🚀 Creating minimal 3D building test');
+
+        // Create test buildings in a grid
+        const buildings = [];
+        for (let x = 0; x < 20; x++) {
+            for (let y = 0; y < 20; y++) {
+                const lng = -74.006 + x * 0.001;
+                const lat = 40.7128 + y * 0.001;
+                const height = 100 + Math.random() * 400; // 100-500m
+
+                buildings.push({
+                    id: `building-${x}-${y}`,
+                    polygon: [
+                        [lng, lat],
+                        [lng + 0.0005, lat],
+                        [lng + 0.0005, lat + 0.0005],
+                        [lng, lat + 0.0005]
+                    ],
+                    height: height
+                });
+            }
+        }
+
+        console.log('🏗️ Created', buildings.length, 'test buildings');
+
+        const deckgl = new deck.DeckGL({
+            container: 'map',
+            initialViewState: {
+                longitude: -74.006,
+                latitude: 40.7128,
+                zoom: 14,
+                pitch: 60,
+                bearing: 0
+            },
+            controller: true,
+            layers: [
+                new deck.PolygonLayer({
+                    id: 'test-buildings',
+                    data: buildings,
+                    getPolygon: d => d.polygon,
+                    getElevation: d => d.height,
+                    getFillColor: [100, 200, 255, 255],
+                    getLineColor: [255, 255, 255, 255],
+                    getLineWidth: 2,
+                    extruded: true,
+                    wireframe: false,
+                    filled: true,
+                    stroked: true,
+                    elevationScale: 2.0,
+                    pickable: true,
+                    material: {
+                        ambient: 0.3,
+                        diffuse: 0.7,
+                        shininess: 32,
+                        specularColor: [255, 255, 255]
+                    }
+                })
+            ]
+        });
+
+        console.log('✅ Deck.GL initialized with', buildings.length, '3D buildings');
+        console.log('📏 Height range: 100-500m, Elevation scale: 2.0x');
+
+        // Debug layer info
+        setTimeout(() => {
+            console.log('🔍 Layer manager:', deckgl.layerManager);
+            console.log('🔍 Layers:', deckgl.layerManager?.layers?.length || 0);
+        }, 2000);
+    </script>
+</body>
+</html>

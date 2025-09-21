@@ -1,0 +1,23 @@
+{
+  "timestamp": "2025-09-21T04:50:48.611Z",
+  "performance": {
+    "memory": {
+      "usedJSHeapSize": 72433049,
+      "totalJSHeapSize": 133668217
+    },
+    "timing": {
+      "loadEventEnd": 1758430245333,
+      "navigationStart": 1758430245208
+    }
+  },
+  "layerCount": 0,
+  "canvasSize": {
+    "width": 1920,
+    "height": 1440,
+    "clientWidth": 1920,
+    "clientHeight": 1440
+  },
+  "url": "http://localhost:5173/",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.3",
+  "description": "Every building forced to 200m+ height with 10x elevation scale - no hexagons"
+}

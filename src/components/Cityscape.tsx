@@ -131,23 +131,7 @@ export function Cityscape({ optimizationResult, showZones = false, onToggleZones
     activeLayers.push(createWeatherLayer(weatherData));
     activeLayers.push(createWindLayer(centerLat, centerLng));
 
-    // Minimal visualization overlay
-    const densityData = generateUrbanDensityData(centerLat, centerLng, 100); // Much reduced
-
-    // Minimal density visualization (much reduced)
-    activeLayers.push(createHexagonLayer(densityData, {
-      radius: 40,
-      elevationScale: 5,
-      coverage: 0.2,
-      colorRange: [
-        [65, 182, 196, 20],    // Very translucent
-        [127, 205, 187, 30],
-        [199, 233, 180, 40],
-        [237, 248, 177, 50],
-        [255, 255, 204, 60],
-        [255, 237, 160, 70]
-      ]
-    }));
+    // REMOVE HEXAGON DISTRACTIONS - focus on buildings only
 
     activeLayers.push(createRoadLayer(cityData.roads || [], state.currentTime || 12));
 

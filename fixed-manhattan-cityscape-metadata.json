@@ -1,0 +1,23 @@
+{
+  "timestamp": "2025-09-21T04:54:42.795Z",
+  "performance": {
+    "memory": {
+      "usedJSHeapSize": 86174817,
+      "totalJSHeapSize": 131941901
+    },
+    "timing": {
+      "loadEventEnd": 1758430479428,
+      "navigationStart": 1758430479309
+    }
+  },
+  "layerCount": 0,
+  "canvasSize": {
+    "width": 1920,
+    "height": 1440,
+    "clientWidth": 1920,
+    "clientHeight": 1440
+  },
+  "url": "http://localhost:5173/",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.3",
+  "description": "1000 forced 3D buildings - syntax fixed, should work like minimal test"
+}
