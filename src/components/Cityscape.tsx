@@ -1,6 +1,7 @@
 import React, { useMemo, useCallback, useState, useEffect } from 'react';
 import DeckGL from '@deck.gl/react';
-import { MapView } from '@deck.gl/core';
+import { MapView, COORDINATE_SYSTEM } from '@deck.gl/core';
+import { _GlobeView as GlobeView } from '@deck.gl/core';
 import { useSimulationContext } from '../contexts/SimulationContext';
 import { useTerrainContext } from '../contexts/TerrainContext';
 import { useCamera } from '../hooks/useCamera';
@@ -8,6 +9,10 @@ import { createBuildingLayer } from '../layers/BuildingLayer';
 import { createAgentLayer } from '../layers/AgentLayer';
 import { createRoadLayer } from '../layers/RoadLayer';
 import { createZoneLayer } from '../layers/ZoneLayer';
+import { createHexagonLayer, generateUrbanDensityData, generateTrafficData } from '../layers/HexagonLayer';
+import { createTerrainLayer, createWaterLayer } from '../layers/TerrainLayer';
+import { createAutonomousAgentLayer, generateAutonomousAgents } from '../layers/AutonomousAgentLayer';
+import { createWeatherLayer, generateWeatherSystem, createWindLayer } from '../layers/WeatherLayer';
 import { getBoundsFromCityModel } from '../utils/coordinates';
 import { PolygonLayer } from '@deck.gl/layers';
 import { createEnhancedTerrainLayer } from '../layers/EnhancedTerrainLayer';
@@ -109,6 +114,41 @@ export function Cityscape({ optimizationResult, showZones = false, onToggleZones
     }
 
     // Roads layer (above terrain, below buildings)
+    // Add realistic terrain base layers FIRST
+    activeLayers.push(createWaterLayer()); // Water bodies (lowest level)
+    activeLayers.push(createTerrainLayer()); // Ground terrain
+
+    // Generate sophisticated simulation data
+    const centerLat = 40.7128;
+    const centerLng = -74.0060;
+
+    // Add autonomous agents (cars, drones, airplanes, people)
+    const autonomousAgents = generateAutonomousAgents(centerLat, centerLng);
+    activeLayers.push(...createAutonomousAgentLayer(autonomousAgents));
+
+    // Add weather system
+    const weatherData = generateWeatherSystem(centerLat, centerLng, 'clear');
+    activeLayers.push(createWeatherLayer(weatherData));
+    activeLayers.push(createWindLayer(centerLat, centerLng));
+
+    // Minimal visualization overlay
+    const densityData = generateUrbanDensityData(centerLat, centerLng, 100); // Much reduced
+
+    // Minimal density visualization (much reduced)
+    activeLayers.push(createHexagonLayer(densityData, {
+      radius: 40,
+      elevationScale: 5,
+      coverage: 0.2,
+      colorRange: [
+        [65, 182, 196, 20],    // Very translucent
+        [127, 205, 187, 30],
+        [199, 233, 180, 40],
+        [237, 248, 177, 50],
+        [255, 255, 204, 60],
+        [255, 237, 160, 70]
+      ]
+    }));
+
     activeLayers.push(createRoadLayer(cityData.roads || [], state.currentTime || 12));
 
     // Zones layer (optional, for debugging)
@@ -267,7 +307,27 @@ export function Cityscape({ optimizationResult, showZones = false, onToggleZones
         onViewStateChange={handleViewStateChange}
         onClick={handleClick}
         layers={layers}
-        views={new MapView({ repeat: true })}
+        views={[
+          new GlobeView({
+            id: 'globe',
+            controller: {
+              maxZoom: 25,      // Infinite zoom capability
+              minZoom: 0,       // Zoom out to see full globe
+              maxPitch: 85
+            }
+          }),
+          new MapView({
+            id: 'map',
+            repeat: true,
+            nearZMultiplier: 0.01,
+            farZMultiplier: 100,
+            orthographic: false,
+            controller: {
+              maxZoom: 25,      // Infinite zoom capability
+              minZoom: 0
+            }
+          })
+        ]}
         controller={{
           dragRotate: true,
           dragPan: true,

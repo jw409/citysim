@@ -39,6 +39,7 @@
     "protoc": "npx pbjs -t static-module -w commonjs -o src/data/city_model.js src/data/city_model.proto && npx pbts -o src/data/city_model.d.ts src/data/city_model.js"
   },
   "dependencies": {
+    "@deck.gl/aggregation-layers": "^9.1.14",
     "@deck.gl/core": "^9.0.0",
     "@deck.gl/layers": "^9.0.0",
     "@deck.gl/react": "^9.0.0",

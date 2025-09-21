@@ -187,9 +187,9 @@ export async function loadCityModel(): Promise<any> {
       bounds: city.bounds ? {
         min_x: city.bounds.minX || 0,
         min_y: city.bounds.minY || 0,
-        max_x: city.bounds.maxX || 1000,
-        max_y: city.bounds.maxY || 1000
-      } : { min_x: 0, min_y: 0, max_x: 1000, max_y: 1000 },
+        max_x: city.bounds.maxX || 15000,
+        max_y: city.bounds.maxY || 15000
+      } : { min_x: 0, min_y: 0, max_x: 15000, max_y: 15000 },
       zones: city.zones || [],
       roads: city.roads || [],
       pois: enhancedPOIs,
@@ -214,7 +214,7 @@ export async function loadCityModel(): Promise<any> {
     console.log('Using fallback empty city model');
     return {
       name: 'Default City',
-      bounds: { min_x: 0, min_y: 0, max_x: 1000, max_y: 1000 },
+      bounds: { min_x: 0, min_y: 0, max_x: 15000, max_y: 15000 }, // 3x larger city area
       zones: [],
       roads: [],
       pois: [],

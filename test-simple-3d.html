@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simple 3D Building Test</title>
+    <script src="https://unpkg.com/deck.gl@latest/dist.min.js"></script>
+    <style>
+        body { margin: 0; font-family: Arial, sans-serif; }
+        #map { position: absolute; top: 0; bottom: 0; width: 100%; }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+    <script>
+        // Simple test to verify 3D extrusion works
+        const deckgl = new deck.DeckGL({
+            container: 'map',
+            initialViewState: {
+                longitude: -74.0060,
+                latitude: 40.7128,
+                zoom: 15,
+                pitch: 45,
+                bearing: 0
+            },
+            controller: true,
+            layers: [
+                new deck.PolygonLayer({
+                    id: 'test-building',
+                    data: [{
+                        polygon: [
+                            [-74.0060, 40.7128],
+                            [-74.0055, 40.7128],
+                            [-74.0055, 40.7125],
+                            [-74.0060, 40.7125]
+                        ],
+                        height: 100
+                    }],
+                    getPolygon: d => d.polygon,
+                    getElevation: d => d.height,
+                    getFillColor: [255, 0, 0, 255],
+                    extruded: true,
+                    elevationScale: 1,
+                    pickable: true
+                })
+            ]
+        });
+
+        console.log('Deck.GL version:', deck.version);
+        console.log('Test layer created with extruded=true, height=100m');
+    </script>
+</body>
+</html>

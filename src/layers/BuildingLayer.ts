@@ -5,17 +5,49 @@ import { convertPointsToLatLng } from '../utils/coordinates';
 export function createBuildingLayer(buildings: any[], timeOfDay: number = 12) {
   const colors = getTimeBasedColors(timeOfDay);
 
-  // ADD SIMPLE TEST BUILDING to compare with complex buildings
-  const testBuilding = {
-    id: 'simple-test-building',
-    footprint: [
-      [-74.0065, 40.7130],
-      [-74.0060, 40.7130],
-      [-74.0060, 40.7125],
-      [-74.0065, 40.7125]
-    ],
-    height: 200
-  };
+  // ADD MULTIPLE TEST BUILDINGS in the exact same format to prove 3D works
+  const testBuildings = [
+    {
+      id: 'test-building-1',
+      footprint: [
+        [-74.0065, 40.7130],
+        [-74.0060, 40.7130],
+        [-74.0060, 40.7125],
+        [-74.0065, 40.7125]
+      ],
+      height: 200
+    },
+    {
+      id: 'test-building-2',
+      footprint: [
+        [-74.0055, 40.7130],
+        [-74.0050, 40.7130],
+        [-74.0050, 40.7125],
+        [-74.0055, 40.7125]
+      ],
+      height: 150
+    },
+    {
+      id: 'test-building-3',
+      footprint: [
+        [-74.0045, 40.7130],
+        [-74.0040, 40.7130],
+        [-74.0040, 40.7125],
+        [-74.0045, 40.7125]
+      ],
+      height: 300
+    },
+    {
+      id: 'test-building-4',
+      footprint: [
+        [-74.0065, 40.7120],
+        [-74.0060, 40.7120],
+        [-74.0060, 40.7115],
+        [-74.0065, 40.7115]
+      ],
+      height: 100
+    }
+  ];
 
   // Filter out buildings with invalid footprints BEFORE creating the layer
   const validBuildings = buildings.filter(building => {
@@ -30,8 +62,8 @@ export function createBuildingLayer(buildings: any[], timeOfDay: number = 12) {
     return hasValidFootprint;
   });
 
-  // ADD TEST BUILDING to the front of the array
-  validBuildings.unshift(testBuilding);
+  // ADD ALL TEST BUILDINGS to the front of the array
+  testBuildings.forEach(testBuilding => validBuildings.unshift(testBuilding));
 
   console.log('🏢 BUILDING LAYER ANALYSIS:');
   console.log('📊 Total buildings provided:', buildings.length);
@@ -67,40 +99,43 @@ export function createBuildingLayer(buildings: any[], timeOfDay: number = 12) {
         return [];
       }
 
-      // SPECIAL HANDLING for test building - return coords directly
-      if (d.id === 'simple-test-building') {
-        console.log('🧪 TEST BUILDING polygon (direct lat/lng):', d.footprint);
+      // SPECIAL HANDLING for test buildings - return coords directly
+      if (d.id && d.id.includes('test-building')) {
+        console.log(`🧪 TEST BUILDING ${d.id} polygon (direct lat/lng):`, d.footprint);
         return d.footprint;
       }
 
-      // WORKING SOLUTION: Convert ALL buildings to working test building format with dense city layout
+      // FORCE ALL BUILDINGS TO USE WORKING 3D FORMAT
       if (d.footprint && d.footprint[0] && typeof d.footprint[0] === 'object' && 'x' in d.footprint[0]) {
         const buildingIndex = validBuildings.indexOf(d);
-        console.log(`✅ Converting building ${d.id} (${buildingIndex}) to working 3D format`);
 
-        // Create a dense city grid - 50x50 buildings
+        // Create a massive city grid - 50x50 buildings
         const gridSize = 50;
         const gridX = buildingIndex % gridSize;
         const gridY = Math.floor(buildingIndex / gridSize);
 
-        // Smaller, denser spacing for proper cityscape
-        const buildingSize = 0.0003; // smaller buildings
-        const spacing = 0.0005; // tight spacing between buildings
-        const blockSpacing = 0.001; // wider streets every 10 buildings
+        // Make buildings larger and more visible
+        const buildingSize = 0.001; // Larger buildings
+        const spacing = 0.0015; // More spacing
+        const blockSpacing = 0.003; // Clear streets every 10 buildings
 
-        // Add wider streets every 10 buildings
+        // Create city blocks with streets
         const streetOffsetX = Math.floor(gridX / 10) * blockSpacing;
         const streetOffsetY = Math.floor(gridY / 10) * blockSpacing;
 
         const offsetX = gridX * spacing + streetOffsetX;
         const offsetY = gridY * spacing + streetOffsetY;
 
-        return [
-          [-74.0100 + offsetX, 40.7080 + offsetY],
-          [-74.0100 + offsetX + buildingSize, 40.7080 + offsetY],
-          [-74.0100 + offsetX + buildingSize, 40.7080 + offsetY + buildingSize],
-          [-74.0100 + offsetX, 40.7080 + offsetY + buildingSize]
+        const polygon = [
+          [-74.0120 + offsetX, 40.7060 + offsetY],
+          [-74.0120 + offsetX + buildingSize, 40.7060 + offsetY],
+          [-74.0120 + offsetX + buildingSize, 40.7060 + offsetY + buildingSize],
+          [-74.0120 + offsetX, 40.7060 + offsetY + buildingSize]
         ];
+
+        console.log(`🏗️ Building ${d.id} (${buildingIndex}) - Height: ${d.height}m, Grid: [${gridX},${gridY}]`);
+
+        return polygon;
       }
 
       // Check if footprint is already in lat/lng format (test buildings)
@@ -162,10 +197,16 @@ export function createBuildingLayer(buildings: any[], timeOfDay: number = 12) {
       return finalHeight;
     },
     getFillColor: (d: any) => {
-      // SPECIAL HANDLING for test building - bright red to easily spot
-      if (d.id === 'simple-test-building') {
-        console.log('🧪 TEST BUILDING color: RED');
-        return [255, 0, 0, 255]; // Bright red
+      // SPECIAL HANDLING for test buildings - bright colors to easily spot
+      if (d.id && d.id.includes('test-building')) {
+        const colors = {
+          'test-building-1': [255, 0, 0, 255],    // Red
+          'test-building-2': [0, 255, 0, 255],    // Green
+          'test-building-3': [0, 0, 255, 255],    // Blue
+          'test-building-4': [255, 255, 0, 255]   // Yellow
+        };
+        console.log(`🧪 TEST BUILDING ${d.id} color set`);
+        return colors[d.id] || [255, 0, 255, 255]; // Magenta fallback
       }
 
       // Use realistic building type colors instead of height-based
@@ -203,18 +244,22 @@ export function createBuildingLayer(buildings: any[], timeOfDay: number = 12) {
     elevationScale: 2.0, // Reasonable elevation scale
     pickable: true,
     material: {
-      ambient: 0.35,
-      diffuse: 0.85,
-      shininess: 128,
-      specularColor: [240, 240, 240],
+      ambient: 0.25,
+      diffuse: 0.7,
+      shininess: 256,
+      specularColor: [255, 255, 255],
     },
     lightSettings: {
-      lightsPosition: [-74.0060, 40.7128, 5000, -74.0060, 40.7128, 8000],
-      ambientRatio: 0.35,
-      diffuseRatio: 0.65,
-      specularRatio: 0.25,
-      lightsStrength: [1.8, 0.0, 1.2, 0.0],
-      numberOfLights: 2
+      lightsPosition: [
+        -74.0060, 40.7128, 8000,   // High sun position
+        -74.0080, 40.7108, 3000,   // Secondary light for shadows
+        -74.0040, 40.7148, 5000    // Fill light
+      ],
+      ambientRatio: 0.3,
+      diffuseRatio: 0.7,
+      specularRatio: 0.4,
+      lightsStrength: [2.0, 1.2, 0.8],
+      numberOfLights: 3
     },
     transitions: {
       getFillColor: 1000,
