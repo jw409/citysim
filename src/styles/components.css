@@ -25,17 +25,15 @@
 
 .app-main {
   flex: 1;
-  display: flex;
   position: relative;
   overflow: hidden;
 }
 
 .visualization-container {
-  flex: 1;
+  width: 100vw;
+  height: calc(100vh - 110px);
   position: relative;
   background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-  min-height: 100%;
-  min-width: 100%;
   overflow: hidden;
 }
 
@@ -167,6 +165,21 @@
 .stats-panel {
   padding: 1rem;
   flex: 1;
+  overflow-y: auto;
+}
+
+.stats-panel-floating {
+  position: fixed;
+  top: 80px;
+  left: 20px;
+  width: 280px;
+  max-height: 300px;
+  background: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-lg);
+  padding: 1rem;
+  z-index: 1000;
   overflow-y: auto;
 }
 

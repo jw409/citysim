@@ -1,4 +1,5 @@
 import React from 'react';
+import { PolygonLayer } from '@deck.gl/layers';
 import { TerrainState } from '../contexts/TerrainContext';
 import { PlanetaryTerrain } from '../components/PlanetaryTerrain';
 import { generateTerrainLayers } from '../utils/terrainGenerator';
@@ -133,33 +134,30 @@ function generatePlanetaryStyleLayers(bounds: any, terrainState: TerrainState): 
   const terrainMesh = generatePlanetaryTerrainMesh(bounds, params, noiseGenerator, scale, timeOfDay);
 
   if (terrainMesh.length > 0) {
-    // Import PolygonLayer dynamically to avoid build issues
-    import('@deck.gl/layers').then(({ PolygonLayer }) => {
-      const terrainLayer = new PolygonLayer({
-        id: 'enhanced_planetary_terrain',
-        data: terrainMesh,
-        getPolygon: (d: any) => d.vertices.map((v: any) => {
-          // Convert local coordinates to lng/lat (simplified)
-          return [v.x / 111320, v.y / 110540];
-        }),
-        getElevation: (d: any) => Math.max(0, d.elevation * (scale > 100 ? 0.1 : 1)),
-        getFillColor: (d: any) => d.color,
-        getLineColor: [0, 0, 0, 0],
-        filled: true,
-        stroked: false,
-        extruded: true,
-        elevationScale: 1,
-        pickable: false,
-        material: {
-          ambient: 0.4,
-          diffuse: 0.8,
-          shininess: 32,
-          specularColor: [255, 255, 255]
-        }
-      });
-
-      layers.push(terrainLayer);
+    const terrainLayer = new PolygonLayer({
+      id: 'enhanced_planetary_terrain',
+      data: terrainMesh,
+      getPolygon: (d: any) => d.vertices.map((v: any) => {
+        // Convert local coordinates to lng/lat (simplified)
+        return [v.x / 111320, v.y / 110540];
+      }),
+      getElevation: (d: any) => Math.max(0, d.elevation * (scale > 100 ? 0.1 : 1)),
+      getFillColor: (d: any) => d.color,
+      getLineColor: [0, 0, 0, 0],
+      filled: true,
+      stroked: false,
+      extruded: true,
+      elevationScale: 1,
+      pickable: false,
+      material: {
+        ambient: 0.4,
+        diffuse: 0.8,
+        shininess: 32,
+        specularColor: [255, 255, 255]
+      }
     });
+
+    layers.push(terrainLayer);
   }
 
   return layers;

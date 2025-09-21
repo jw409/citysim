@@ -3,9 +3,6 @@ import { useSimulationContext } from '../contexts/SimulationContext';
 import { useTerrainContext } from '../contexts/TerrainContext';
 import { useCamera } from '../hooks/useCamera';
 import { Cityscape } from './Cityscape';
-import { CameraControlPanel } from './CameraControlPanel';
-import { TimeControlPanel } from './TimeControlPanel';
-import { TerrainControlPanel } from './TerrainControlPanel';
 import { PerformanceMonitor } from './PerformanceMonitor';
 import { enhanceSimulationDataWithLayers } from '../utils/multiLayerDataGenerator';
 import { enhanceCityWithGeography } from '../utils/geographicCityGenerator';
@@ -131,21 +128,6 @@ export function CityVisualization({ optimizationResult, onStart, onPause, onSetS
         onToggleZones={toggleZones}
         camera={camera}
       />
-
-      <CameraControlPanel
-        camera={camera}
-        showZones={showZones}
-        onToggleZones={toggleZones}
-      />
-
-      <TimeControlPanel
-        onStart={onStart}
-        onPause={onPause}
-        onSetSpeed={onSetSpeed}
-        isInitialized={isInitialized}
-      />
-
-      <TerrainControlPanel />
 
       {showPerformance && (
         <PerformanceMonitor

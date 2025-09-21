@@ -75,7 +75,7 @@ export function TerrainControlPanel() {
       defaultPosition={{ x: window.innerWidth - 360, y: 20 }}
       defaultSize={{ width: 340, height: 500 }}
       isCollapsible={true}
-      initiallyCollapsed={true}
+      initiallyCollapsed={false}
       storageKey="terrain-controls"
       panelType="terrain"
     >

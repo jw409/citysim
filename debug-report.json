@@ -1,0 +1,276 @@
+{
+  "timestamp": "2025-09-21T02:18:13.639Z",
+  "errors": [],
+  "consoleLogs": [
+    {
+      "type": "log",
+      "text": "ControlPanel render: {isInitialized: true, isRunning: false, isLoading: false, currentTime: 8, speed: 1}",
+      "timestamp": "2025-09-21T02:18:13.430Z"
+    },
+    {
+      "type": "log",
+      "text": "ControlPanel render: {isInitialized: true, isRunning: false, isLoading: false, currentTime: 8, speed: 1}",
+      "timestamp": "2025-09-21T02:18:13.430Z"
+    },
+    {
+      "type": "log",
+      "text": "ControlPanel render: {isInitialized: true, isRunning: false, isLoading: false, currentTime: 8, speed: 1}",
+      "timestamp": "2025-09-21T02:18:13.446Z"
+    },
+    {
+      "type": "log",
+      "text": "ControlPanel render: {isInitialized: true, isRunning: false, isLoading: false, currentTime: 8, speed: 1}",
+      "timestamp": "2025-09-21T02:18:13.446Z"
+    },
+    {
+      "type": "log",
+      "text": "ControlPanel render: {isInitialized: true, isRunning: false, isLoading: false, currentTime: 8, speed: 1}",
+      "timestamp": "2025-09-21T02:18:13.446Z"
+    },
+    {
+      "type": "log",
+      "text": "ControlPanel render: {isInitialized: true, isRunning: false, isLoading: false, currentTime: 8, speed: 1}",
+      "timestamp": "2025-09-21T02:18:13.446Z"
+    },
+    {
+      "type": "log",
+      "text": "ControlPanel render: {isInitialized: true, isRunning: false, isLoading: false, currentTime: 8, speed: 1}",
+      "timestamp": "2025-09-21T02:18:13.462Z"
+    },
+    {
+      "type": "log",
+      "text": "ControlPanel render: {isInitialized: true, isRunning: false, isLoading: false, currentTime: 8, speed: 1}",
+      "timestamp": "2025-09-21T02:18:13.463Z"
+    },
+    {
+      "type": "log",
+      "text": "ControlPanel render: {isInitialized: true, isRunning: false, isLoading: false, currentTime: 8, speed: 1}",
+      "timestamp": "2025-09-21T02:18:13.463Z"
+    },
+    {
+      "type": "log",
+      "text": "ControlPanel render: {isInitialized: true, isRunning: false, isLoading: false, currentTime: 8, speed: 1}",
+      "timestamp": "2025-09-21T02:18:13.463Z"
+    },
+    {
+      "type": "log",
+      "text": "ControlPanel render: {isInitialized: true, isRunning: false, isLoading: false, currentTime: 8, speed: 1}",
+      "timestamp": "2025-09-21T02:18:13.479Z"
+    },
+    {
+      "type": "log",
+      "text": "ControlPanel render: {isInitialized: true, isRunning: false, isLoading: false, currentTime: 8, speed: 1}",
+      "timestamp": "2025-09-21T02:18:13.479Z"
+    },
+    {
+      "type": "log",
+      "text": "ControlPanel render: {isInitialized: true, isRunning: false, isLoading: false, currentTime: 8, speed: 1}",
+      "timestamp": "2025-09-21T02:18:13.480Z"
+    },
+    {
+      "type": "log",
+      "text": "ControlPanel render: {isInitialized: true, isRunning: false, isLoading: false, currentTime: 8, speed: 1}",
+      "timestamp": "2025-09-21T02:18:13.480Z"
+    },
+    {
+      "type": "log",
+      "text": "ControlPanel render: {isInitialized: true, isRunning: false, isLoading: false, currentTime: 8, speed: 1}",
+      "timestamp": "2025-09-21T02:18:13.496Z"
+    },
+    {
+      "type": "log",
+      "text": "ControlPanel render: {isInitialized: true, isRunning: false, isLoading: false, currentTime: 8, speed: 1}",
+      "timestamp": "2025-09-21T02:18:13.496Z"
+    },
+    {
+      "type": "log",
+      "text": "ControlPanel render: {isInitialized: true, isRunning: false, isLoading: false, currentTime: 8, speed: 1}",
+      "timestamp": "2025-09-21T02:18:13.496Z"
+    },
+    {
+      "type": "log",
+      "text": "ControlPanel render: {isInitialized: true, isRunning: false, isLoading: false, currentTime: 8, speed: 1}",
+      "timestamp": "2025-09-21T02:18:13.496Z"
+    },
+    {
+      "type": "log",
+      "text": "ControlPanel render: {isInitialized: true, isRunning: false, isLoading: false, currentTime: 8, speed: 1}",
+      "timestamp": "2025-09-21T02:18:13.513Z"
+    },
+    {
+      "type": "log",
+      "text": "ControlPanel render: {isInitialized: true, isRunning: false, isLoading: false, currentTime: 8, speed: 1}",
+      "timestamp": "2025-09-21T02:18:13.513Z"
+    },
+    {
+      "type": "log",
+      "text": "ControlPanel render: {isInitialized: true, isRunning: false, isLoading: false, currentTime: 8, speed: 1}",
+      "timestamp": "2025-09-21T02:18:13.513Z"
+    },
+    {
+      "type": "log",
+      "text": "ControlPanel render: {isInitialized: true, isRunning: false, isLoading: false, currentTime: 8, speed: 1}",
+      "timestamp": "2025-09-21T02:18:13.513Z"
+    },
+    {
+      "type": "log",
+      "text": "ControlPanel render: {isInitialized: true, isRunning: false, isLoading: false, currentTime: 8, speed: 1}",
+      "timestamp": "2025-09-21T02:18:13.529Z"
+    },
+    {
+      "type": "log",
+      "text": "ControlPanel render: {isInitialized: true, isRunning: false, isLoading: false, currentTime: 8, speed: 1}",
+      "timestamp": "2025-09-21T02:18:13.529Z"
+    },
+    {
+      "type": "log",
+      "text": "ControlPanel render: {isInitialized: true, isRunning: false, isLoading: false, currentTime: 8, speed: 1}",
+      "timestamp": "2025-09-21T02:18:13.530Z"
+    },
+    {
+      "type": "log",
+      "text": "ControlPanel render: {isInitialized: true, isRunning: false, isLoading: false, currentTime: 8, speed: 1}",
+      "timestamp": "2025-09-21T02:18:13.530Z"
+    },
+    {
+      "type": "log",
+      "text": "ControlPanel render: {isInitialized: true, isRunning: false, isLoading: false, currentTime: 8, speed: 1}",
+      "timestamp": "2025-09-21T02:18:13.546Z"
+    },
+    {
+      "type": "log",
+      "text": "ControlPanel render: {isInitialized: true, isRunning: false, isLoading: false, currentTime: 8, speed: 1}",
+      "timestamp": "2025-09-21T02:18:13.546Z"
+    },
+    {
+      "type": "log",
+      "text": "ControlPanel render: {isInitialized: true, isRunning: false, isLoading: false, currentTime: 8, speed: 1}",
+      "timestamp": "2025-09-21T02:18:13.546Z"
+    },
+    {
+      "type": "log",
+      "text": "ControlPanel render: {isInitialized: true, isRunning: false, isLoading: false, currentTime: 8, speed: 1}",
+      "timestamp": "2025-09-21T02:18:13.546Z"
+    },
+    {
+      "type": "log",
+      "text": "ControlPanel render: {isInitialized: true, isRunning: false, isLoading: false, currentTime: 8, speed: 1}",
+      "timestamp": "2025-09-21T02:18:13.563Z"
+    },
+    {
+      "type": "log",
+      "text": "ControlPanel render: {isInitialized: true, isRunning: false, isLoading: false, currentTime: 8, speed: 1}",
+      "timestamp": "2025-09-21T02:18:13.563Z"
+    },
+    {
+      "type": "log",
+      "text": "ControlPanel render: {isInitialized: true, isRunning: false, isLoading: false, currentTime: 8, speed: 1}",
+      "timestamp": "2025-09-21T02:18:13.565Z"
+    },
+    {
+      "type": "log",
+      "text": "ControlPanel render: {isInitialized: true, isRunning: false, isLoading: false, currentTime: 8, speed: 1}",
+      "timestamp": "2025-09-21T02:18:13.565Z"
+    },
+    {
+      "type": "log",
+      "text": "ControlPanel render: {isInitialized: true, isRunning: false, isLoading: false, currentTime: 8, speed: 1}",
+      "timestamp": "2025-09-21T02:18:13.580Z"
+    },
+    {
+      "type": "log",
+      "text": "ControlPanel render: {isInitialized: true, isRunning: false, isLoading: false, currentTime: 8, speed: 1}",
+      "timestamp": "2025-09-21T02:18:13.580Z"
+    },
+    {
+      "type": "log",
+      "text": "ControlPanel render: {isInitialized: true, isRunning: false, isLoading: false, currentTime: 8, speed: 1}",
+      "timestamp": "2025-09-21T02:18:13.580Z"
+    },
+    {
+      "type": "log",
+      "text": "ControlPanel render: {isInitialized: true, isRunning: false, isLoading: false, currentTime: 8, speed: 1}",
+      "timestamp": "2025-09-21T02:18:13.580Z"
+    },
+    {
+      "type": "log",
+      "text": "ControlPanel render: {isInitialized: true, isRunning: false, isLoading: false, currentTime: 8, speed: 1}",
+      "timestamp": "2025-09-21T02:18:13.596Z"
+    },
+    {
+      "type": "log",
+      "text": "ControlPanel render: {isInitialized: true, isRunning: false, isLoading: false, currentTime: 8, speed: 1}",
+      "timestamp": "2025-09-21T02:18:13.596Z"
+    },
+    {
+      "type": "log",
+      "text": "ControlPanel render: {isInitialized: true, isRunning: false, isLoading: false, currentTime: 8, speed: 1}",
+      "timestamp": "2025-09-21T02:18:13.596Z"
+    },
+    {
+      "type": "log",
+      "text": "ControlPanel render: {isInitialized: true, isRunning: false, isLoading: false, currentTime: 8, speed: 1}",
+      "timestamp": "2025-09-21T02:18:13.597Z"
+    },
+    {
+      "type": "log",
+      "text": "ControlPanel render: {isInitialized: true, isRunning: false, isLoading: false, currentTime: 8, speed: 1}",
+      "timestamp": "2025-09-21T02:18:13.614Z"
+    },
+    {
+      "type": "log",
+      "text": "ControlPanel render: {isInitialized: true, isRunning: false, isLoading: false, currentTime: 8, speed: 1}",
+      "timestamp": "2025-09-21T02:18:13.614Z"
+    },
+    {
+      "type": "log",
+      "text": "ControlPanel render: {isInitialized: true, isRunning: false, isLoading: false, currentTime: 8, speed: 1}",
+      "timestamp": "2025-09-21T02:18:13.614Z"
+    },
+    {
+      "type": "log",
+      "text": "ControlPanel render: {isInitialized: true, isRunning: false, isLoading: false, currentTime: 8, speed: 1}",
+      "timestamp": "2025-09-21T02:18:13.614Z"
+    },
+    {
+      "type": "log",
+      "text": "ControlPanel render: {isInitialized: true, isRunning: false, isLoading: false, currentTime: 8, speed: 1}",
+      "timestamp": "2025-09-21T02:18:13.638Z"
+    },
+    {
+      "type": "log",
+      "text": "ControlPanel render: {isInitialized: true, isRunning: false, isLoading: false, currentTime: 8, speed: 1}",
+      "timestamp": "2025-09-21T02:18:13.638Z"
+    },
+    {
+      "type": "log",
+      "text": "ControlPanel render: {isInitialized: true, isRunning: false, isLoading: false, currentTime: 8, speed: 1}",
+      "timestamp": "2025-09-21T02:18:13.638Z"
+    },
+    {
+      "type": "log",
+      "text": "ControlPanel render: {isInitialized: true, isRunning: false, isLoading: false, currentTime: 8, speed: 1}",
+      "timestamp": "2025-09-21T02:18:13.638Z"
+    }
+  ],
+  "buildingData": {
+    "buildingAnalysis": [],
+    "polygonDebug": [],
+    "elevationDebug": [],
+    "colorDebug": []
+  },
+  "deckGLInfo": {
+    "error": "DeckGL container not found"
+  },
+  "reactState": {
+    "hasReactState": false
+  },
+  "screenshots": [
+    "debug-initial-state.png",
+    "debug-after-load.png",
+    "debug-after-zoom.png",
+    "debug-preset-1.png",
+    "debug-preset-3.png",
+    "debug-performance-monitor.png"
+  ]
+}

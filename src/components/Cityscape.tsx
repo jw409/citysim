@@ -1,6 +1,6 @@
 import React, { useMemo, useCallback, useState, useEffect } from 'react';
 import DeckGL from '@deck.gl/react';
-import { OrbitView } from '@deck.gl/core';
+import { MapView } from '@deck.gl/core';
 import { useSimulationContext } from '../contexts/SimulationContext';
 import { useTerrainContext } from '../contexts/TerrainContext';
 import { useCamera } from '../hooks/useCamera';
@@ -30,24 +30,23 @@ import { createChargingStationLayer } from '../layers/ChargingStationLayer';
 import { OptimizationResult } from '../types/optimization';
 
 interface CityscapeProps {
-  width?: number;
-  height?: number;
   optimizationResult?: OptimizationResult | null;
+  showZones?: boolean;
+  onToggleZones?: () => void;
+  camera?: any;
 }
 
-
-export function Cityscape({ width = 800, height = 600, optimizationResult }: CityscapeProps) {
+export function Cityscape({ optimizationResult, showZones = false, onToggleZones }: CityscapeProps) {
   const { state } = useSimulationContext();
   const { state: terrainState } = useTerrainContext();
-  const [showZones, setShowZones] = useState(false);
 
-  // GEMINI'S FIX: Proper 3D camera positioning above ground
+  // FIXED: Proper camera positioning to show the full city
   const camera = useCamera({
     longitude: -74.0060,
     latitude: 40.7128,
-    zoom: 12,      // Good zoom for city detail
-    pitch: 45,     // 3D angle to see building tops
-    bearing: 0,    // No rotation
+    zoom: 11,      // Zoomed out to see the full city spread
+    pitch: 60,     // Good 3D perspective without being too extreme
+    bearing: 30,   // Slight rotation for better 3D view
     target: [0, 0, 0]  // Look at ground level, camera will be above
   });
 
@@ -118,8 +117,9 @@ export function Cityscape({ width = 800, height = 600, optimizationResult }: Cit
     }
 
     console.log('Creating building layer with buildings:', cityData.buildings?.length, cityData.buildings?.slice(0, 2));
+
     const buildingLayer = createBuildingLayer(cityData.buildings || [], state.currentTime || 12);
-    console.log('Building layer created:', buildingLayer);
+    console.log('Building layer created with', cityData.buildings?.length || 0, 'buildings');
     activeLayers.push(buildingLayer);
 
     activeLayers.push(createAgentLayer(state.agents, state.currentTime || 12));
@@ -177,30 +177,7 @@ export function Cityscape({ width = 800, height = 600, optimizationResult }: Cit
       );
     }
 
-    // GEMINI'S FINAL TEST: Add guaranteed visible layer
-    const testLayer = new PolygonLayer({
-      id: 'visibility-test',
-      data: [
-        {
-          polygon: [
-            [-74.008, 40.710], [-74.004, 40.710],
-            [-74.004, 40.715], [-74.008, 40.715]
-          ],
-          height: 100
-        }
-      ],
-      getPolygon: d => d.polygon,
-      getElevation: d => d.height,
-      getFillColor: [255, 255, 0, 255], // Bright yellow
-      extruded: true,
-      stroked: true,
-      getLineColor: [255, 0, 255, 255], // Bright magenta outline
-      getLineWidth: 5
-    });
-    activeLayers.push(testLayer);
-
     console.log(`Rendering ${activeLayers.length} layers (${activeLayers.map(l => l.id).join(', ')})`);
-    console.log('🔍 VISIBILITY TEST: Added bright yellow test building at NYC coordinates');
 
     return activeLayers;
   }, [state.cityModel, state.agents, state.currentTime, state.simulationData, showZones, terrainState, optimizationResult]);
@@ -225,8 +202,10 @@ export function Cityscape({ width = 800, height = 600, optimizationResult }: Cit
   }, [camera]);
 
   const toggleZones = useCallback(() => {
-    setShowZones(prev => !prev);
-  }, []);
+    if (onToggleZones) {
+      onToggleZones();
+    }
+  }, [onToggleZones]);
 
   // Prevent right-click context menu on canvas
   const handleContextMenu = useCallback((event: React.MouseEvent) => {
@@ -252,7 +231,9 @@ export function Cityscape({ width = 800, height = 600, optimizationResult }: Cit
           camera.presets.isometric();
           break;
         case 'z':
-          setShowZones(prev => !prev);
+          if (onToggleZones) {
+            onToggleZones();
+          }
           break;
         case 'escape':
           if (camera.controls.followTarget) {
@@ -264,29 +245,32 @@ export function Cityscape({ width = 800, height = 600, optimizationResult }: Cit
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [camera, setShowZones]);
+  }, [camera, onToggleZones]);
 
   return (
     <div
-      style={{ position: 'relative', width, height }}
+      style={{ position: 'relative', width: '100%', height: '100%' }}
       onContextMenu={handleContextMenu}
     >
       <DeckGL
-        width={width}
-        height={height}
+        width="100%"
+        height="100%"
         viewState={camera.viewState}
         onViewStateChange={handleViewStateChange}
         onClick={handleClick}
         layers={layers}
-        views={new OrbitView({
-          orbitAxis: 'Z',
-          fov: 50,
-          minZoom: 3,
-          maxZoom: 20,
-          minPitch: 0,
-          maxPitch: 85
-        })}
-        controller={true}
+        views={new MapView({ repeat: true })}
+        controller={{
+          dragRotate: true,
+          dragPan: true,
+          scrollZoom: true,
+          touchZoom: true,
+          touchRotate: true,
+          keyboard: true,
+          inertia: true,
+          scrollZoomSpeed: 0.5,
+          dragRotateSpeed: 0.01
+        }}
         getCursor={() => camera.controls.followTarget ? 'crosshair' : 'grab'}
         getTooltip={({ object, layer }) => {
           if (!object) return null;
@@ -307,85 +291,6 @@ export function Cityscape({ width = 800, height = 600, optimizationResult }: Cit
         }}
       />
 
-      {/* Camera and View Controls */}
-      <div style={{
-        position: 'absolute',
-        top: 10,
-        left: 10,
-        background: 'rgba(0, 0, 0, 0.8)',
-        color: 'white',
-        padding: '10px',
-        borderRadius: '5px',
-        fontSize: '12px',
-        minWidth: '200px'
-      }}>
-        <h4 style={{ margin: '0 0 10px 0' }}>Camera Controls</h4>
-
-        {/* View Controls */}
-        <div style={{ marginBottom: '10px' }}>
-          <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', marginBottom: '5px' }}>
-            <input
-              type="checkbox"
-              checked={showZones}
-              onChange={toggleZones}
-              style={{ marginRight: '5px' }}
-            />
-            Show Zones
-          </label>
-        </div>
-
-        {/* Camera Presets */}
-        <div style={{ marginBottom: '10px' }}>
-          <div style={{ marginBottom: '5px', fontWeight: 'bold' }}>View Presets:</div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '5px' }}>
-            <button onClick={camera.presets.overview} style={{ padding: '3px 6px', fontSize: '11px' }}>
-              Overview
-            </button>
-            <button onClick={camera.presets.street} style={{ padding: '3px 6px', fontSize: '11px' }}>
-              Street
-            </button>
-            <button onClick={camera.presets.aerial} style={{ padding: '3px 6px', fontSize: '11px' }}>
-              Aerial
-            </button>
-            <button onClick={camera.presets.isometric} style={{ padding: '3px 6px', fontSize: '11px' }}>
-              Isometric
-            </button>
-          </div>
-        </div>
-
-        {/* Follow Mode */}
-        <div style={{ marginBottom: '10px' }}>
-          <div style={{ marginBottom: '5px', fontWeight: 'bold' }}>Follow Mode:</div>
-          {camera.controls.followTarget ? (
-            <div style={{ fontSize: '11px' }}>
-              <div style={{ color: '#4CAF50' }}>Following: {camera.controls.followTarget}</div>
-              <button
-                onClick={camera.stopFollowing}
-                style={{ padding: '3px 6px', fontSize: '11px', marginTop: '3px' }}
-              >
-                Stop Following
-              </button>
-            </div>
-          ) : (
-            <div style={{ fontSize: '11px', color: '#999' }}>
-              Click an agent to follow
-            </div>
-          )}
-        </div>
-
-        {/* Controls Help */}
-        <div style={{ fontSize: '10px', color: '#ccc', marginTop: '10px', borderTop: '1px solid #444', paddingTop: '5px' }}>
-          <div style={{ marginBottom: '3px', fontWeight: 'bold', color: '#fff' }}>Mouse Controls:</div>
-          <div>🖱️ Left click + drag: Pan</div>
-          <div>🖱️ Right click + drag: Rotate</div>
-          <div>🖱️ Scroll: Zoom</div>
-          <div>🖱️ Click agent: Follow</div>
-          <div style={{ marginTop: '5px', marginBottom: '3px', fontWeight: 'bold', color: '#fff' }}>Keyboard Shortcuts:</div>
-          <div>1,2,3,4: Camera presets</div>
-          <div>Z: Toggle zones</div>
-          <div>ESC: Stop following</div>
-        </div>
-      </div>
 
       {/* Status Indicator */}
       <div style={{

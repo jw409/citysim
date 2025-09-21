@@ -4,11 +4,8 @@ import { TerrainProvider } from './contexts/TerrainContext';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { LoadingScreen } from './components/LoadingScreen';
 import { StatusBar } from './components/StatusBar';
-import { Toolbar } from './components/Toolbar';
 import { ControlPanel } from './components/ControlPanel';
 import { CityVisualization } from './components/CityVisualization';
-import { OptimizationPanel } from './components/OptimizationPanel';
-import { OptimizationResults } from './components/OptimizationResults';
 import { useSimulation } from './hooks/useSimulation';
 import { useSimulationContext } from './contexts/SimulationContext';
 import { usePerformanceAdaptation } from './hooks/usePerformanceAdaptation';
@@ -145,43 +142,11 @@ function AppContent() {
               showPerformance={showPerformance}
               onTogglePerformance={() => setShowPerformance(prev => !prev)}
             />
-          </div>
 
-          <aside className="sidebar">
-            <Toolbar />
+            {/* Simple time controls only */}
             <ControlPanel />
-            <OptimizationPanel
-              onOptimize={handleOptimize}
-              isOptimizing={isOptimizing}
-              progress={optimizationProgress}
-            />
-            <OptimizationResults
-              result={optimizationResult}
-              onClear={() => setOptimizationResult(null)}
-            />
 
-            <div className="stats-panel">
-              <h3 className="toolbar-title">Statistics</h3>
-              <div className="stats-grid">
-                <div className="stat-card">
-                  <div className="stat-label">Total Agents</div>
-                  <div className="stat-value">{state.stats.totalAgents}</div>
-                </div>
-                <div className="stat-card">
-                  <div className="stat-label">Active</div>
-                  <div className="stat-value">{state.stats.activeAgents}</div>
-                </div>
-                <div className="stat-card">
-                  <div className="stat-label">Avg Speed</div>
-                  <div className="stat-value">{state.stats.averageSpeed.toFixed(1)}</div>
-                </div>
-                <div className="stat-card">
-                  <div className="stat-label">Congestion</div>
-                  <div className="stat-value">{(state.stats.congestionLevel * 100).toFixed(0)}%</div>
-                </div>
-              </div>
-            </div>
-          </aside>
+          </div>
         </main>
       </div>
     </>

@@ -1,4 +1,5 @@
 import { useSimulationContext } from '../contexts/SimulationContext';
+import { DraggablePanel } from './DraggablePanel';
 
 const tools = [
   { id: 'select', label: 'Select', icon: '👆' },
@@ -17,8 +18,15 @@ export function Toolbar() {
   };
 
   return (
-    <div className="toolbar">
-      <h3 className="toolbar-title">Building Tools</h3>
+    <DraggablePanel
+      title="🔧 Building Tools"
+      defaultPosition={{ x: window.innerWidth - 240, y: 80 }}
+      defaultSize={{ width: 220, height: 280 }}
+      isCollapsible={true}
+      initiallyCollapsed={false}
+      storageKey="building-tools"
+      panelType="toolbar"
+    >
       <div className="tool-grid">
         {tools.map(tool => (
           <button
@@ -32,6 +40,6 @@ export function Toolbar() {
           </button>
         ))}
       </div>
-    </div>
+    </DraggablePanel>
   );
 }

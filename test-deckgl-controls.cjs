@@ -78,7 +78,7 @@ async function testDeckGLControls() {
   // Take final screenshot
   console.log('📸 Taking final screenshot...');
   await page.screenshot({
-    path: 'deckgl-controls-test.png',
+    path: 'orbit-controls-test.png',
     fullPage: true
   });
 
