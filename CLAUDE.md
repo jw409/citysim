@@ -68,9 +68,35 @@ npm test
 npm run test:viewport
 npm run test:core
 npm run test:performance
+npm run test:debug
 
 # Update visual regression baselines
 npm run test:update-snapshots
+```
+
+### Debug Test Utilities
+The consolidated debug framework provides comprehensive testing tools:
+
+```typescript
+import { createDebugHelpers } from '../utils/debug-helpers';
+
+// In your test
+const debug = createDebugHelpers(page);
+
+// Comprehensive diagnosis
+const diagnosis = await debug.runDiagnosis();
+
+// Test camera presets with screenshots
+await debug.testCameraPresets();
+
+// Test simulation controls
+await debug.testSimulationControls();
+
+// Performance monitoring
+const metrics = await debug.getPerformanceMetrics();
+
+// Run full test suite
+await debug.runComprehensiveTest();
 ```
 
 ### File Cleanup

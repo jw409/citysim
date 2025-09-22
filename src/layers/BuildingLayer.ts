@@ -1,5 +1,6 @@
 import { PolygonLayer } from '@deck.gl/layers';
 import { getTimeBasedColors } from '../utils/colorSchemes';
+import { convertPointsToLatLng } from '../utils/coordinates';
 
 export function createBuildingLayer(buildings: any[], timeOfDay: number = 12) {
   const colors = getTimeBasedColors(timeOfDay);
@@ -8,27 +9,37 @@ export function createBuildingLayer(buildings: any[], timeOfDay: number = 12) {
 
   // Debug: Log a few buildings to check their data
   if (buildings.length > 0) {
-    console.log('Sample building data:', buildings.slice(0, 3).map(b => ({
-      id: b.id,
-      height: b.height,
-      type: b.type,
-      allProps: Object.keys(b),
-      footprint: Array.isArray(b.footprint) ? `${b.footprint.length} points` : b.footprint
-    })));
+    const samples = buildings.slice(0, 5);
+    console.log('=== BUILDING HEIGHT DEBUG ===');
+    samples.forEach((b, i) => {
+      console.log(`Building ${i}: ID=${b.id}, height=${b.height}, footprint=${Array.isArray(b.footprint) ? b.footprint.length + ' points' : 'invalid'}`);
+      if (i === 0 && Array.isArray(b.footprint)) {
+        console.log(`  First footprint sample: ${JSON.stringify(b.footprint.slice(0, 2))}`);
+      }
+    });
+    console.log('===========================');
   }
 
   return new PolygonLayer({
     id: 'buildings',
     data: buildings,
 
-    // Ensure the footprint is a valid polygon array
+    // Convert footprint from {x,y} objects to [lng,lat] arrays
     getPolygon: (d: any) => {
-      if (!d.footprint) return null;
-      // If footprint is already an array of coordinates, return it
-      if (Array.isArray(d.footprint) && Array.isArray(d.footprint[0])) {
+      if (!d.footprint || !Array.isArray(d.footprint)) return null;
+
+      // Convert from {x, y} objects to [lng, lat] arrays for deck.gl
+      if (d.footprint.length > 0 && typeof d.footprint[0] === 'object' && 'x' in d.footprint[0]) {
+        const converted = convertPointsToLatLng(d.footprint);
+        console.log(`Converting building ${d.id} footprint: ${d.footprint.length} points -> lat/lng`);
+        return converted;
+      }
+
+      // If already in [lng, lat] format, return as-is
+      if (Array.isArray(d.footprint[0])) {
         return d.footprint;
       }
-      // If it's a different format, try to convert it
+
       console.warn('Invalid footprint format for building:', d.id, d.footprint);
       return null;
     },
@@ -36,9 +47,7 @@ export function createBuildingLayer(buildings: any[], timeOfDay: number = 12) {
     // DIRECTLY use the height property
     getElevation: (d: any) => {
       const height = d.height || 0;
-      if (height > 0) {
-        console.log(`Building ${d.id} height: ${height}`);
-      }
+      console.log(`getElevation called: Building ${d.id} height=${height}`);
       return height;
     },
 
@@ -52,7 +61,7 @@ export function createBuildingLayer(buildings: any[], timeOfDay: number = 12) {
     wireframe: false,
     filled: true,
     stroked: true,
-    elevationScale: 3.0, // Increased to make buildings clearly visible
+    elevationScale: 20.0, // MASSIVE scale to test if elevation works at all
     pickable: true,
     material: {
       ambient: 0.25,
