@@ -6,6 +6,17 @@ export function createBuildingLayer(buildings: any[], timeOfDay: number = 12) {
 
   console.log(`Creating building layer with ${buildings.length} buildings.`);
 
+  // Debug: Log a few buildings to check their data
+  if (buildings.length > 0) {
+    console.log('Sample building data:', buildings.slice(0, 3).map(b => ({
+      id: b.id,
+      height: b.height,
+      type: b.type,
+      allProps: Object.keys(b),
+      footprint: Array.isArray(b.footprint) ? `${b.footprint.length} points` : b.footprint
+    })));
+  }
+
   return new PolygonLayer({
     id: 'buildings',
     data: buildings,
@@ -23,7 +34,13 @@ export function createBuildingLayer(buildings: any[], timeOfDay: number = 12) {
     },
 
     // DIRECTLY use the height property
-    getElevation: (d: any) => d.height || 0,
+    getElevation: (d: any) => {
+      const height = d.height || 0;
+      if (height > 0) {
+        console.log(`Building ${d.id} height: ${height}`);
+      }
+      return height;
+    },
 
     getFillColor: (d: any) => {
       const buildingType = getBuildingType(d);
@@ -35,7 +52,7 @@ export function createBuildingLayer(buildings: any[], timeOfDay: number = 12) {
     wireframe: false,
     filled: true,
     stroked: true,
-    elevationScale: 1.0, // Start with a 1.0 scale for baseline
+    elevationScale: 1.0, // Start with baseline to debug
     pickable: true,
     material: {
       ambient: 0.25,

@@ -141,13 +141,13 @@ function generatePlanetaryStyleLayers(bounds: any, terrainState: TerrainState): 
         // Convert local coordinates to lng/lat (simplified)
         return [v.x / 111320, v.y / 110540];
       }),
-      getElevation: (d: any) => Math.max(0, d.elevation * (scale > 100 ? 0.1 : 1)),
+      getElevation: (d: any) => Math.max(0, d.elevation * (scale > 100 ? 0.1 : 2.0)),
       getFillColor: (d: any) => d.color,
       getLineColor: [0, 0, 0, 0],
       filled: true,
       stroked: false,
       extruded: true,
-      elevationScale: 1,
+      elevationScale: 3.0, // Increased for more dramatic terrain
       pickable: false,
       material: {
         ambient: 0.4,
@@ -176,8 +176,8 @@ function generatePlanetaryTerrainMesh(
   const { min_x, min_y, max_x, max_y } = bounds;
   const terrainMesh: any[] = [];
 
-  // Adjust resolution based on scale
-  let resolution = scale > 100 ? 1000 : scale > 10 ? 500 : 200;
+  // Adjust resolution based on scale - smaller numbers = higher detail
+  let resolution = scale > 100 ? 1000 : scale > 10 ? 100 : 50;
 
   // Generate height map
   const heightMap: { [key: string]: any } = {};

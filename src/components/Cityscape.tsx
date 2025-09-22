@@ -33,6 +33,8 @@ import { createDroneLayer } from '../layers/aerial/DroneLayer';
 // Optimization layers
 import { createChargingStationLayer } from '../layers/ChargingStationLayer';
 import { OptimizationResult } from '../types/optimization';
+import { debugManager } from '../utils/debugUtils';
+import { DebugOverlay } from './DebugOverlay';
 
 interface CityscapeProps {
   optimizationResult?: OptimizationResult | null;
@@ -44,6 +46,7 @@ interface CityscapeProps {
 export function Cityscape({ optimizationResult, showZones = false, onToggleZones }: CityscapeProps) {
   const { state } = useSimulationContext();
   const { state: terrainState } = useTerrainContext();
+  const [debugVisible, setDebugVisible] = useState(false);
 
   // FIXED: Proper camera positioning to show the full city
   const camera = useCamera({
@@ -203,12 +206,29 @@ export function Cityscape({ optimizationResult, showZones = false, onToggleZones
 
     console.log(`Rendering ${activeLayers.length} layers (${activeLayers.map(l => l.id).join(', ')})`);
 
+    // Register layers with debug manager
+    activeLayers.forEach(layer => {
+      debugManager.registerLayer(layer);
+    });
+
+    // Build spatial index from layer data
+    debugManager.buildSpatialIndex();
+
     return activeLayers;
   }, [state.cityModel, state.agents, state.currentTime, state.simulationData, showZones, terrainState, optimizationResult]);
 
   const handleViewStateChange = useCallback(({ viewState: newViewState }: any) => {
     console.log('🎥 ViewState changing:', newViewState);
     camera.setViewState(newViewState);
+
+    // Update debug manager with new view state
+    debugManager.updateViewState({
+      longitude: newViewState.longitude,
+      latitude: newViewState.latitude,
+      zoom: newViewState.zoom,
+      pitch: newViewState.pitch,
+      bearing: newViewState.bearing
+    });
   }, [camera.setViewState]);
 
   // DEBUG: Log current viewState
@@ -268,12 +288,15 @@ export function Cityscape({ optimizationResult, showZones = false, onToggleZones
             camera.stopFollowing();
           }
           break;
+        case 'd':
+          setDebugVisible(!debugVisible);
+          break;
       }
     };
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [camera, onToggleZones]);
+  }, [camera, onToggleZones, debugVisible]);
 
   return (
     <div
@@ -292,14 +315,7 @@ export function Cityscape({ optimizationResult, showZones = false, onToggleZones
         onClick={handleClick}
         layers={layers}
         views={[
-          new GlobeView({
-            id: 'globe',
-            controller: {
-              maxZoom: 25,      // Infinite zoom capability
-              minZoom: 0,       // Zoom out to see full globe
-              maxPitch: 85
-            }
-          }),
+          // Use MapView for city-scale visualization to avoid dual rendering
           new MapView({
             id: 'map',
             repeat: true,
@@ -308,7 +324,8 @@ export function Cityscape({ optimizationResult, showZones = false, onToggleZones
             orthographic: false,
             controller: {
               maxZoom: 25,      // Infinite zoom capability
-              minZoom: 0
+              minZoom: 0,       // Allow global view in MapView
+              maxPitch: 85
             }
           })
         ]}
@@ -357,6 +374,12 @@ export function Cityscape({ optimizationResult, showZones = false, onToggleZones
       }}>
         {layers.length} layers active
       </div>
+
+      {/* Debug Overlay */}
+      <DebugOverlay
+        isVisible={debugVisible}
+        onToggle={() => setDebugVisible(!debugVisible)}
+      />
     </div>
   );
 }

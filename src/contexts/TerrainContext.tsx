@@ -33,15 +33,15 @@ type TerrainAction =
 
 const initialState: TerrainState = {
   isEnabled: true,
-  scale: 1, // City scale by default
+  scale: 10, // Regional scale for more visible terrain
   seed: 12345,
   timeOfDay: 12,
   showAtmosphere: false,
   terrainProfile: 'manhattan',
   customParameters: {
-    mountainHeight: 100,
+    mountainHeight: 200, // Increased for more dramatic elevation
     waterLevel: 0,
-    hilliness: 0.5,
+    hilliness: 0.7, // Increased hilliness for more variation
     riverProbability: 0.3,
     coastalDistance: 5000
   },

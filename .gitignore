@@ -41,3 +41,8 @@ src/wasm/
 wasm/pkg/
 wasm/target/
 
+# Test screenshots and debugging images
+tests/temp-screenshots/
+*.png
+!tests/baselines/**/*.png
+

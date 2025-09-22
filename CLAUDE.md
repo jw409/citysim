@@ -1,67 +1,79 @@
 # Claude Code Instructions for UrbanSynth
 
-## Playwright Testing Protocol
+## Playwright Testing & Screenshot Protocol
 
-### Window Configuration
-- Always use longer windows: `1920x1440` instead of default `1920x1080`
-- Launch browser with: `chromium.launch({ headless: false, args: ['--window-size=1920,1440'] })`
-- Set viewport: `page.setViewportSize({ width: 1920, height: 1440 })`
+### Core Requirements
+- **Viewport**: Always use `1920x1440` for consistent 3D visualization
+- **Browser**: `chromium.launch({ headless: false, args: ['--window-size=1920,1440'] })`
+- **Multi-angle captures**: Required for 3D scene analysis and debugging
 
-### Screenshot Comparison Protocol
-When testing visual changes, always take TWO screenshots for comparison:
+### Screenshot Organization
+- **Test screenshots**: Use `tests/temp-screenshots/` for all debugging/development
+- **Test baselines**: Use `tests/baselines/` for official regression baselines
+- **Never save** screenshots to project root (already gitignored)
 
-1. **Normal view**: Standard screenshot
-2. **Panned view**: Rotate/pan the camera 15 degrees for different perspective
+### Quick Debug Capture
+Use the standalone script for rapid debugging:
+```bash
+# Quick 2-angle capture (normal + panned)
+node scripts/capture-debug.mjs feature-name
 
-This provides:
-- Better understanding of 3D geometry
-- Different lighting angles
-- Verification that changes work from multiple viewpoints
+# Comprehensive 4-angle capture (normal + panned + tilted + zoomed-out)
+node scripts/capture-debug.mjs issue-name --comprehensive
 
-### Example Implementation
-```javascript
-// Screenshot 1: Normal view
-await page.screenshot({ path: 'feature-normal.png', fullPage: true });
-
-// Screenshot 2: Pan 15 degrees and capture
-await page.evaluate(() => {
-  // Simulate mouse drag to rotate view ~15 degrees
-  const canvas = document.querySelector('canvas');
-  if (canvas) {
-    const rect = canvas.getBoundingClientRect();
-    const centerX = rect.width / 2;
-    const centerY = rect.height / 2;
-
-    // Simulate drag from center to 15 degrees rotation
-    canvas.dispatchEvent(new MouseEvent('mousedown', { clientX: centerX, clientY: centerY }));
-    canvas.dispatchEvent(new MouseEvent('mousemove', { clientX: centerX + 50, clientY: centerY }));
-    canvas.dispatchEvent(new MouseEvent('mouseup', { clientX: centerX + 50, clientY: centerY }));
-  }
-});
-await page.waitForTimeout(500);
-await page.screenshot({ path: 'feature-panned.png', fullPage: true });
+# Include full page UI in screenshots
+node scripts/capture-debug.mjs ui-test --full-page
 ```
 
-## Current Debugging Status
+### Programmatic Screenshot Capture
+In tests, use the `ScreenshotHelpers` utility:
+```typescript
+import { createScreenshotHelpers } from '../utils/screenshot-helpers';
 
-### Building Rendering Issue
-- ✅ Pure deck.gl works perfectly (red 3D building in test-simple-3d.html)
-- ❌ React deck.gl app shows flat buildings despite same settings
-- Root cause: Difference between vanilla deck.gl and @deck.gl/react implementation
+// In your test
+const screenshots = createScreenshotHelpers(page);
 
-### Camera Settings
-- Zoom: 14 (good detail level)
-- Pitch: 60 (good 3D perspective)
-- Bearing: 30 (slight rotation)
+// Quick debug (normal + panned views)
+await screenshots.captureDebug('feature-test');
 
-### Key Findings
-- Buildings have correct heights (196m, 252m, 347m, 393m)
-- No JavaScript errors after fixing type checking
-- viewState missing pitch/bearing issue partially resolved
-- 3D extrusion works in isolation but not in React app
+// Comprehensive analysis (all 4 angles)
+await screenshots.captureComprehensive('bug-investigation');
 
-## Next Investigation Steps
-1. Compare React deck.gl layer props vs vanilla deck.gl
-2. Check if polygon coordinate format matches expected structure
-3. Verify material and lighting settings in React context
-4. Test minimal React reproduction case
+// Before/after comparison
+await screenshots.captureComparison(
+  async () => await viewport.clickCameraPreset('overview'),
+  async () => await viewport.clickCameraPreset('street'),
+  'preset-comparison'
+);
+```
+
+### Multi-Angle Protocol Details
+1. **Normal**: Current viewport state
+2. **Panned**: Rotate 100px horizontally (≈15° for most zoom levels)
+3. **Tilted**: Rotate 50px vertically for different elevation
+4. **Zoomed-out**: Zoom out 300px for broader context
+
+### Camera Movements for Analysis
+- **Pan**: `viewport.rotateCamera(deltaX, 0)` for horizontal rotation
+- **Tilt**: `viewport.rotateCamera(0, deltaY)` for vertical perspective
+- **Zoom**: `viewport.zoomCamera(delta)` for scale changes
+- **Stabilization**: Always `await viewport.waitForViewportStabilization()` after movements
+
+### Test Running
+```bash
+# Run all tests
+npm test
+
+# Run specific test suites
+npm run test:viewport
+npm run test:core
+npm run test:performance
+
+# Update visual regression baselines
+npm run test:update-snapshots
+```
+
+### File Cleanup
+- Temp screenshots auto-cleanup after 7 days
+- Manual cleanup: `screenshots.cleanupOldScreenshots()`
+- Recent files: `screenshots.getRecentScreenshots(10)`
