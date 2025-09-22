@@ -72,31 +72,82 @@ export function createTerrainLayer() {
   });
 }
 
-export function createWaterLayer() {
-  // Add water bodies around the city
-  const centerLng = -74.0060;
-  const centerLat = 40.7128;
+export function createWaterLayer(riverData?: any) {
+  // Use the actual generated river data if available
+  if (!riverData || !riverData.path || riverData.path.length === 0) {
+    // Fallback to default rivers if no river data provided
+    const centerLng = -74.0060;
+    const centerLat = 40.7128;
 
-  const waterBodies = [
-    {
-      id: 'hudson-river',
-      polygon: [
-        [centerLng - 0.03, centerLat - 0.02],
-        [centerLng - 0.025, centerLat - 0.02],
-        [centerLng - 0.025, centerLat + 0.03],
-        [centerLng - 0.03, centerLat + 0.03]
-      ]
-    },
-    {
-      id: 'east-river',
-      polygon: [
-        [centerLng + 0.025, centerLat - 0.015],
-        [centerLng + 0.03, centerLat - 0.015],
-        [centerLng + 0.03, centerLat + 0.025],
-        [centerLng + 0.025, centerLat + 0.025]
-      ]
+    const waterBodies = [
+      {
+        id: 'default-water',
+        polygon: [
+          [centerLng - 0.02, centerLat - 0.01],
+          [centerLng + 0.02, centerLat - 0.01],
+          [centerLng + 0.02, centerLat + 0.01],
+          [centerLng - 0.02, centerLat + 0.01]
+        ]
+      }
+    ];
+
+    return new PolygonLayer({
+      id: 'water-layer',
+      data: waterBodies,
+      getPolygon: (d: any) => d.polygon,
+      getFillColor: [64, 164, 223, 180],
+      getLineColor: [255, 255, 255, 0],
+      getLineWidth: 0,
+      extruded: false,
+      wireframe: false,
+      filled: true,
+      stroked: false,
+      pickable: false
+    });
+  }
+
+  // Generate water polygons from the actual river path
+  const waterBodies = [];
+  const riverWidth = riverData.width || 200; // meters
+
+  // Create water segments along the river path
+  for (let i = 0; i < riverData.path.length - 1; i++) {
+    const p1 = riverData.path[i];
+    const p2 = riverData.path[i + 1];
+
+    if (!p1 || !p2) continue;
+
+    // Convert from local coordinates to lat/lng (simplified conversion)
+    const centerLng = -74.0060;
+    const centerLat = 40.7128;
+    const metersToDegreesLng = 1 / 111320;
+    const metersToDegreesLat = 1 / 110540;
+
+    const lng1 = centerLng + (p1.x * metersToDegreesLng);
+    const lat1 = centerLat + (p1.y * metersToDegreesLat);
+    const lng2 = centerLng + (p2.x * metersToDegreesLng);
+    const lat2 = centerLat + (p2.y * metersToDegreesLat);
+
+    // Create water segment with width
+    const dx = lng2 - lng1;
+    const dy = lat2 - lat1;
+    const length = Math.sqrt(dx * dx + dy * dy);
+
+    if (length > 0) {
+      const perpX = -dy / length * (riverWidth * metersToDegreesLng / 2);
+      const perpY = dx / length * (riverWidth * metersToDegreesLat / 2);
+
+      waterBodies.push({
+        id: `river-segment-${i}`,
+        polygon: [
+          [lng1 + perpX, lat1 + perpY],
+          [lng1 - perpX, lat1 - perpY],
+          [lng2 - perpX, lat2 - perpY],
+          [lng2 + perpX, lat2 + perpY]
+        ]
+      });
     }
-  ];
+  }
 
   return new PolygonLayer({
     id: 'water-layer',

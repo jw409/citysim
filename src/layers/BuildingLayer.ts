@@ -60,12 +60,54 @@ export function createBuildingLayer(buildings: any[], timeOfDay: number = 12) {
       if (Array.isArray(color) && color.length >= 3) {
         return [color[0], color[1], color[2], 255]; // Force alpha to 255
       }
-      // Fallback colors based on building type
+      // Realistic building colors with variation
+      const buildingId = d.id || '';
+      const hashCode = buildingId.split('').reduce((a, b) => {
+        a = ((a << 5) - a) + b.charCodeAt(0);
+        return a & a;
+      }, 0);
+      const variation = Math.abs(hashCode) % 40; // 0-40 variation
+
       switch (buildingType) {
-        case 'office': return [70, 130, 180, 255]; // Steel blue
-        case 'commercial': return [255, 140, 0, 255]; // Dark orange
-        case 'residential': return [34, 139, 34, 255]; // Forest green
-        default: return [128, 128, 128, 255]; // Gray
+        case 'office':
+          // Office buildings: glass, steel, concrete variations
+          return [
+            Math.min(255, 120 + variation), // Blue-gray glass
+            Math.min(255, 140 + variation),
+            Math.min(255, 200 + variation),
+            255
+          ];
+        case 'commercial':
+          // Commercial: muted brick, stucco, painted variations
+          return [
+            Math.min(255, 140 + variation), // More muted brick/stucco tones
+            Math.min(255, 110 + variation),
+            Math.min(255, 90 + variation),
+            255
+          ];
+        case 'residential':
+          // Residential: muted house colors
+          return [
+            Math.min(255, 160 + variation), // More muted residential colors
+            Math.min(255, 150 + variation),
+            Math.min(255, 130 + variation),
+            255
+          ];
+        case 'industrial':
+          // Industrial: metal, concrete
+          return [
+            Math.min(255, 140 + variation), // Industrial gray/metal
+            Math.min(255, 140 + variation),
+            Math.min(255, 140 + variation),
+            255
+          ];
+        default:
+          return [
+            Math.min(255, 160 + variation), // Mixed development
+            Math.min(255, 160 + variation),
+            Math.min(255, 160 + variation),
+            255
+          ];
       }
     },
     getLineColor: [255, 255, 255, 255],
@@ -79,22 +121,47 @@ export function createBuildingLayer(buildings: any[], timeOfDay: number = 12) {
     elevationRange: [0, 3000], // Set max elevation range
     pickable: true,
     material: {
-      ambient: 0.4,      // Moderate ambient lighting
-      diffuse: 0.6,      // Balanced diffuse lighting
-      shininess: 32,     // Lower shininess for softer look
-      specularColor: [40, 40, 40], // Subtle specular highlights
+      ambient: 0.35,     // Slightly lower ambient for more contrast
+      diffuse: 0.8,      // Higher diffuse for better surface definition
+      shininess: 64,     // Higher shininess for more realistic surfaces
+      specularColor: [80, 80, 80], // More prominent specular highlights
+    },
+    // Add texture-like effects through UV mapping and material properties
+    getLineWidth: 1,  // Thinner lines for more detailed building outlines
+    wireframe: false,
+    filled: true,
+    stroked: true,
+    // Add more realistic building appearance
+    lightSettings: {
+      lightsPosition: [-74.006, 40.7128, 8000, -74.006, 40.7128, 8000], // NYC coordinates
+      ambientRatio: 0.4,
+      diffuseRatio: 0.6,
+      specularRatio: 0.2,
+      lightsStrength: [0.8, 0.0, 0.8, 0.0],
+      numberOfLights: 2
     },
   });
 }
 
 // Helper function to determine building type (can be kept as is)
 function getBuildingType(building: any): string {
-  if (building.type) {
-    return String(building.type).toLowerCase();
+  // Map numeric types from generator to color scheme names
+  // From generate_city.cjs: 0=HOUSE, 2=OFFICE_BUILDING, 3=STORE, 4=WAREHOUSE
+  if (typeof building.type === 'number') {
+    switch (building.type) {
+      case 0: return 'residential';  // HOUSE
+      case 2: return 'office';        // OFFICE_BUILDING
+      case 3: return 'commercial';    // STORE
+      case 4: return 'industrial';    // WAREHOUSE
+      default: break;
+    }
   }
+
+  // Fallback to height-based determination if type is missing/invalid
   const height = building.height || 0;
   if (height > 200) return 'office';
   if (height > 100) return 'commercial';
+  if (height > 50) return 'industrial';
   return 'residential';
 }
 

@@ -75,7 +75,7 @@ class CityGenerator {
       properties: { residential_density: 0, commercial_density: 0, office_density: 0 }
     });
 
-    // Residential neighborhoods (organic grid-based placement)
+    // Residential neighborhoods (massive coverage like real cities)
     const residentialAreas = [
       // Upper East Side equivalent
       { x: 1800, y: 1000, width: 1500, height: 1800, id: 'upper_east' },
@@ -83,12 +83,20 @@ class CityGenerator {
       { x: -1200, y: -1500, width: 1200, height: 1000, id: 'village' },
       // Brooklyn Heights equivalent
       { x: -3000, y: 1500, width: 2000, height: 1500, id: 'heights' },
-      // Suburbs North
-      { x: 800, y: 2500, width: 2500, height: 1500, id: 'suburbs_north' },
-      // Suburbs South
-      { x: -1500, y: -3000, width: 2200, height: 1200, id: 'suburbs_south' },
-      // Westside
-      { x: -3500, y: -800, width: 1800, height: 1600, id: 'westside' }
+      // Suburbs North (much larger)
+      { x: 800, y: 2500, width: 3500, height: 2000, id: 'suburbs_north' },
+      // Suburbs South (much larger)
+      { x: -1500, y: -3000, width: 3000, height: 1800, id: 'suburbs_south' },
+      // Westside (expanded)
+      { x: -3500, y: -800, width: 2500, height: 2200, id: 'westside' },
+      // New massive residential areas to fill empty space
+      { x: 3000, y: -1000, width: 2500, height: 2500, id: 'eastside' },
+      { x: -2000, y: 3000, width: 3000, height: 1500, id: 'northside' },
+      { x: 1500, y: -3500, width: 2000, height: 1500, id: 'southeast' },
+      { x: -4500, y: -2500, width: 2000, height: 2000, id: 'southwest' },
+      // Fill the gaps with more residential
+      { x: 0, y: 4000, width: 2000, height: 1000, id: 'far_north' },
+      { x: 2000, y: 2000, width: 1500, height: 1500, id: 'northeast' }
     ];
 
     residentialAreas.forEach(area => {
@@ -101,14 +109,19 @@ class CityGenerator {
       });
     });
 
-    // Commercial corridors (along major streets)
+    // Commercial corridors (along major streets) - much more coverage
     const commercialAreas = [
-      // Main commercial strip
-      { x: 0, y: 1800, width: 1800, height: 400, id: 'main_strip' },
-      // Shopping district
-      { x: 1200, y: -1000, width: 1000, height: 600, id: 'shopping' },
-      // Entertainment district
-      { x: -1800, y: 500, width: 800, height: 800, id: 'entertainment' }
+      // Main commercial strip (expanded)
+      { x: 0, y: 1800, width: 2400, height: 600, id: 'main_strip' },
+      // Shopping district (larger)
+      { x: 1200, y: -1000, width: 1500, height: 800, id: 'shopping' },
+      // Entertainment district (expanded)
+      { x: -1800, y: 500, width: 1200, height: 1000, id: 'entertainment' },
+      // New commercial areas to fill gaps
+      { x: 2500, y: 0, width: 1000, height: 1000, id: 'east_commercial' },
+      { x: -2500, y: -1000, width: 1000, height: 1200, id: 'west_commercial' },
+      { x: 500, y: -2000, width: 1200, height: 600, id: 'south_commercial' },
+      { x: -1000, y: 3500, width: 1500, height: 500, id: 'north_commercial' }
     ];
 
     commercialAreas.forEach(area => {
@@ -334,8 +347,8 @@ class CityGenerator {
       speed_limit: 80
     });
 
-    // Major arterials in grid pattern (like Broadway, 5th Ave)
-    const arterialSpacing = 1500;
+    // Major arterials in grid pattern (like Broadway, 5th Ave) - realistic spacing
+    const arterialSpacing = 600; // More realistic: arterial every 600m
     let roadId = 0;
 
     // North-South arterials
@@ -382,8 +395,8 @@ class CityGenerator {
       speed_limit: 40
     });
 
-    // Secondary street grid (finer resolution)
-    const streetSpacing = 500;
+    // Secondary street grid (realistic urban density)
+    const streetSpacing = 200; // Realistic: local street every 200m
     for (let x = cityBounds.min_x + 250; x <= cityBounds.max_x; x += streetSpacing) {
       // Skip if too close to arterials
       if (Math.abs(x % arterialSpacing) > 200) {
@@ -417,46 +430,204 @@ class CityGenerator {
       }
     }
 
-    // Add some curved suburban roads for variety
+    // Add curved roads throughout the city for realism
+    this.generateCurvedRoads(cityBounds);
     this.generateSuburbanRoads(cityBounds);
 
     // Add bridges where roads cross the river
     this.generateBridges();
   }
 
+  generateCurvedRoads(bounds) {
+    console.log('🛣️ Generating curved major roads...');
+
+    // Major curved boulevards that flow through the city
+    const curvedRoads = [];
+
+    // Curved Boulevard 1: Sweeping S-curve from southwest to northeast
+    const boulevard1Points = [];
+    for (let i = 0; i <= 20; i++) {
+      const t = i / 20;
+      const x = bounds.min_x + t * (bounds.max_x - bounds.min_x);
+      const y = bounds.min_y + (bounds.max_y - bounds.min_y) * 0.5 +
+                Math.sin(t * Math.PI * 1.5) * 1200; // S-curve with 1200m amplitude
+      boulevard1Points.push({ x, y });
+    }
+
+    curvedRoads.push({
+      id: 'curved_boulevard_1',
+      type: 1, // ARTERIAL
+      path: boulevard1Points,
+      width: 14,
+      lanes: 4,
+      speed_limit: 55
+    });
+
+    // Curved Boulevard 2: Circular arc in the northern part
+    const boulevard2Points = [];
+    const centerX = 0;
+    const centerY = bounds.max_y - 1500;
+    const radius = 2000;
+    for (let angle = -Math.PI/3; angle <= Math.PI/3; angle += Math.PI/30) {
+      const x = centerX + Math.cos(angle) * radius;
+      const y = centerY + Math.sin(angle) * radius;
+      boulevard2Points.push({ x, y });
+    }
+
+    curvedRoads.push({
+      id: 'curved_boulevard_2',
+      type: 1, // ARTERIAL
+      path: boulevard2Points,
+      width: 12,
+      lanes: 4,
+      speed_limit: 50
+    });
+
+    // Curved Boulevard 3: Diagonal curve from northwest to southeast
+    const boulevard3Points = [];
+    for (let i = 0; i <= 15; i++) {
+      const t = i / 15;
+      const x = bounds.min_x + 1000 + t * (bounds.max_x - bounds.min_x - 2000);
+      const y = bounds.max_y - 500 - t * (bounds.max_y - bounds.min_y - 1000) +
+                Math.cos(t * Math.PI * 2) * 800; // Wavy diagonal
+      boulevard3Points.push({ x, y });
+    }
+
+    curvedRoads.push({
+      id: 'curved_boulevard_3',
+      type: 1, // ARTERIAL
+      path: boulevard3Points,
+      width: 13,
+      lanes: 4,
+      speed_limit: 55
+    });
+
+    // Curved local streets
+    for (let i = 0; i < 6; i++) {
+      const curvePoints = [];
+      const startX = bounds.min_x + this.random() * (bounds.max_x - bounds.min_x);
+      const startY = bounds.min_y + this.random() * (bounds.max_y - bounds.min_y);
+      const length = 1000 + this.random() * 1500;
+      const direction = this.random() * Math.PI * 2;
+
+      for (let j = 0; j <= 12; j++) {
+        const t = j / 12;
+        const curve = Math.sin(t * Math.PI * 3) * 200; // Sinusoidal curve
+        const x = startX + Math.cos(direction) * t * length + Math.cos(direction + Math.PI/2) * curve;
+        const y = startY + Math.sin(direction) * t * length + Math.sin(direction + Math.PI/2) * curve;
+
+        if (x >= bounds.min_x && x <= bounds.max_x && y >= bounds.min_y && y <= bounds.max_y) {
+          curvePoints.push({ x, y });
+        }
+      }
+
+      if (curvePoints.length > 3) {
+        curvedRoads.push({
+          id: `curved_local_${i}`,
+          type: 3, // LOCAL
+          path: curvePoints,
+          width: 9,
+          lanes: 2,
+          speed_limit: 35
+        });
+      }
+    }
+
+    curvedRoads.forEach(road => this.roads.push(road));
+  }
+
   generateSuburbanRoads(bounds) {
     // Add curved roads in residential areas for realism
-    const curves = [
-      // Curved residential street
-      {
-        id: 'suburban_curve_1',
-        type: 3,
-        path: [
-          { x: bounds.min_x + 1000, y: bounds.min_y + 1000 },
-          { x: bounds.min_x + 1200, y: bounds.min_y + 1100 },
-          { x: bounds.min_x + 1400, y: bounds.min_y + 1050 },
-          { x: bounds.min_x + 1600, y: bounds.min_y + 1200 }
-        ],
-        width: 6,
-        lanes: 2,
-        speed_limit: 25
-      },
-      // Cul-de-sac
-      {
-        id: 'cul_de_sac_1',
-        type: 3,
-        path: [
-          { x: bounds.max_x - 1000, y: bounds.max_y - 1000 },
-          { x: bounds.max_x - 900, y: bounds.max_y - 950 },
-          { x: bounds.max_x - 850, y: bounds.max_y - 1000 },
-          { x: bounds.max_x - 900, y: bounds.max_y - 1050 },
-          { x: bounds.max_x - 1000, y: bounds.max_y - 1000 }
-        ],
-        width: 6,
-        lanes: 2,
-        speed_limit: 20
+    const curves = [];
+
+    // Generate multiple curved suburban streets
+    for (let i = 0; i < 8; i++) {
+      const startX = bounds.min_x + this.random() * (bounds.max_x - bounds.min_x);
+      const startY = bounds.min_y + this.random() * (bounds.max_y - bounds.min_y);
+
+      // Create sinusoidal curved path
+      const path = [];
+      const length = 800 + this.random() * 400; // 800-1200m long streets
+      const curveAmplitude = 50 + this.random() * 100; // How much the road curves
+      const curveFrequency = 2 + this.random() * 2; // Number of curves
+
+      for (let t = 0; t <= 1; t += 0.1) {
+        const x = startX + t * length;
+        const y = startY + Math.sin(t * Math.PI * curveFrequency) * curveAmplitude;
+
+        // Check if point is within bounds
+        if (x >= bounds.min_x && x <= bounds.max_x && y >= bounds.min_y && y <= bounds.max_y) {
+          path.push({ x, y });
+        }
       }
-    ];
+
+      if (path.length > 2) {
+        curves.push({
+          id: `suburban_curve_${i}`,
+          type: 3, // LOCAL
+          path,
+          width: 6 + this.random() * 4, // 6-10m width
+          lanes: 2,
+          speed_limit: 25 + Math.floor(this.random() * 15) // 25-40 km/h
+        });
+      }
+    }
+
+    // Add circular/cul-de-sac roads
+    for (let i = 0; i < 5; i++) {
+      const centerX = bounds.min_x + this.random() * (bounds.max_x - bounds.min_x);
+      const centerY = bounds.min_y + this.random() * (bounds.max_y - bounds.min_y);
+      const radius = 50 + this.random() * 50; // 50-100m radius
+
+      const path = [];
+      for (let angle = 0; angle <= Math.PI * 2; angle += Math.PI / 8) {
+        const x = centerX + Math.cos(angle) * radius;
+        const y = centerY + Math.sin(angle) * radius;
+
+        if (x >= bounds.min_x && x <= bounds.max_x && y >= bounds.min_y && y <= bounds.max_y) {
+          path.push({ x, y });
+        }
+      }
+
+      if (path.length > 4) {
+        curves.push({
+          id: `cul_de_sac_${i}`,
+          type: 3, // LOCAL
+          path,
+          width: 6,
+          lanes: 2,
+          speed_limit: 20
+        });
+      }
+    }
+
+    // Add diagonal boulevards that cut across the grid
+    for (let i = 0; i < 3; i++) {
+      const angle = (Math.PI / 6) + i * (Math.PI / 4); // Different diagonal angles
+      const length = 4000;
+      const startX = bounds.min_x + this.random() * 2000;
+      const startY = bounds.min_y + this.random() * 2000;
+
+      const path = [
+        { x: startX, y: startY },
+        { x: startX + Math.cos(angle) * length, y: startY + Math.sin(angle) * length }
+      ];
+
+      // Clip to bounds
+      if (path[1].x > bounds.max_x) path[1].x = bounds.max_x;
+      if (path[1].y > bounds.max_y) path[1].y = bounds.max_y;
+      if (path[1].x < bounds.min_x) path[1].x = bounds.min_x;
+      if (path[1].y < bounds.min_y) path[1].y = bounds.min_y;
+
+      curves.push({
+        id: `boulevard_${i}`,
+        type: 1, // ARTERIAL
+        path,
+        width: 15,
+        lanes: 4,
+        speed_limit: 60
+      });
+    }
 
     curves.forEach(road => this.roads.push(road));
   }
@@ -577,55 +748,170 @@ class CityGenerator {
   generateBuildings() {
     console.log('🏢 Generating realistic buildings...');
 
+    // Track all placed buildings globally for cross-zone collision detection
+    this.allPlacedBuildings = [];
+
     // Generate buildings based on zones with proper density and height gradients
     this.zones.forEach(zone => {
       this.generateBuildingsForZone(zone);
     });
 
-    // Also generate buildings for high-capacity POIs (as landmarks)
+    // Generate collision-aware landmark buildings for high-capacity POIs
     this.pois.forEach((poi, i) => {
       if (poi.capacity > 80) {
-        const footprint = this.generateBuildingFootprint(poi.position.x, poi.position.y, 3, true);
-        const height = this.getBuildingHeight(poi.zone_id, poi.type, true);
+        // Try to place landmark with collision detection
+        let placed = false;
+        let attempts = 0;
+        const maxAttempts = 5;
 
-        this.buildings.push({
-          id: `landmark_${i}`,
-          footprint,
-          height,
-          zone_id: poi.zone_id,
-          type: this.getBuildingType(poi.type)
-        });
+        while (!placed && attempts < maxAttempts) {
+          attempts++;
+
+          // Small variation in position to avoid exact POI overlap
+          const finalX = poi.position.x + (this.random() - 0.5) * 20;
+          const finalY = poi.position.y + (this.random() - 0.5) * 20;
+
+          // Generate footprint with collision-aware system
+          const nearestRoad = this.findNearestRoad(finalX, finalY);
+          const rotation = nearestRoad ? this.calculateBuildingRotation(finalX, finalY, nearestRoad) : 0;
+          const footprint = this.generateOrientedBuildingFootprint(finalX, finalY, 3, rotation);
+
+          // Check for overlaps with existing buildings
+          let overlaps = false;
+          for (const existingBuilding of this.allPlacedBuildings) {
+            if (this.buildingFootprintsOverlap(footprint, existingBuilding.footprint)) {
+              overlaps = true;
+              break;
+            }
+          }
+
+          // Also check if landmark would be in water
+          if (this.isPointInWater(finalX, finalY)) {
+            overlaps = true; // Treat water placement as overlap
+          }
+
+          if (!overlaps) {
+            const height = this.getBuildingHeight(poi.zone_id, poi.type, true);
+            const landmark = {
+              id: `landmark_${i}`,
+              footprint,
+              height,
+              zone_id: poi.zone_id,
+              type: this.getBuildingType(poi.type),
+              rotation: rotation * 180 / Math.PI
+            };
+            this.buildings.push(landmark);
+            this.allPlacedBuildings.push(landmark); // Add to global tracking
+            placed = true;
+          }
+        }
+
+        if (!placed) {
+          console.log(`  Could not place landmark ${i} after ${maxAttempts} attempts (capacity: ${poi.capacity})`);
+        }
       }
     });
   }
 
   generateBuildingsForZone(zone) {
     const bounds = this.getZoneBounds(zone.boundary);
-    const buildingCount = Math.floor(zone.density * 100); // More buildings in denser zones
+    const blockSize = 120; // Smaller, more realistic city blocks: 120m x 120m
+    const streetWidth = 15; // Realistic street width: 15m (about 4 lanes)
 
-    for (let i = 0; i < buildingCount; i++) {
-      // Place buildings on a grid-like pattern with some randomness
-      const gridX = bounds.min_x + (i % 10) * (bounds.width / 10);
-      const gridY = bounds.min_y + Math.floor(i / 10) * (bounds.height / 10);
+    console.log(`Generating buildings for zone ${zone.id} with block-based placement...`);
 
-      // Add randomness to avoid perfect grid
-      const x = gridX + (this.random() - 0.5) * 100;
-      const y = gridY + (this.random() - 0.5) * 100;
+    // Track placed buildings for collision detection
+    const placedBuildingsInZone = [];
 
-      // Ensure building is within zone
-      if (this.isPointInZone(x, y, zone.boundary)) {
-        const footprint = this.generateBuildingFootprint(x, y, zone.type);
-        const height = this.getBuildingHeight(zone.id, zone.type);
+    // Create a grid of city blocks aligned with street network
+    for (let x = bounds.min_x; x < bounds.max_x; x += blockSize + streetWidth) {
+      for (let y = bounds.min_y; y < bounds.max_y; y += blockSize + streetWidth) {
+        // Check if this block intersects with any roads
+        if (this.isBlockClearOfRoads(x, y, blockSize)) {
+          // Place 6-12 buildings per block for much higher density
+          const buildingsPerBlock = Math.max(3, Math.floor(zone.density * 12));
 
-        this.buildings.push({
-          id: `building_${zone.id}_${i}`,
-          footprint,
-          height,
-          zone_id: zone.id,
-          type: this.getZoneBuildingType(zone.type)
-        });
+          // Track buildings placed in this block for local collision detection
+          const blockBuildings = [];
+
+          for (let i = 0; i < buildingsPerBlock; i++) {
+            // Try multiple times to place building without overlap
+            let placed = false;
+            let attempts = 0;
+            const maxAttempts = 15; // More attempts for higher density
+
+            while (!placed && attempts < maxAttempts) {
+              attempts++;
+
+              // Create 4x3 grid within each block for better building distribution
+              const gridCols = 4;
+              const gridRows = 3;
+              const gridX = x + (i % gridCols) * (blockSize/gridCols) + (blockSize/gridCols/2);
+              const gridY = y + Math.floor(i/gridRows) * (blockSize/gridRows) + (blockSize/gridRows/2);
+
+              // Add variation while maintaining block structure and street access
+              const finalX = gridX + (this.random() - 0.5) * 20; // Reduced randomness for better access
+              const finalY = gridY + (this.random() - 0.5) * 20;
+
+              if (this.isPointInZone(finalX, finalY, zone.boundary)) {
+                // Find nearest road for rotation alignment and access validation
+                const nearestRoad = this.findNearestRoad(finalX, finalY);
+                const roadDistance = nearestRoad ? this.pointToLineSegmentDistance(finalX, finalY, nearestRoad.p1, nearestRoad.p2) : Infinity;
+
+                // Ensure building has reasonable street access (within 150m of a road)
+                if (roadDistance > 150) {
+                  continue; // Skip this position, try again
+                }
+
+                // Check if building would be placed in water (river collision)
+                if (this.isPointInWater(finalX, finalY)) {
+                  // console.log(`Building blocked by water at (${finalX}, ${finalY})`);
+                  continue; // Skip this position - it's in water
+                }
+
+                const rotation = nearestRoad ? this.calculateBuildingRotation(finalX, finalY, nearestRoad) : 0;
+
+                // Generate footprint with rotation
+                const footprint = this.generateOrientedBuildingFootprint(finalX, finalY, zone.type, rotation);
+
+                // Check for overlaps with existing buildings (global check)
+                let overlaps = false;
+                for (const existingBuilding of [...this.allPlacedBuildings, ...blockBuildings]) {
+                  if (this.buildingFootprintsOverlap(footprint, existingBuilding.footprint)) {
+                    overlaps = true;
+                    break;
+                  }
+                }
+
+                if (!overlaps) {
+                  const height = this.getBuildingHeight(zone.id, zone.type);
+                  const building = {
+                    id: `building_${zone.id}_${Math.floor(x)}_${Math.floor(y)}_${i}`,
+                    footprint,
+                    height,
+                    zone_id: zone.id,
+                    type: this.getZoneBuildingType(zone.type),
+                    rotation: rotation * 180 / Math.PI // Store rotation in degrees
+                  };
+
+                  this.buildings.push(building);
+                  blockBuildings.push(building);
+                  placedBuildingsInZone.push(building);
+                  this.allPlacedBuildings.push(building); // Add to global tracking
+                  placed = true;
+                }
+              }
+            }
+
+            if (!placed && attempts >= maxAttempts) {
+              console.log(`  Could not place building ${i} in block at (${x}, ${y}) after ${maxAttempts} attempts`);
+            }
+          }
+        }
       }
     }
+
+    console.log(`  Placed ${placedBuildingsInZone.length} buildings in zone ${zone.id}`);
   }
 
   generateBuildingFootprint(x, y, zoneType, isLandmark = false) {
@@ -714,6 +1000,256 @@ class CityGenerator {
       }
     }
     return inside;
+  }
+
+  // Check if a city block is clear of roads
+  isBlockClearOfRoads(blockX, blockY, blockSize) {
+    const buffer = 10; // 10m buffer from roads
+
+    for (const road of this.roads) {
+      if (!road.path || road.path.length < 2) continue;
+
+      for (let i = 0; i < road.path.length - 1; i++) {
+        const p1 = road.path[i];
+        const p2 = road.path[i + 1];
+
+        // Check if road segment intersects with this block
+        if (this.lineIntersectsRect(
+          p1.x, p1.y, p2.x, p2.y,
+          blockX - buffer, blockY - buffer,
+          blockX + blockSize + buffer, blockY + blockSize + buffer
+        )) {
+          return false; // Block intersects with road
+        }
+      }
+    }
+    return true; // Block is clear
+  }
+
+  // Check if line segment intersects rectangle
+  lineIntersectsRect(x1, y1, x2, y2, rectX1, rectY1, rectX2, rectY2) {
+    // Check if line segment intersects rectangle using separating axis theorem
+    return !(x1 > rectX2 && x2 > rectX2) &&
+           !(x1 < rectX1 && x2 < rectX1) &&
+           !(y1 > rectY2 && y2 > rectY2) &&
+           !(y1 < rectY1 && y2 < rectY1);
+  }
+
+  // Check if two building footprints overlap
+  buildingFootprintsOverlap(footprintA, footprintB) {
+    // First do a quick bounding box check
+    const boundsA = this.getFootprintBounds(footprintA);
+    const boundsB = this.getFootprintBounds(footprintB);
+
+    if (!this.boundingBoxesOverlap(boundsA, boundsB)) {
+      return false;
+    }
+
+    // Then do precise polygon overlap check
+    return this.polygonsOverlap(footprintA, footprintB);
+  }
+
+  // Get bounding box of a footprint
+  getFootprintBounds(footprint) {
+    const xs = footprint.map(p => p.x);
+    const ys = footprint.map(p => p.y);
+    return {
+      minX: Math.min(...xs),
+      maxX: Math.max(...xs),
+      minY: Math.min(...ys),
+      maxY: Math.max(...ys)
+    };
+  }
+
+  // Check if two bounding boxes overlap
+  boundingBoxesOverlap(a, b) {
+    return !(a.maxX < b.minX || b.maxX < a.minX || a.maxY < b.minY || b.maxY < a.minY);
+  }
+
+  // Check if two polygons overlap
+  polygonsOverlap(polyA, polyB) {
+    // Check if any vertex of one polygon is inside the other
+    for (const point of polyA) {
+      if (this.isPointInPolygon(point.x, point.y, polyB)) return true;
+    }
+    for (const point of polyB) {
+      if (this.isPointInPolygon(point.x, point.y, polyA)) return true;
+    }
+
+    // Check if edges intersect
+    for (let i = 0; i < polyA.length; i++) {
+      const a1 = polyA[i];
+      const a2 = polyA[(i + 1) % polyA.length];
+      for (let j = 0; j < polyB.length; j++) {
+        const b1 = polyB[j];
+        const b2 = polyB[(j + 1) % polyB.length];
+        if (this.lineSegmentsIntersect(a1, a2, b1, b2)) return true;
+      }
+    }
+
+    return false;
+  }
+
+  // Check if a point is inside a polygon
+  isPointInPolygon(x, y, polygon) {
+    let inside = false;
+    for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+      if (((polygon[i].y > y) !== (polygon[j].y > y)) &&
+          (x < (polygon[j].x - polygon[i].x) * (y - polygon[i].y) / (polygon[j].y - polygon[i].y) + polygon[i].x)) {
+        inside = !inside;
+      }
+    }
+    return inside;
+  }
+
+  // Check if two line segments intersect
+  lineSegmentsIntersect(p1, p2, p3, p4) {
+    const denom = (p4.y - p3.y) * (p2.x - p1.x) - (p4.x - p3.x) * (p2.y - p1.y);
+    if (Math.abs(denom) < 0.0001) return false; // Parallel lines
+
+    const ua = ((p4.x - p3.x) * (p1.y - p3.y) - (p4.y - p3.y) * (p1.x - p3.x)) / denom;
+    const ub = ((p2.x - p1.x) * (p1.y - p3.y) - (p2.y - p1.y) * (p1.x - p3.x)) / denom;
+
+    return ua >= 0 && ua <= 1 && ub >= 0 && ub <= 1;
+  }
+
+  // Find the nearest road to a building position
+  findNearestRoad(x, y) {
+    let nearestRoad = null;
+    let minDistance = Infinity;
+
+    for (const road of this.roads) {
+      if (!road.path || road.path.length < 2) continue;
+
+      for (let i = 0; i < road.path.length - 1; i++) {
+        const p1 = road.path[i];
+        const p2 = road.path[i + 1];
+        const distance = this.pointToLineSegmentDistance(x, y, p1, p2);
+
+        if (distance < minDistance) {
+          minDistance = distance;
+          nearestRoad = { p1, p2, type: road.type };
+        }
+      }
+    }
+
+    return minDistance < 150 ? nearestRoad : null; // Only align if within 150m of a road
+  }
+
+  // Calculate distance from point to line segment
+  pointToLineSegmentDistance(px, py, p1, p2) {
+    const dx = p2.x - p1.x;
+    const dy = p2.y - p1.y;
+    const lengthSquared = dx * dx + dy * dy;
+
+    if (lengthSquared === 0) {
+      // Line segment is a point
+      return Math.sqrt((px - p1.x) * (px - p1.x) + (py - p1.y) * (py - p1.y));
+    }
+
+    let t = ((px - p1.x) * dx + (py - p1.y) * dy) / lengthSquared;
+    t = Math.max(0, Math.min(1, t));
+
+    const nearestX = p1.x + t * dx;
+    const nearestY = p1.y + t * dy;
+
+    return Math.sqrt((px - nearestX) * (px - nearestX) + (py - nearestY) * (py - nearestY));
+  }
+
+  // Calculate building rotation to align with nearest road
+  calculateBuildingRotation(x, y, nearestRoad) {
+    const dx = nearestRoad.p2.x - nearestRoad.p1.x;
+    const dy = nearestRoad.p2.y - nearestRoad.p1.y;
+    let angle = Math.atan2(dy, dx);
+
+    // Add some variation for organic feel (±15 degrees)
+    angle += (this.random() - 0.5) * (Math.PI / 12);
+
+    return angle;
+  }
+
+  // Check if a point is in water (river or other water bodies)
+  isPointInWater(x, y) {
+    // Check if point is near the river
+    if (!this.river || !this.river.path || this.river.path.length === 0) {
+      console.log('No river data available for water collision');
+      return false;
+    }
+
+    const riverWidth = this.river.width || 200; // Default river width
+    const bufferDistance = riverWidth / 2 + 80; // Increased buffer for safety
+
+    // Check distance to river centerline
+    for (let i = 0; i < this.river.path.length - 1; i++) {
+      const p1 = this.river.path[i];
+      const p2 = this.river.path[i + 1];
+
+      if (!p1 || !p2 || typeof p1.x === 'undefined' || typeof p1.y === 'undefined') {
+        continue; // Skip invalid points
+      }
+
+      const distance = this.pointToLineSegmentDistance(x, y, p1, p2);
+
+      if (distance < bufferDistance) {
+        // Debug log for testing
+        // console.log(`Building blocked by water at (${x}, ${y}), distance to river: ${distance}m`);
+        return true; // Point is in water or too close to water
+      }
+    }
+
+    return false;
+  }
+
+  // Generate an oriented building footprint (rotated to align with roads)
+  generateOrientedBuildingFootprint(x, y, zoneType, rotation = 0) {
+    let baseWidth, baseHeight;
+
+    // Realistic building sizes based on real urban planning standards
+    switch (zoneType) {
+      case 3: // DOWNTOWN - office buildings (smaller than previous)
+        baseWidth = 25 + this.random() * 35; // 25-60m (realistic office building)
+        baseHeight = 20 + this.random() * 30; // 20-50m depth
+        break;
+      case 1: // COMMERCIAL - stores/shops (smaller than previous)
+        baseWidth = 15 + this.random() * 25; // 15-40m (realistic storefront)
+        baseHeight = 10 + this.random() * 20; // 10-30m depth
+        break;
+      case 2: // INDUSTRIAL - warehouses (much smaller than previous)
+        baseWidth = 30 + this.random() * 40; // 30-70m (realistic warehouse)
+        baseHeight = 25 + this.random() * 35; // 25-60m depth
+        break;
+      case 0: // RESIDENTIAL - houses (slightly smaller)
+        baseWidth = 8 + this.random() * 12; // 8-20m (realistic house width)
+        baseHeight = 6 + this.random() * 10; // 6-16m depth
+        break;
+      default:
+        baseWidth = 20;
+        baseHeight = 15;
+    }
+
+    // Create rectangular footprint
+    const halfWidth = baseWidth / 2;
+    const halfHeight = baseHeight / 2;
+
+    // Define corners before rotation
+    const corners = [
+      { x: -halfWidth, y: -halfHeight },
+      { x: halfWidth, y: -halfHeight },
+      { x: halfWidth, y: halfHeight },
+      { x: -halfWidth, y: halfHeight }
+    ];
+
+    // Apply rotation and translation
+    const footprint = corners.map(corner => {
+      const rotatedX = corner.x * Math.cos(rotation) - corner.y * Math.sin(rotation);
+      const rotatedY = corner.x * Math.sin(rotation) + corner.y * Math.cos(rotation);
+      return {
+        x: x + rotatedX,
+        y: y + rotatedY
+      };
+    });
+
+    return footprint;
   }
 
   getBuildingType(poiType) {

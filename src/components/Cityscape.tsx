@@ -11,6 +11,7 @@ import { createRoadLayer } from '../layers/RoadLayer';
 import { createZoneLayer } from '../layers/ZoneLayer';
 import { createHexagonLayer, generateUrbanDensityData, generateTrafficData } from '../layers/HexagonLayer';
 import { createTerrainLayer, createWaterLayer } from '../layers/TerrainLayer';
+import { createGroundLayer } from '../layers/GroundLayer';
 import { createAutonomousAgentLayer, generateAutonomousAgents } from '../layers/AutonomousAgentLayer';
 import { createWeatherLayer, generateWeatherSystem, createWindLayer } from '../layers/WeatherLayer';
 import { getBoundsFromCityModel } from '../utils/coordinates';
@@ -58,29 +59,29 @@ export function Cityscape({ optimizationResult, showZones = false, onToggleZones
     target: [0, 0, 0]  // Look at ground level, camera will be above
   });
 
-  // GEMINI'S FIX: Temporarily disable automatic camera updates for debugging
+  // DISABLED: Update camera to center on city when model loads (for static view)
   // useEffect(() => {
   //   if (state.cityModel) {
   //     console.log('Updating view state based on city model bounds...');
   //     const bounds = getBoundsFromCityModel(state.cityModel);
   //     camera.smoothTransitionTo(bounds, 1500);
   //   }
-  // }, [state.cityModel]);
+  // }, [state.cityModel, camera.smoothTransitionTo]);
 
-  // Update camera follow targets when agents move
-  useEffect(() => {
-    if (state.agents && state.agents.length > 0) {
-      state.agents.forEach((agent: any) => {
-        if (agent.position && agent.id) {
-          camera.updateFollowTarget(
-            agent.id,
-            [agent.position.x, agent.position.y, agent.position.z || 5],
-            'agent'
-          );
-        }
-      });
-    }
-  }, [state.agents]);
+  // DISABLED: Update camera follow targets when agents move (too distracting)
+  // useEffect(() => {
+  //   if (state.agents && state.agents.length > 0) {
+  //     state.agents.forEach((agent: any) => {
+  //       if (agent.position && agent.id) {
+  //         camera.updateFollowTarget(
+  //           agent.id,
+  //           [agent.position.x, agent.position.y, agent.position.z || 5],
+  //           'agent'
+  //         );
+  //       }
+  //     });
+  //   }
+  // }, [state.agents]);
 
   // Create layers with enhanced simulation data
   const layers = useMemo(() => {
@@ -118,15 +119,16 @@ export function Cityscape({ optimizationResult, showZones = false, onToggleZones
 
     // Roads layer (above terrain, below buildings)
     // Add realistic terrain base layers FIRST
-    activeLayers.push(createWaterLayer()); // Water bodies (lowest level)
-    activeLayers.push(createTerrainLayer()); // Ground terrain
+    activeLayers.push(createGroundLayer()); // Textured ground plane (lowest level)
+    activeLayers.push(createWaterLayer(cityData.river)); // Water bodies using actual river data
+    // activeLayers.push(createTerrainLayer()); // Ground terrain - DISABLED: too visually distracting
 
     // Generate sophisticated simulation data
     const centerLat = 40.7128;
     const centerLng = -74.0060;
 
-    // Add autonomous agents (cars, drones, airplanes, people)
-    const autonomousAgents = generateAutonomousAgents(centerLat, centerLng);
+    // Add realistic autonomous agents (cars from residences, drones from rooftops, people from entrances)
+    const autonomousAgents = generateAutonomousAgents(centerLat, centerLng, cityData);
     activeLayers.push(...createAutonomousAgentLayer(autonomousAgents));
 
     // Add weather system
@@ -138,10 +140,10 @@ export function Cityscape({ optimizationResult, showZones = false, onToggleZones
 
     activeLayers.push(createRoadLayer(cityData.roads || [], state.currentTime || 12));
 
-    // Zones layer (optional, for debugging)
-    if (showZones) {
-      activeLayers.push(createZoneLayer(cityData.zones || [], state.currentTime || 12, true));
-    }
+    // Zones layer (disabled - too visually distracting)
+    // if (showZones) {
+    //   activeLayers.push(createZoneLayer(cityData.zones || [], state.currentTime || 12, true));
+    // }
 
     console.log('Creating building layer with buildings:', cityData.buildings?.length, cityData.buildings?.slice(0, 2));
 
@@ -160,9 +162,10 @@ export function Cityscape({ optimizationResult, showZones = false, onToggleZones
       if (enhancedData.infrastructure.utilities?.length > 0) {
         activeLayers.push(createUtilityTunnelLayer(enhancedData.infrastructure.utilities));
       }
-      if (enhancedData.infrastructure.subway?.length > 0) {
-        activeLayers.push(createSubwayLayer(enhancedData.infrastructure.subway));
-      }
+      // DISABLED: Subway system too visually distracting
+      // if (enhancedData.infrastructure.subway?.length > 0) {
+      //   activeLayers.push(createSubwayLayer(enhancedData.infrastructure.subway));
+      // }
       if (enhancedData.infrastructure.parking?.length > 0) {
         activeLayers.push(createUndergroundParkingLayer(enhancedData.infrastructure.parking));
       }
@@ -342,7 +345,7 @@ export function Cityscape({ optimizationResult, showZones = false, onToggleZones
           touchZoom: true,
           touchRotate: true,
           keyboard: true,
-          inertia: true,
+          inertia: false,  // DISABLED: Prevents automatic movement after user input
           scrollZoomSpeed: 0.5,
           dragRotateSpeed: 0.01
         }}
