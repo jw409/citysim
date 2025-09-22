@@ -52,7 +52,7 @@ export function createBuildingLayer(buildings: any[], timeOfDay: number = 12) {
     wireframe: false,
     filled: true,
     stroked: true,
-    elevationScale: 1.0, // Start with baseline to debug
+    elevationScale: 3.0, // Increased to make buildings clearly visible
     pickable: true,
     material: {
       ambient: 0.25,

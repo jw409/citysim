@@ -46,3 +46,9 @@ tests/temp-screenshots/
 *.png
 !tests/baselines/**/*.png
 
+# Debug and temporary scripts (keep in scripts/ directory)
+/*.cjs
+/*.mjs
+/test-*.js
+/debug-*.js
+

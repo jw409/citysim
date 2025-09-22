@@ -215,7 +215,7 @@ export function Cityscape({ optimizationResult, showZones = false, onToggleZones
     debugManager.buildSpatialIndex();
 
     return activeLayers;
-  }, [state.cityModel, state.agents, state.currentTime, state.simulationData, showZones, terrainState, optimizationResult]);
+  }, [state.cityModel, state.agents, state.simulationData, showZones, terrainState, optimizationResult]);
 
   const handleViewStateChange = useCallback(({ viewState: newViewState }: any) => {
     console.log('🎥 ViewState changing:', newViewState);
@@ -263,7 +263,11 @@ export function Cityscape({ optimizationResult, showZones = false, onToggleZones
   // Handle keyboard shortcuts for camera controls
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
-      if (event.target !== document.body) return; // Only handle when not in an input
+      // Allow keyboard shortcuts even when canvas has focus
+      const target = event.target as HTMLElement;
+      if (target && target.tagName === 'INPUT' && target.type === 'text') {
+        return; // Don't handle when typing in text inputs
+      }
 
       switch (event.key.toLowerCase()) {
         case '1':
@@ -289,13 +293,15 @@ export function Cityscape({ optimizationResult, showZones = false, onToggleZones
           }
           break;
         case 'd':
+          event.preventDefault(); // Prevent any default behavior
           setDebugVisible(!debugVisible);
           break;
       }
     };
 
-    window.addEventListener('keydown', handleKeyPress);
-    return () => window.removeEventListener('keydown', handleKeyPress);
+    // Use capture phase to ensure we get the event before canvas handlers
+    document.addEventListener('keydown', handleKeyPress, true);
+    return () => document.removeEventListener('keydown', handleKeyPress, true);
   }, [camera, onToggleZones, debugVisible]);
 
   return (
