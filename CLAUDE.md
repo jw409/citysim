@@ -103,3 +103,41 @@ await debug.runComprehensiveTest();
 - Temp screenshots auto-cleanup after 7 days
 - Manual cleanup: `screenshots.cleanupOldScreenshots()`
 - Recent files: `screenshots.getRecentScreenshots(10)`
+
+## 🚨 IMPORTANT DEBUGGING REMINDERS
+
+### When Debugging Issues - ALWAYS Use These Tools First
+
+**NEVER write ad-hoc debugging scripts!** Use the consolidated framework:
+
+1. **For visual issues**:
+   ```bash
+   node scripts/capture-debug.mjs issue-name --comprehensive
+   ```
+
+2. **For systematic debugging in tests**:
+   ```typescript
+   const debug = createDebugHelpers(page);
+   const diagnosis = await debug.runDiagnosis();
+   await debug.testCameraPresets();
+   ```
+
+3. **For performance issues**:
+   ```typescript
+   const debug = createDebugHelpers(page);
+   const metrics = await debug.getPerformanceMetrics();
+   await debug.runComprehensiveTest();
+   ```
+
+### Debug Workflow
+1. **Start with diagnosis**: `debug.runDiagnosis()` - gives console logs, errors, DOM state
+2. **Capture multi-angle**: `screenshots.captureMultiAngle()` - better than single shots
+3. **Test systematically**: Use existing test utilities, don't write one-off scripts
+4. **Save reports**: All debug data goes to `tests/temp-screenshots/` with timestamps
+
+### Available Debug Tests
+- `npm run test:debug` - Run comprehensive debug suite
+- Individual test files in `tests/e2e/debug/`
+- Consolidated utilities in `tests/utils/debug-helpers.ts`
+
+**Remember**: The goal is reusable, systematic debugging, not scattered scripts!
