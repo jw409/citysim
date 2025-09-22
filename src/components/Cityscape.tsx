@@ -326,7 +326,7 @@ export function Cityscape({ optimizationResult, showZones = false, onToggleZones
             id: 'map',
             repeat: true,
             nearZMultiplier: 0.01,
-            farZMultiplier: 100,
+            farZMultiplier: 1000,  // Increased far plane to prevent clipping
             orthographic: false,
             controller: {
               maxZoom: 25,      // Infinite zoom capability

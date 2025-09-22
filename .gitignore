@@ -50,5 +50,7 @@ tests/temp-screenshots/
 /*.cjs
 /*.mjs
 /test-*.js
+/test-*.mjs
+/test-*.html
 /debug-*.js
 

@@ -47,6 +47,8 @@ The numbering shows the evolution of problem-solving approaches:
 ### Special Documents
 
 - **[VERIFICATION.md](./VERIFICATION.md)**: Comprehensive testing and validation checklist demonstrating systematic verification practices for 3D applications
+- **[LETTER_TO_GEMINI.md](./LETTER_TO_GEMINI.md)**: Detailed technical analysis and debugging journey documentation
+- **[TECH_ADVISOR_LETTER_FOLLOWUP.md](./TECH_ADVISOR_LETTER_FOLLOWUP.md)**: Follow-up technical insights and recommendations
 
 ## Value for Development Teams
 

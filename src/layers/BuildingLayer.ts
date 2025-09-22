@@ -31,7 +31,7 @@ export function createBuildingLayer(buildings: any[], timeOfDay: number = 12) {
       // Convert from {x, y} objects to [lng, lat] arrays for deck.gl
       if (d.footprint.length > 0 && typeof d.footprint[0] === 'object' && 'x' in d.footprint[0]) {
         const converted = convertPointsToLatLng(d.footprint);
-        console.log(`Converting building ${d.id} footprint: ${d.footprint.length} points -> lat/lng`);
+        // Footprint converted successfully
         return converted;
       }
 
@@ -47,27 +47,42 @@ export function createBuildingLayer(buildings: any[], timeOfDay: number = 12) {
     // DIRECTLY use the height property
     getElevation: (d: any) => {
       const height = d.height || 0;
-      console.log(`getElevation called: Building ${d.id} height=${height}`);
+      if (height > 100) {
+        console.trace(`Rendering tall building ${d.id} with height ${height}`);
+      }
       return height;
     },
 
     getFillColor: (d: any) => {
       const buildingType = getBuildingType(d);
-      return colors.buildings[buildingType] || colors.buildings.residential;
+      const color = colors.buildings[buildingType] || colors.buildings.residential;
+      // Ensure full opacity and valid color format
+      if (Array.isArray(color) && color.length >= 3) {
+        return [color[0], color[1], color[2], 255]; // Force alpha to 255
+      }
+      // Fallback colors based on building type
+      switch (buildingType) {
+        case 'office': return [70, 130, 180, 255]; // Steel blue
+        case 'commercial': return [255, 140, 0, 255]; // Dark orange
+        case 'residential': return [34, 139, 34, 255]; // Forest green
+        default: return [128, 128, 128, 255]; // Gray
+      }
     },
     getLineColor: [255, 255, 255, 255],
     getLineWidth: 2,
     extruded: true,
-    wireframe: false,
+    wireframe: false,  // Disable wireframe for solid buildings
     filled: true,
     stroked: true,
-    elevationScale: 20.0, // MASSIVE scale to test if elevation works at all
+    elevationScale: 1.0, // Realistic 1:1 scale - buildings already have proper heights in meters
+    getElevationValue: (d: any) => d.height || 0, // Alternative elevation accessor
+    elevationRange: [0, 3000], // Set max elevation range
     pickable: true,
     material: {
-      ambient: 0.25,
-      diffuse: 0.7,
-      shininess: 256,
-      specularColor: [255, 255, 255],
+      ambient: 0.4,      // Moderate ambient lighting
+      diffuse: 0.6,      // Balanced diffuse lighting
+      shininess: 32,     // Lower shininess for softer look
+      specularColor: [40, 40, 40], // Subtle specular highlights
     },
   });
 }
