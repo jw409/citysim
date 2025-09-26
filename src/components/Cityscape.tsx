@@ -121,7 +121,7 @@ export function Cityscape({ optimizationResult, showZones = false, onToggleZones
     // Add realistic terrain base layers FIRST
     activeLayers.push(createGroundLayer()); // Textured ground plane (lowest level)
     activeLayers.push(createWaterLayer(cityData.river)); // Water bodies using actual river data
-    // activeLayers.push(createTerrainLayer()); // Ground terrain - DISABLED: too visually distracting
+    activeLayers.push(createTerrainLayer()); // Ground terrain layer for elevation
 
     // Generate sophisticated simulation data
     const centerLat = 40.7128;

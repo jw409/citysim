@@ -18,9 +18,6 @@ use performance::PerformanceProfile;
 use benchmarking::DeviceBenchmark;
 use adaptive_scaling::AdaptiveScaler;
 
-#[cfg(feature = "wee_alloc")]
-#[global_allocator]
-static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
 thread_local! {
     static SIMULATION: Rc<RefCell<Option<Simulation>>> = Rc::new(RefCell::new(None));

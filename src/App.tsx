@@ -132,7 +132,7 @@ function AppContent() {
         </header>
 
         <main className="app-main">
-          <div className="visualization-container">
+          <div className="visualization-container" data-testid={state.isInitialized ? "city-loaded" : "city-loading"}>
             <CityVisualization
               optimizationResult={optimizationResult}
               onStart={start}

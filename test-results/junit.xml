@@ -1,0 +1,76 @@
+<testsuites id="" name="" tests="2" failures="2" skipped="0" errors="0" time="17.566654000000003">
+<testsuite name="e2e/debug/visual-terrain-analysis.spec.ts" timestamp="2025-09-26T08:12:13.817Z" hostname="chromium" tests="2" failures="2" skipped="0" time="13.896" errors="0">
+<testcase name="Visual Terrain Analysis with Camera Angles › comprehensive terrain verification with multiple camera angles" classname="e2e/debug/visual-terrain-analysis.spec.ts" time="6.979">
+<failure message="visual-terrain-analysis.spec.ts:14:3 comprehensive terrain verification with multiple camera angles" type="FAILURE">
+<![CDATA[  [chromium] › e2e/debug/visual-terrain-analysis.spec.ts:14:3 › Visual Terrain Analysis with Camera Angles › comprehensive terrain verification with multiple camera angles 
+
+    Error: page.evaluate: TypeError: window.viewport.panTo is not a function
+        at eval (eval at evaluate (:291:30), <anonymous>:6:27)
+        at UtilityScript.evaluate (<anonymous>:293:16)
+        at UtilityScript.<anonymous> (<anonymous>:1:44)
+        at eval (eval at evaluate (:291:30), <anonymous>:6:27)
+        at UtilityScript.evaluate (<anonymous>:293:16)
+        at UtilityScript.<anonymous> (<anonymous>:1:44)
+        at /home/jw/dev/citysim/tests/e2e/debug/visual-terrain-analysis.spec.ts:32:18
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../test-results/e2e-debug-visual-terrain-a-be828-with-multiple-camera-angles-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../test-results/e2e-debug-visual-terrain-a-be828-with-multiple-camera-angles-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../test-results/e2e-debug-visual-terrain-a-be828-with-multiple-camera-angles-chromium/error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[🏔️ Starting comprehensive terrain analysis...
+📍 Analyzing northeast-hill: Northeast hill area (expected 180m peak)
+
+[[ATTACHMENT|e2e-debug-visual-terrain-a-be828-with-multiple-camera-angles-chromium/test-failed-1.png]]
+
+[[ATTACHMENT|e2e-debug-visual-terrain-a-be828-with-multiple-camera-angles-chromium/video.webm]]
+
+[[ATTACHMENT|e2e-debug-visual-terrain-a-be828-with-multiple-camera-angles-chromium/error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Visual Terrain Analysis with Camera Angles › building density analysis across city zones" classname="e2e/debug/visual-terrain-analysis.spec.ts" time="6.917">
+<failure message="visual-terrain-analysis.spec.ts:216:3 building density analysis across city zones" type="FAILURE">
+<![CDATA[  [chromium] › e2e/debug/visual-terrain-analysis.spec.ts:216:3 › Visual Terrain Analysis with Camera Angles › building density analysis across city zones 
+
+    Error: page.evaluate: TypeError: window.viewport.panTo is not a function
+        at eval (eval at evaluate (:291:30), <anonymous>:6:27)
+        at UtilityScript.evaluate (<anonymous>:293:16)
+        at UtilityScript.<anonymous> (<anonymous>:1:44)
+        at eval (eval at evaluate (:291:30), <anonymous>:6:27)
+        at UtilityScript.evaluate (<anonymous>:293:16)
+        at UtilityScript.<anonymous> (<anonymous>:1:44)
+        at /home/jw/dev/citysim/tests/e2e/debug/visual-terrain-analysis.spec.ts:232:18
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../test-results/e2e-debug-visual-terrain-a-82bdc--analysis-across-city-zones-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../test-results/e2e-debug-visual-terrain-a-82bdc--analysis-across-city-zones-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../test-results/e2e-debug-visual-terrain-a-82bdc--analysis-across-city-zones-chromium/error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[🏢 Analyzing building density across city zones...
+📍 Analyzing downtown-core (expected: very-high density)
+
+[[ATTACHMENT|e2e-debug-visual-terrain-a-82bdc--analysis-across-city-zones-chromium/test-failed-1.png]]
+
+[[ATTACHMENT|e2e-debug-visual-terrain-a-82bdc--analysis-across-city-zones-chromium/video.webm]]
+
+[[ATTACHMENT|e2e-debug-visual-terrain-a-82bdc--analysis-across-city-zones-chromium/error-context.md]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+</testsuites>

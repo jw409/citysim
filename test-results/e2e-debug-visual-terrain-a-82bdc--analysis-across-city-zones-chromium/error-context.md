@@ -1,0 +1,62 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e2]:
+  - generic [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e5]:
+        - generic [ref=e6]: "Status:"
+        - generic [ref=e7]: ⏸️ Paused
+      - generic [ref=e8]:
+        - generic [ref=e9]: "Speed:"
+        - generic [ref=e10]: 1.0x
+    - generic [ref=e11]:
+      - generic [ref=e12]:
+        - generic [ref=e13]: "Time:"
+        - generic [ref=e14]: 08:00 (Morning)
+      - generic [ref=e15]:
+        - generic [ref=e16]: "Day:"
+        - generic [ref=e17]: "1"
+    - generic [ref=e18]:
+      - generic [ref=e19]:
+        - generic [ref=e20]: "Agents:"
+        - generic [ref=e21]: 0/0
+      - generic [ref=e22]:
+        - generic [ref=e23]: "FPS:"
+        - generic [ref=e24]: "0"
+      - generic [ref=e25]:
+        - generic [ref=e26]: "Avg Speed:"
+        - generic [ref=e27]: 0.0 km/h
+      - generic [ref=e28]:
+        - generic [ref=e29]: "Congestion:"
+        - generic [ref=e30]: 0%
+  - generic [ref=e31]:
+    - banner [ref=e32]:
+      - heading "UrbanSynth" [level=1] [ref=e33]
+      - generic [ref=e34]: City Simulation Platform
+    - main [ref=e35]:
+      - generic [ref=e36]:
+        - generic [ref=e37]:
+          - generic [ref=e38]:
+            - generic [ref=e41]: 22 layers active
+            - button "🔍 Debug" [ref=e42] [cursor=pointer]
+          - generic [ref=e44]:
+            - generic: 📊 Performance Monitor
+            - button "▼" [ref=e46] [cursor=pointer]
+        - generic [ref=e47]:
+          - generic [ref=e48]:
+            - generic: ⏱️ Time Controls
+            - button "▲" [ref=e50] [cursor=pointer]
+          - generic [ref=e51]:
+            - generic [ref=e52]:
+              - generic [ref=e53]: "Simulation Status: ✅ Ready"
+              - button "▶️ Play" [ref=e55] [cursor=pointer]
+            - generic [ref=e56]:
+              - generic [ref=e57]: "Speed: 1.0x"
+              - slider [ref=e58]: "1"
+            - generic [ref=e59]:
+              - generic [ref=e60]: Time
+              - generic [ref=e61]:
+                - generic [ref=e62]: 08:00
+                - generic [ref=e63]: Day 1
+```

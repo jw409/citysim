@@ -53,7 +53,7 @@ class CityGenerator {
       id: 'downtown_core',
       type: 3, // DOWNTOWN
       boundary: this.generateRectangularZone(-800, -200, 1600, 1000),
-      density: 0.95,
+      density: 0.98,
       properties: { residential_density: 0.1, commercial_density: 0.4, office_density: 0.8 }
     });
 
@@ -62,7 +62,7 @@ class CityGenerator {
       id: 'financial_district',
       type: 3, // DOWNTOWN
       boundary: this.generateRectangularZone(-800, 800, 1200, 600),
-      density: 0.9,
+      density: 0.95,
       properties: { residential_density: 0.05, commercial_density: 0.2, office_density: 0.9 }
     });
 
@@ -104,7 +104,7 @@ class CityGenerator {
         id: `residential_${area.id}`,
         type: 0, // RESIDENTIAL
         boundary: this.generateRectangularZone(area.x, area.y, area.width, area.height),
-        density: 0.7,
+        density: 0.85,
         properties: { residential_density: 0.85, commercial_density: 0.15, office_density: 0.05 }
       });
     });
@@ -129,7 +129,7 @@ class CityGenerator {
         id: `commercial_${area.id}`,
         type: 1, // COMMERCIAL
         boundary: this.generateRectangularZone(area.x, area.y, area.width, area.height),
-        density: 0.8,
+        density: 0.9,
         properties: { residential_density: 0.1, commercial_density: 0.85, office_density: 0.2 }
       });
     });
@@ -141,16 +141,20 @@ class CityGenerator {
       // Manufacturing zone
       { x: 3500, y: -1500, width: 1800, height: 1500, id: 'manufacturing' },
       // Logistics hub near highway
-      { x: 2500, y: 3500, width: 2000, height: 1000, id: 'logistics' }
+      { x: 2500, y: 3500, width: 2000, height: 1000, id: 'logistics' },
+      // International airport
+      { x: -3000, y: 4000, width: 3000, height: 2000, id: 'airport' }
     ];
 
     industrialAreas.forEach(area => {
       this.zones.push({
         id: `industrial_${area.id}`,
-        type: 2, // INDUSTRIAL
+        type: area.id === 'airport' ? 5 : 2, // AIRPORT (5) or INDUSTRIAL (2)
         boundary: this.generateRectangularZone(area.x, area.y, area.width, area.height),
-        density: 0.4,
-        properties: { residential_density: 0.02, commercial_density: 0.1, office_density: 0.15 }
+        density: area.id === 'airport' ? 0.2 : 0.4,
+        properties: area.id === 'airport' ?
+          { residential_density: 0, commercial_density: 0.1, office_density: 0.05 } :
+          { residential_density: 0.02, commercial_density: 0.1, office_density: 0.15 }
       });
     });
 
@@ -745,6 +749,19 @@ class CityGenerator {
     return typeNames[Math.floor(this.random() * typeNames.length)];
   }
 
+  getTerrainHeight(x, y) {
+    // Create realistic terrain with hills, valleys, and flat areas
+    const scale1 = 0.001; // Large terrain features
+    const scale2 = 0.003; // Medium terrain features
+    const scale3 = 0.01;  // Fine terrain details
+
+    const noise1 = this.noise(x * scale1, y * scale1) * 100; // ±100m major elevation
+    const noise2 = this.noise(x * scale2, y * scale2) * 30;  // ±30m hills
+    const noise3 = this.noise(x * scale3, y * scale3) * 10;  // ±10m fine details
+
+    return noise1 + noise2 + noise3;
+  }
+
   generateBuildings() {
     console.log('🏢 Generating realistic buildings...');
 
@@ -792,10 +809,12 @@ class CityGenerator {
 
           if (!overlaps) {
             const height = this.getBuildingHeight(poi.zone_id, poi.type, true);
+            const terrainHeight = this.getTerrainHeight(poi.x, poi.y);
             const landmark = {
               id: `landmark_${i}`,
               footprint,
               height,
+              terrain_height: terrainHeight,
               zone_id: poi.zone_id,
               type: this.getBuildingType(poi.type),
               rotation: rotation * 180 / Math.PI
@@ -829,7 +848,7 @@ class CityGenerator {
         // Check if this block intersects with any roads
         if (this.isBlockClearOfRoads(x, y, blockSize)) {
           // Place 6-12 buildings per block for much higher density
-          const buildingsPerBlock = Math.max(3, Math.floor(zone.density * 12));
+          const buildingsPerBlock = Math.max(8, Math.floor(zone.density * 25));
 
           // Track buildings placed in this block for local collision detection
           const blockBuildings = [];
@@ -885,10 +904,12 @@ class CityGenerator {
 
                 if (!overlaps) {
                   const height = this.getBuildingHeight(zone.id, zone.type);
+                  const terrainHeight = this.getTerrainHeight(x, y);
                   const building = {
                     id: `building_${zone.id}_${Math.floor(x)}_${Math.floor(y)}_${i}`,
                     footprint,
                     height,
+                    terrain_height: terrainHeight,
                     zone_id: zone.id,
                     type: this.getZoneBuildingType(zone.type),
                     rotation: rotation * 180 / Math.PI // Store rotation in degrees

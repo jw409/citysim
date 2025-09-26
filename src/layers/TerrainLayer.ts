@@ -1,47 +1,151 @@
 import { PolygonLayer } from '@deck.gl/layers';
 
-export function createTerrainLayer() {
-  // Create a large ground plane with realistic terrain
-  const terrainSize = 0.1; // degrees (covers large area)
-  const centerLng = -74.0060;
-  const centerLat = 40.7128;
+// Simplex noise function for realistic terrain generation
+function noise(x: number, y: number): number {
+  const n = Math.sin(x * 12.9898 + y * 78.233) * 43758.5453;
+  return (n - Math.floor(n));
+}
 
-  // Generate terrain patches with elevation variation
-  const terrainPatches = [];
-  const patchSize = 0.005; // Size of each terrain patch
+// Generate layered noise for realistic terrain with local hills
+function getTerrainHeight(x: number, y: number): number {
+  const scale1 = 0.0003; // Very large terrain features
+  const scale2 = 0.0015; // Medium terrain features
+  const scale3 = 0.006;  // Fine terrain details
+
+  const noise1 = noise(x * scale1, y * scale1) * 20; // ±20m major elevation
+  const noise2 = noise(x * scale2, y * scale2) * 12; // ±12m medium hills
+  const noise3 = noise(x * scale3, y * scale3) * 4;  // ±4m fine details
+
+  // Create 3 large dramatic hills with smooth falloff
+  const hill1CenterX = 2500, hill1CenterY = 2000; // Northeast hill
+  const hill2CenterX = -3000, hill2CenterY = -1500; // Southwest hill
+  const hill3CenterX = 1000, hill3CenterY = -3500; // Southeast hill
+
+  // Calculate distance to each hill center
+  const dist1 = Math.sqrt((x - hill1CenterX) * (x - hill1CenterX) + (y - hill1CenterY) * (y - hill1CenterY));
+  const dist2 = Math.sqrt((x - hill2CenterX) * (x - hill2CenterX) + (y - hill2CenterY) * (y - hill2CenterY));
+  const dist3 = Math.sqrt((x - hill3CenterX) * (x - hill3CenterX) + (y - hill3CenterY) * (y - hill3CenterY));
+
+  // Create dramatic hill profiles with smooth Gaussian falloff
+  const hillRadius = 2200; // 2.2km radius for each hill (slightly larger)
+  const hill1Height = Math.max(0, 180 * Math.exp(-Math.pow(dist1 / hillRadius, 2))); // Peak 180m - DRAMATIC!
+  const hill2Height = Math.max(0, 200 * Math.exp(-Math.pow(dist2 / hillRadius, 2))); // Peak 200m - MASSIVE!
+  const hill3Height = Math.max(0, 160 * Math.exp(-Math.pow(dist3 / hillRadius, 2))); // Peak 160m - BIG!
+
+  // Add noise variation to hill surfaces for naturalness
+  const hillNoise1 = hill1Height > 5 ? noise(x * 0.002, y * 0.002) * hill1Height * 0.15 : 0;
+  const hillNoise2 = hill2Height > 5 ? noise(x * 0.002 + 100, y * 0.002 + 100) * hill2Height * 0.15 : 0;
+  const hillNoise3 = hill3Height > 5 ? noise(x * 0.002 + 200, y * 0.002 + 200) * hill3Height * 0.15 : 0;
+
+  const hills = hill1Height + hill2Height + hill3Height + hillNoise1 + hillNoise2 + hillNoise3;
+
+  // Base terrain (very subtle)
+  const baseTerrain = noise1 + noise2 + noise3;
+
+  // Combine with reduced base terrain influence
+  const totalElevation = baseTerrain * 0.3 + hills;
+
+  // Less flattening near downtown, but still some
+  const distanceFromCenter = Math.sqrt(x * x + y * y);
+  const flatteningFactor = Math.max(0.7, 1 - (distanceFromCenter / 10000)); // Less aggressive flattening
+
+  return totalElevation * flatteningFactor;
+}
+
+export function createTerrainLayer() {
+  // Use the same coordinate system as buildings (meters from city center)
+  const terrainSize = 12000; // 12km x 12km to cover entire city
+  const patchSize = 600; // 600m x 600m patches for very smooth borders
   const patchesPerSide = Math.ceil(terrainSize / patchSize);
+  const halfSize = terrainSize / 2;
+
+  const terrainPatches = [];
 
   for (let x = 0; x < patchesPerSide; x++) {
     for (let y = 0; y < patchesPerSide; y++) {
-      const offsetX = (x - patchesPerSide / 2) * patchSize;
-      const offsetY = (y - patchesPerSide / 2) * patchSize;
+      const centerX = -halfSize + (x + 0.5) * patchSize;
+      const centerY = -halfSize + (y + 0.5) * patchSize;
 
-      // Create elevation variation using noise
-      const distanceFromCenter = Math.sqrt(offsetX * offsetX + offsetY * offsetY);
-      const baseElevation = Math.max(0, 20 - distanceFromCenter * 1000); // Lower near edges
-      const noiseElevation = (Math.random() - 0.5) * 10; // ±5m variation
-      const elevation = baseElevation + noiseElevation;
+      // Get terrain height at this location
+      const elevation = getTerrainHeight(centerX, centerY);
 
-      // Color based on elevation and distance from city center
-      let color;
-      if (elevation > 15) {
-        color = [139, 69, 19, 255]; // Brown (higher ground)
-      } else if (elevation > 10) {
-        color = [34, 139, 34, 255]; // Forest green (parks)
+      // Ultra-realistic terrain coloring with proper elevation zones and lighting
+      const distanceFromCenter = Math.sqrt(centerX * centerX + centerY * centerY);
+      const urbanFactor = Math.max(0, 1 - (distanceFromCenter / 5000)); // 0 = rural, 1 = urban
+
+      // Calculate slope for lighting (approximate using nearby elevation changes)
+      const sampleDistance = 300; // Sample distance for slope calculation
+      const elevationEast = getTerrainHeight(centerX + sampleDistance, centerY);
+      const elevationWest = getTerrainHeight(centerX - sampleDistance, centerY);
+      const elevationNorth = getTerrainHeight(centerX, centerY + sampleDistance);
+      const elevationSouth = getTerrainHeight(centerX, centerY - sampleDistance);
+
+      const slopeX = (elevationEast - elevationWest) / (sampleDistance * 2);
+      const slopeY = (elevationNorth - elevationSouth) / (sampleDistance * 2);
+      const slopeAngle = Math.sqrt(slopeX * slopeX + slopeY * slopeY);
+
+      // Realistic elevation-based terrain types
+      let baseColor;
+      if (elevation > 150) {
+        // Mountain peaks - rocky gray-brown
+        baseColor = [95, 85, 75];
+      } else if (elevation > 100) {
+        // High hills - exposed rock and sparse vegetation
+        baseColor = [110, 100, 85];
+      } else if (elevation > 50) {
+        // Mid hills - mixed forest and meadow
+        baseColor = [75, 95, 55];
+      } else if (elevation > 20) {
+        // Low hills - dense forest
+        baseColor = [65, 85, 45];
       } else if (elevation > 5) {
-        color = [154, 205, 50, 255]; // Yellow green (grass)
+        // Suburban areas - grass and development
+        baseColor = [85, 100, 65];
+      } else if (elevation > -5) {
+        // Urban lowlands - mixed pavement and vegetation
+        baseColor = [95, 95, 85];
       } else {
-        color = [105, 105, 105, 255]; // Gray (urban ground)
+        // Water level areas - wetlands
+        baseColor = [70, 80, 90];
       }
 
-      // Create terrain patch
+      // Add slope-based lighting (north-facing slopes darker, south-facing brighter)
+      const lightDirection = [0, 1, 0.8]; // Light from south-east, slightly from above
+      const slopeShading = 1 + (slopeY * lightDirection[1] + slopeX * lightDirection[0]) * 0.3;
+      const shadingFactor = Math.max(0.6, Math.min(1.4, slopeShading));
+
+      // Apply urban development overlay
+      if (urbanFactor > 0.2) {
+        const concreteAmount = urbanFactor * 0.7;
+        const concreteColor = [115, 115, 120];
+        baseColor = [
+          Math.floor(baseColor[0] * (1 - concreteAmount) + concreteColor[0] * concreteAmount),
+          Math.floor(baseColor[1] * (1 - concreteAmount) + concreteColor[1] * concreteAmount),
+          Math.floor(baseColor[2] * (1 - concreteAmount) + concreteColor[2] * concreteAmount)
+        ];
+      }
+
+      // Add realistic atmospheric perspective (distant areas more blue/hazy)
+      const atmosphericDistance = Math.min(1, distanceFromCenter / 8000);
+      const atmosphericBlue = 20 * atmosphericDistance;
+
+      // Apply all effects
+      const color = [
+        Math.max(30, Math.min(255, Math.floor((baseColor[0] + atmosphericBlue) * shadingFactor))),
+        Math.max(30, Math.min(255, Math.floor((baseColor[1] + atmosphericBlue) * shadingFactor))),
+        Math.max(30, Math.min(255, Math.floor((baseColor[2] + atmosphericBlue * 1.2) * shadingFactor))),
+        255
+      ];
+
+      // Create terrain patch with local coordinates
+      const halfPatch = patchSize / 2;
       terrainPatches.push({
         id: `terrain-${x}-${y}`,
         polygon: [
-          [centerLng + offsetX, centerLat + offsetY],
-          [centerLng + offsetX + patchSize, centerLat + offsetY],
-          [centerLng + offsetX + patchSize, centerLat + offsetY + patchSize],
-          [centerLng + offsetX, centerLat + offsetY + patchSize]
+          [centerX - halfPatch, centerY - halfPatch],
+          [centerX + halfPatch, centerY - halfPatch],
+          [centerX + halfPatch, centerY + halfPatch],
+          [centerX - halfPatch, centerY + halfPatch]
         ],
         elevation: elevation,
         color: color
@@ -52,22 +156,32 @@ export function createTerrainLayer() {
   return new PolygonLayer({
     id: 'terrain-layer',
     data: terrainPatches,
+    coordinateSystem: 2, // COORDINATE_SYSTEM.METER_OFFSETS to match buildings
+    coordinateOrigin: [-74.0060, 40.7128, 0], // NYC center
     getPolygon: (d: any) => d.polygon,
     getElevation: (d: any) => d.elevation,
     getFillColor: (d: any) => d.color,
-    getLineColor: [120, 120, 120, 100],
-    getLineWidth: 1,
+    getLineColor: [0, 0, 0, 0], // No borders for seamless terrain
+    getLineWidth: 0,
     extruded: true,
     wireframe: false,
     filled: true,
     stroked: false,
-    elevationScale: 3.0,
+    elevationScale: 1.0, // 1:1 scale to match building heights
     pickable: false,
     material: {
-      ambient: 0.4,
-      diffuse: 0.8,
-      shininess: 4,
-      specularColor: [100, 100, 100]
+      ambient: 0.4,   // Reduced ambient for more dramatic shadows
+      diffuse: 0.9,   // High diffuse for realistic light response
+      shininess: 1,   // Very low shininess - natural terrain is not shiny
+      specularColor: [40, 45, 50] // Slightly cool specular highlights
+    },
+    // Enhanced lighting settings for ultra realism
+    lightSettings: {
+      lightsPosition: [-74.0060, 40.7128, 5000, -74.0060, 40.7128, 5000], // High sun position
+      ambientRatio: 0.35,   // Lower ambient ratio for better contrast
+      diffuseRatio: 0.65,   // Higher diffuse for realistic lighting
+      specularRatio: 0.05,  // Minimal specular for natural terrain
+      numberOfLights: 2
     }
   });
 }

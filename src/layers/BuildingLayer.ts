@@ -44,14 +44,11 @@ export function createBuildingLayer(buildings: any[], timeOfDay: number = 12) {
       return null;
     },
 
-    // DIRECTLY use the height property
-    getElevation: (d: any) => {
-      const height = d.height || 0;
-      if (height > 100) {
-        console.trace(`Rendering tall building ${d.id} with height ${height}`);
-      }
-      return height;
-    },
+    // Building height (not including terrain offset)
+    getElevation: (d: any) => d.height || 0,
+
+    // Terrain elevation offset - this raises buildings to sit ON the terrain
+    getElevationOffset: (d: any) => Math.max(0, d.terrain_height || 0),
 
     getFillColor: (d: any) => {
       const buildingType = getBuildingType(d);
@@ -111,7 +108,7 @@ export function createBuildingLayer(buildings: any[], timeOfDay: number = 12) {
       }
     },
     getLineColor: [255, 255, 255, 255],
-    getLineWidth: 2,
+    getLineWidth: 1,  // Thinner lines for more detailed building outlines
     extruded: true,
     wireframe: false,  // Disable wireframe for solid buildings
     filled: true,
@@ -126,11 +123,6 @@ export function createBuildingLayer(buildings: any[], timeOfDay: number = 12) {
       shininess: 64,     // Higher shininess for more realistic surfaces
       specularColor: [80, 80, 80], // More prominent specular highlights
     },
-    // Add texture-like effects through UV mapping and material properties
-    getLineWidth: 1,  // Thinner lines for more detailed building outlines
-    wireframe: false,
-    filled: true,
-    stroked: true,
     // Add more realistic building appearance
     lightSettings: {
       lightsPosition: [-74.006, 40.7128, 8000, -74.006, 40.7128, 8000], // NYC coordinates
