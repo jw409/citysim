@@ -96,13 +96,13 @@ class EnhancedTerrainGenerator {
   }
 
   private calculateHillContributions(x: number, y: number): number {
-    // Realistic hill placement: far from city center where real cities build
+    // Realistic hill placement: visible on horizon but outside urban core
     const hills = [
-      { x: 8500, y: 6000, height: 180, radius: 2400 },   // Northeast hills - far from city
-      { x: -9000, y: -7500, height: 200, radius: 2600 }, // Southwest mountains - distant
-      { x: 6500, y: -8500, height: 160, radius: 2200 },  // Southeast ridge - well outside city
-      { x: -7500, y: 9000, height: 140, radius: 2000 },  // Northwest highlands - beyond suburbs
-      { x: 10000, y: -3000, height: 120, radius: 1800 }  // Eastern foothills - far periphery
+      { x: 5000, y: 4000, height: 240, radius: 2800 },   // Northeast hills - visible on horizon
+      { x: -6000, y: -5000, height: 280, radius: 3000 }, // Southwest mountains - prominent
+      { x: 4500, y: -5500, height: 220, radius: 2600 },  // Southeast ridge - clearly visible
+      { x: -5500, y: 6000, height: 200, radius: 2400 },  // Northwest highlands - scenic backdrop
+      { x: 7000, y: -2000, height: 180, radius: 2200 }   // Eastern foothills - rolling hills
     ];
 
     let totalHillHeight = 0;
@@ -159,7 +159,7 @@ class EnhancedTerrainGenerator {
     // River follows a curved path: starts northwest, curves through center, exits southeast
     const riverCenterLine = this.getDistanceToRiverCenterline(x, y);
 
-    // River width varies: narrower in hills (200m), wider in city (400m), widest at mouth (800m)
+    // River width varies: narrower in hills (200m), wider in city (600m), widest at mouth (1000m)
     const riverWidth = this.getRiverWidth(x, y);
 
     // River depth: deeper in center, shallower at edges
@@ -167,13 +167,13 @@ class EnhancedTerrainGenerator {
       return 1000; // Above river elevation - no effect
     }
 
-    // Calculate river depth based on distance from centerline
+    // Calculate river depth based on distance from centerline - make it much more prominent
     const normalizedDistance = riverCenterLine / (riverWidth / 2); // 0 at center, 1 at edge
-    const riverDepth = 8 * (1 - normalizedDistance * normalizedDistance); // Parabolic depth profile
+    const riverDepth = 25 * (1 - normalizedDistance * normalizedDistance); // DEEPER parabolic depth profile
 
     // River elevation decreases toward the southeast (flows to sea)
     const flowDirection = x + y; // Southeast is positive
-    const baseRiverElevation = -3 + (flowDirection * 0.0001); // Gentle slope toward sea
+    const baseRiverElevation = -5 + (flowDirection * 0.0002); // Steeper slope, starts deeper
 
     return baseRiverElevation - riverDepth;
   }
@@ -205,23 +205,23 @@ class EnhancedTerrainGenerator {
   private getRiverWidth(x: number, y: number): number {
     const distanceFromCityCenter = Math.sqrt(x * x + y * y);
 
-    // River width varies realistically:
-    // - Narrow in the hills/countryside (150m)
-    // - Medium through suburbs (300m)
-    // - Wide through city center (500m)
-    // - Widest near the mouth (800m at southeast edge)
+    // River width varies realistically - make it MORE prominent:
+    // - Medium in the hills/countryside (300m)
+    // - Wide through suburbs (500m)
+    // - Very wide through city center (800m)
+    // - Massive near the mouth (1200m at southeast edge)
 
     if (distanceFromCityCenter < 2000) {
-      return 500; // Wide through dense city center
+      return 800; // Very wide through dense city center - PROMINENT
     } else if (distanceFromCityCenter < 5000) {
-      return 300; // Medium through suburbs
+      return 500; // Wide through suburbs
     } else {
       // Varies based on distance to mouth (southeast corner)
       const distanceToMouth = Math.sqrt((x - 6000) * (x - 6000) + (y - 6000) * (y - 6000));
       if (distanceToMouth < 3000) {
-        return 800; // Widest near mouth
+        return 1200; // Massive near mouth - like Hudson River
       }
-      return 200; // Narrow in rural/mountainous areas
+      return 300; // Medium in rural/mountainous areas
     }
   }
 
