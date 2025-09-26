@@ -153,29 +153,63 @@ class EnhancedTerrainGenerator {
   }
 
   private calculateRiverElevation(x: number, y: number): number {
-    // Main river flowing northwest to southeast through city center
-    // River equation: creates a valley that gets deeper near the center
+    // DRAMATIC OCEAN BAY SYSTEM - Multiple deep channels creating cliff city on islands/peninsulas
 
-    // River follows a curved path: starts northwest, curves through center, exits southeast
-    const riverCenterLine = this.getDistanceToRiverCenterline(x, y);
+    let minElevation = 1000; // Start high, find lowest water level
 
-    // River width varies: narrower in hills (200m), wider in city (600m), widest at mouth (1000m)
-    const riverWidth = this.getRiverWidth(x, y);
+    // Main ocean bay (runs east-west through city center)
+    const mainBayY = 0;
+    const mainBayWidth = 1500; // MASSIVE ocean bay
+    const mainBayDepth = 60;   // Very deep ocean channel
 
-    // River depth: deeper in center, shallower at edges
-    if (riverCenterLine > riverWidth / 2) {
-      return 1000; // Above river elevation - no effect
+    const distanceFromMainBay = Math.abs(y - mainBayY);
+    if (distanceFromMainBay <= mainBayWidth / 2) {
+      const normalizedDist = distanceFromMainBay / (mainBayWidth / 2);
+      const depthFactor = 1 - (normalizedDist * normalizedDist);
+      const oceanElevation = -mainBayDepth * depthFactor;
+      minElevation = Math.min(minElevation, oceanElevation);
     }
 
-    // Calculate river depth based on distance from centerline - make it much more prominent
-    const normalizedDistance = riverCenterLine / (riverWidth / 2); // 0 at center, 1 at edge
-    const riverDepth = 25 * (1 - normalizedDistance * normalizedDistance); // DEEPER parabolic depth profile
+    // Northern fjord - creates dramatic cliff separation
+    const northFjordY = 3500;
+    const northFjordWidth = 800;
+    const northFjordDepth = 40;
 
-    // River elevation decreases toward the southeast (flows to sea)
-    const flowDirection = x + y; // Southeast is positive
-    const baseRiverElevation = -5 + (flowDirection * 0.0002); // Steeper slope, starts deeper
+    const distanceFromNorthFjord = Math.abs(y - northFjordY);
+    if (distanceFromNorthFjord <= northFjordWidth / 2) {
+      const normalizedDist = distanceFromNorthFjord / (northFjordWidth / 2);
+      const depthFactor = 1 - (normalizedDist * normalizedDist);
+      const fjordElevation = -northFjordDepth * depthFactor;
+      minElevation = Math.min(minElevation, fjordElevation);
+    }
 
-    return baseRiverElevation - riverDepth;
+    // Southern fjord - creates another cliff separation
+    const southFjordY = -3500;
+    const southFjordWidth = 800;
+    const southFjordDepth = 40;
+
+    const distanceFromSouthFjord = Math.abs(y - southFjordY);
+    if (distanceFromSouthFjord <= southFjordWidth / 2) {
+      const normalizedDist = distanceFromSouthFjord / (southFjordWidth / 2);
+      const depthFactor = 1 - (normalizedDist * normalizedDist);
+      const fjordElevation = -southFjordDepth * depthFactor;
+      minElevation = Math.min(minElevation, fjordElevation);
+    }
+
+    // Eastern ocean inlet - connects to main bay
+    const eastInletX = 5000;
+    const eastInletWidth = 600;
+    const eastInletDepth = 35;
+
+    const distanceFromEastInlet = Math.abs(x - eastInletX);
+    if (distanceFromEastInlet <= eastInletWidth / 2) {
+      const normalizedDist = distanceFromEastInlet / (eastInletWidth / 2);
+      const depthFactor = 1 - (normalizedDist * normalizedDist);
+      const inletElevation = -eastInletDepth * depthFactor;
+      minElevation = Math.min(minElevation, inletElevation);
+    }
+
+    return minElevation === 1000 ? 1000 : minElevation;
   }
 
   private getDistanceToRiverCenterline(x: number, y: number): number {
