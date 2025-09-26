@@ -96,13 +96,13 @@ class EnhancedTerrainGenerator {
   }
 
   private calculateHillContributions(x: number, y: number): number {
-    // DRAMATIC CLIFFSIDE CITY - Create cliff formations with ocean at bottom
+    // EXTREME CLIFFSIDE CITY - 2x higher cliff formations with ocean at bottom
     const hills = [
-      { x: 7000, y: 0, height: 800, radius: 4000 },      // Eastern cliff wall - MASSIVE CLIFF
-      { x: -7000, y: 0, height: 750, radius: 3800 },     // Western cliff wall - TOWERING
-      { x: 0, y: 8000, height: 700, radius: 4200 },      // Northern highlands - MOUNTAIN BACKDROP
-      { x: 4000, y: -6000, height: 650, radius: 3600 },  // Southeast cliff - DRAMATIC RIDGE
-      { x: -4000, y: 6000, height: 600, radius: 3400 }   // Northwest peaks - HIGH PLATEAU
+      { x: 7000, y: 0, height: 1600, radius: 4000 },      // Eastern cliff wall - EXTREME CLIFF
+      { x: -7000, y: 0, height: 1500, radius: 3800 },     // Western cliff wall - MEGA TOWERING
+      { x: 0, y: 8000, height: 1400, radius: 4200 },      // Northern highlands - MASSIVE MOUNTAIN
+      { x: 4000, y: -6000, height: 1300, radius: 3600 },  // Southeast cliff - EXTREME RIDGE
+      { x: -4000, y: 6000, height: 1200, radius: 3400 }   // Northwest peaks - ULTRA HIGH PLATEAU
     ];
 
     let totalHillHeight = 0;
