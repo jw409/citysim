@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { ViewportHelpers } from '../../fixtures/viewport-helpers';
+import { testPerformanceTracker } from '../../utils/test-performance';
 
 test.describe('Visual Terrain Analysis with Camera Angles', () => {
   let viewport: ViewportHelpers;
@@ -11,12 +12,13 @@ test.describe('Visual Terrain Analysis with Camera Angles', () => {
     await page.setViewportSize({ width: 1920, height: 1440 });
     await viewport.goto();
 
-    // Wait for city to load completely
-    await viewport.waitForViewportStabilization(3000);
+    // Reduced wait time for faster tests
+    await viewport.waitForViewportStabilization(1500);
   });
 
   test('comprehensive terrain verification with multiple camera angles', async ({ page }) => {
-    console.log('🏔️ Starting comprehensive terrain analysis...');
+    testPerformanceTracker.startTest('terrain-camera-angles', 'medium');
+    console.log('🏔️ Starting optimized terrain analysis...');
 
     // Test multiple locations with angled camera views to verify terrain
     const testLocations = [
@@ -41,9 +43,9 @@ test.describe('Visual Terrain Analysis with Camera Angles', () => {
       const panFactorY = location.y / 100;
       await viewport.panCamera(panFactorX, panFactorY);
 
-      // Zoom to medium level for terrain analysis
-      await viewport.zoomCamera(-300); // Zoom in for better terrain visibility
-      await viewport.waitForViewportStabilization(1000);
+      // Quick zoom - reduced time
+      await viewport.zoomCamera(-200); // Moderate zoom, less extreme
+      await viewport.waitForViewportStabilization(400); // Reduced wait time
 
       // Test multiple camera angles for this location
       const cameraAngles = [
@@ -63,9 +65,9 @@ test.describe('Visual Terrain Analysis with Camera Angles', () => {
       for (const angle of cameraAngles) {
         console.log(`  📷 Testing camera angle: ${angle.description}`);
 
-        // Set camera angle using proper viewport helpers
+        // Quick camera angle - reduced stabilization time
         await viewport.rotateCamera(angle.rotation, angle.tilt);
-        await viewport.waitForViewportStabilization(500);
+        await viewport.waitForViewportStabilization(250); // Faster camera movement
 
         // Capture screenshot
         const screenshotPath = `tests/temp-screenshots/terrain-analysis-${location.name}-${angle.name}.png`;
@@ -200,6 +202,8 @@ test.describe('Visual Terrain Analysis with Camera Angles', () => {
     expect(totalBuildings, 'Should have more buildings for dense city').toBeGreaterThan(10000);
     expect(totalBuildingsWithTerrain / totalBuildings, 'Most buildings should have terrain data').toBeGreaterThan(0.8);
 
+    testPerformanceTracker.endTest();
+
     // Save detailed analysis report
     const reportPath = 'tests/temp-screenshots/terrain-analysis-report.json';
     await page.evaluate((data) => {
@@ -233,13 +237,13 @@ test.describe('Visual Terrain Analysis with Camera Angles', () => {
       const panFactorY = zone.y / 100;
       await viewport.panCamera(panFactorX, panFactorY);
 
-      // Set appropriate zoom for density analysis
-      await viewport.zoomCamera(-500); // Zoom in for building density analysis
-      await viewport.waitForViewportStabilization(800);
+      // Quick zoom for density analysis
+      await viewport.zoomCamera(-300); // Reduced zoom intensity
+      await viewport.waitForViewportStabilization(400); // Faster stabilization
 
       // Take angled screenshot for visual verification
       await viewport.rotateCamera(30, 25); // 30° rotation, 25° tilt
-      await viewport.waitForViewportStabilization(500);
+      await viewport.waitForViewportStabilization(300); // Faster camera positioning
       await page.screenshot({ path: `tests/temp-screenshots/density-analysis-${zone.name}.png` });
 
       const densityAnalysis = await page.evaluate(({ x, y, radius }) => {

@@ -7,6 +7,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "test": "playwright test",
+    "test:fast": "npx playwright test tests/e2e/core/fast-initial-load.spec.ts --project=chromium",
+    "test:fast-all": "npm run test:fast && npm run test:core",
     "test:core": "node scripts/test-runner.cjs core",
     "test:viewport": "node scripts/test-runner.cjs viewport",
     "test:simulation": "node scripts/test-runner.cjs simulation",
