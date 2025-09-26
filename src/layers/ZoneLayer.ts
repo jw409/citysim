@@ -8,7 +8,13 @@ export function createZoneLayer(zones: any[], timeOfDay: number = 12, visible: b
   return new PolygonLayer({
     id: 'zones',
     data: zones,
-    getPolygon: (d: any) => d.boundary ? convertPointsToLatLng(d.boundary) : [],
+    coordinateSystem: 2, // COORDINATE_SYSTEM.METER_OFFSETS to match terrain/buildings
+    coordinateOrigin: [-74.0060, 40.7128, 0], // NYC center - same as other layers
+    getPolygon: (d: any) => {
+      if (!d.boundary) return [];
+      // Convert from {x, y} objects to [x, y] arrays (meters) - don't convert to lat/lng
+      return d.boundary.map((p: any) => [p.x, p.y]);
+    },
     getFillColor: (d: any) => {
       const zoneType = getZoneTypeName(d.zone_type);
       const color = colors.zones[zoneType] || colors.zones.residential;

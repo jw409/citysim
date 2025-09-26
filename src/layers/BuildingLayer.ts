@@ -23,19 +23,19 @@ export function createBuildingLayer(buildings: any[], timeOfDay: number = 12) {
   return new PolygonLayer({
     id: 'buildings',
     data: buildings,
+    coordinateSystem: 2, // COORDINATE_SYSTEM.METER_OFFSETS to match terrain
+    coordinateOrigin: [-74.0060, 40.7128, 0], // NYC center - same as terrain
 
-    // Convert footprint from {x,y} objects to [lng,lat] arrays
+    // Keep footprint in meter coordinates (don't convert to lat/lng)
     getPolygon: (d: any) => {
       if (!d.footprint || !Array.isArray(d.footprint)) return null;
 
-      // Convert from {x, y} objects to [lng, lat] arrays for deck.gl
+      // If footprint has {x, y} objects, convert to [x, y] arrays (meters)
       if (d.footprint.length > 0 && typeof d.footprint[0] === 'object' && 'x' in d.footprint[0]) {
-        const converted = convertPointsToLatLng(d.footprint);
-        // Footprint converted successfully
-        return converted;
+        return d.footprint.map((p: any) => [p.x, p.y]);
       }
 
-      // If already in [lng, lat] format, return as-is
+      // If already in [x, y] format, return as-is (meters)
       if (Array.isArray(d.footprint[0])) {
         return d.footprint;
       }

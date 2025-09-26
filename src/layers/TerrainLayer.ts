@@ -290,9 +290,20 @@ export function createTerrainLayer() {
       const centerX = -halfSize + (x + 0.5) * patchSize;
       const centerY = -halfSize + (y + 0.5) * patchSize;
 
+      // Ensure we don't go beyond terrain bounds (fix edge tile Z-axis issues)
+      if (Math.abs(centerX) > halfSize || Math.abs(centerY) > halfSize) {
+        continue; // Skip tiles that extend beyond the defined terrain area
+      }
+
       // Get enhanced terrain data including texture information
       const terrainData = generator.getTerrainData(centerX, centerY);
       const { elevation, textureKey, materials, slope } = terrainData;
+
+      // Validate elevation data for edge tiles
+      if (elevation === undefined || elevation === null || !isFinite(elevation)) {
+        console.warn(`Invalid elevation for terrain tile at ${centerX}, ${centerY}: ${elevation}`);
+        continue; // Skip this tile to prevent Z-axis issues
+      }
 
       // Get texture UV coordinates from atlas
       const textureRegion = textureRegions[textureKey];
