@@ -43,7 +43,7 @@
     "@deck.gl/core": "^9.0.0",
     "@deck.gl/layers": "^9.0.0",
     "@deck.gl/react": "^9.0.0",
-    "playwright": "^1.55.0",
+    "playwright": "^1.55.1",
     "protobufjs": "^7.5.4",
     "puppeteer": "^24.22.3",
     "react": "^18.2.0",

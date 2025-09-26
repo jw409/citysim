@@ -96,13 +96,13 @@ class EnhancedTerrainGenerator {
   }
 
   private calculateHillContributions(x: number, y: number): number {
-    // Realistic hill placement: visible on horizon but outside urban core
+    // DRAMATICALLY VISIBLE HILLS - Much higher and closer for clear visibility
     const hills = [
-      { x: 5000, y: 4000, height: 240, radius: 2800 },   // Northeast hills - visible on horizon
-      { x: -6000, y: -5000, height: 280, radius: 3000 }, // Southwest mountains - prominent
-      { x: 4500, y: -5500, height: 220, radius: 2600 },  // Southeast ridge - clearly visible
-      { x: -5500, y: 6000, height: 200, radius: 2400 },  // Northwest highlands - scenic backdrop
-      { x: 7000, y: -2000, height: 180, radius: 2200 }   // Eastern foothills - rolling hills
+      { x: 4000, y: 3500, height: 500, radius: 3500 },   // Northeast hills - MASSIVE
+      { x: -4500, y: -4000, height: 550, radius: 3800 }, // Southwest mountains - GIANT
+      { x: 3800, y: -4200, height: 480, radius: 3300 },  // Southeast ridge - HUGE
+      { x: -4200, y: 4500, height: 450, radius: 3100 },  // Northwest highlands - ENORMOUS
+      { x: 5500, y: -1500, height: 420, radius: 2900 }   // Eastern foothills - VERY HIGH
     ];
 
     let totalHillHeight = 0;
