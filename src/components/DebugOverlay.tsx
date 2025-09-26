@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { debugManager } from '../utils/debugUtils';
+import { useSimulationContext } from '../contexts/SimulationContext';
 
 interface DebugOverlayProps {
   isVisible: boolean;
@@ -7,10 +8,12 @@ interface DebugOverlayProps {
 }
 
 export function DebugOverlay({ isVisible, onToggle }: DebugOverlayProps) {
+  const { state } = useSimulationContext();
   const [debugInfo, setDebugInfo] = useState(debugManager.getDebugInfo());
   const [selectedLayer, setSelectedLayer] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [activeTab, setActiveTab] = useState<'debug' | 'performance'>('performance');
 
   // Update debug info periodically
   useEffect(() => {

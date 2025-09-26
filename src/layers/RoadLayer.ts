@@ -2,47 +2,126 @@ import { PathLayer } from '@deck.gl/layers';
 import { getTimeBasedColors } from '../utils/colorSchemes';
 import { convertPointsToLatLng } from '../utils/coordinates';
 
-// Terrain height calculation - same as TerrainLayer for consistency
-function noise(x: number, y: number): number {
+// Import terrain calculation from utilities
+import { exponentialDecayHeight } from '../utils/coordinates';
+
+// Simple noise function for terrain variation
+function perlinNoise(x: number, y: number): number {
   const n = Math.sin(x * 12.9898 + y * 78.233) * 43758.5453;
-  return (n - Math.floor(n));
+  return (n - Math.floor(n)) * 2 - 1; // -1 to 1 range
 }
 
+// Terrain height calculation - matches current dramatic cliffside TerrainLayer
 function getTerrainHeightAt(x: number, y: number): number {
-  const scale1 = 0.0003; // Very large terrain features
-  const scale2 = 0.0015; // Medium terrain features
-  const scale3 = 0.006;  // Fine terrain details
-
-  const noise1 = noise(x * scale1, y * scale1) * 20;
-  const noise2 = noise(x * scale2, y * scale2) * 12;
-  const noise3 = noise(x * scale3, y * scale3) * 4;
-
-  // Same 3 hills as terrain
-  const hill1CenterX = 2500, hill1CenterY = 2000;
-  const hill2CenterX = -3000, hill2CenterY = -1500;
-  const hill3CenterX = 1000, hill3CenterY = -3500;
-
-  const dist1 = Math.sqrt((x - hill1CenterX) * (x - hill1CenterX) + (y - hill1CenterY) * (y - hill1CenterY));
-  const dist2 = Math.sqrt((x - hill2CenterX) * (x - hill2CenterX) + (y - hill2CenterY) * (y - hill2CenterY));
-  const dist3 = Math.sqrt((x - hill3CenterX) * (x - hill3CenterX) + (y - hill3CenterY) * (y - hill3CenterY));
-
-  const hillRadius = 2200;
-  const hill1Height = Math.max(0, 180 * Math.exp(-Math.pow(dist1 / hillRadius, 2)));
-  const hill2Height = Math.max(0, 200 * Math.exp(-Math.pow(dist2 / hillRadius, 2)));
-  const hill3Height = Math.max(0, 160 * Math.exp(-Math.pow(dist3 / hillRadius, 2)));
-
-  const hillNoise1 = hill1Height > 5 ? noise(x * 0.002, y * 0.002) * hill1Height * 0.15 : 0;
-  const hillNoise2 = hill2Height > 5 ? noise(x * 0.002 + 100, y * 0.002 + 100) * hill2Height * 0.15 : 0;
-  const hillNoise3 = hill3Height > 5 ? noise(x * 0.002 + 200, y * 0.002 + 200) * hill3Height * 0.15 : 0;
-
-  const hills = hill1Height + hill2Height + hill3Height + hillNoise1 + hillNoise2 + hillNoise3;
+  // Base terrain using multi-octave noise
+  const noise1 = perlinNoise(x * 0.0008, y * 0.0008) * 35;
+  const noise2 = perlinNoise(x * 0.0025, y * 0.0025) * 18;
+  const noise3 = perlinNoise(x * 0.008, y * 0.008) * 8;
   const baseTerrain = noise1 + noise2 + noise3;
-  const totalElevation = baseTerrain * 0.3 + hills;
 
+  // EXTREME CLIFFSIDE CITY - Same dramatic cliffs as TerrainLayer
+  const hills = [
+    { x: 7000, y: 0, height: 1600, radius: 4000 },      // Eastern cliff wall
+    { x: -7000, y: 0, height: 1500, radius: 3800 },     // Western cliff wall
+    { x: 0, y: 8000, height: 1400, radius: 4200 },      // Northern highlands
+    { x: 4000, y: -6000, height: 1300, radius: 3600 },  // Southeast cliff
+    { x: -4000, y: 6000, height: 1200, radius: 3400 }   // Northwest peaks
+  ];
+
+  let hillContribution = 0;
+  for (const hill of hills) {
+    const hillHeight = exponentialDecayHeight(x, y, hill.x, hill.y, hill.height, hill.radius, 1.8);
+    if (hillHeight > 2) {
+      // Add surface variation to hills
+      const variation = perlinNoise(x * 0.001 + hill.x * 0.0001, y * 0.001 + hill.y * 0.0001) * hillHeight * 0.12;
+      hillContribution += hillHeight + variation;
+    } else {
+      hillContribution += hillHeight;
+    }
+  }
+
+  const totalElevation = baseTerrain + hillContribution;
+
+  // Realistic urban core: cities are built on flat land
   const distanceFromCenter = Math.sqrt(x * x + y * y);
-  const flatteningFactor = Math.max(0.7, 1 - (distanceFromCenter / 10000));
 
-  return totalElevation * flatteningFactor;
+  // Ocean bay system - deep water channels
+  const riverElevation = calculateRiverElevation(x, y);
+
+  // Flat urban core (0-3km) like real cities
+  if (distanceFromCenter < 3000) {
+    const baseElevation = Math.max(-2, Math.min(2, totalElevation * 0.05));
+    return Math.min(baseElevation, riverElevation);
+  }
+
+  // Suburban transition (3-6km)
+  if (distanceFromCenter < 6000) {
+    const suburbanFactor = (distanceFromCenter - 3000) / 3000;
+    const suburbanElevation = totalElevation * (0.05 + suburbanFactor * 0.3);
+    return Math.min(suburbanElevation, riverElevation);
+  }
+
+  // Rural areas with full elevation
+  const ruralTransition = Math.min(1, (distanceFromCenter - 6000) / 2000);
+  const flatteningFactor = 0.35 + (ruralTransition * 0.65);
+  const ruralElevation = totalElevation * flatteningFactor;
+
+  return Math.min(ruralElevation, riverElevation);
+}
+
+// Ocean bay system calculation - matches TerrainLayer
+function calculateRiverElevation(x: number, y: number): number {
+  let minElevation = 1000;
+
+  // Main ocean bay (east-west through center)
+  const mainBayY = 0;
+  const mainBayWidth = 1500;
+  const mainBayDepth = 60;
+  const distanceFromMainBay = Math.abs(y - mainBayY);
+  if (distanceFromMainBay <= mainBayWidth / 2) {
+    const normalizedDist = distanceFromMainBay / (mainBayWidth / 2);
+    const depthFactor = 1 - (normalizedDist * normalizedDist);
+    const oceanElevation = -mainBayDepth * depthFactor;
+    minElevation = Math.min(minElevation, oceanElevation);
+  }
+
+  // Northern fjord
+  const northFjordY = 3500;
+  const northFjordWidth = 800;
+  const northFjordDepth = 40;
+  const distanceFromNorthFjord = Math.abs(y - northFjordY);
+  if (distanceFromNorthFjord <= northFjordWidth / 2) {
+    const normalizedDist = distanceFromNorthFjord / (northFjordWidth / 2);
+    const depthFactor = 1 - (normalizedDist * normalizedDist);
+    const fjordElevation = -northFjordDepth * depthFactor;
+    minElevation = Math.min(minElevation, fjordElevation);
+  }
+
+  // Southern fjord
+  const southFjordY = -3500;
+  const southFjordWidth = 800;
+  const southFjordDepth = 40;
+  const distanceFromSouthFjord = Math.abs(y - southFjordY);
+  if (distanceFromSouthFjord <= southFjordWidth / 2) {
+    const normalizedDist = distanceFromSouthFjord / (southFjordWidth / 2);
+    const depthFactor = 1 - (normalizedDist * normalizedDist);
+    const fjordElevation = -southFjordDepth * depthFactor;
+    minElevation = Math.min(minElevation, fjordElevation);
+  }
+
+  // Eastern ocean inlet
+  const eastInletX = 5000;
+  const eastInletWidth = 600;
+  const eastInletDepth = 35;
+  const distanceFromEastInlet = Math.abs(x - eastInletX);
+  if (distanceFromEastInlet <= eastInletWidth / 2) {
+    const normalizedDist = distanceFromEastInlet / (eastInletWidth / 2);
+    const depthFactor = 1 - (normalizedDist * normalizedDist);
+    const inletElevation = -eastInletDepth * depthFactor;
+    minElevation = Math.min(minElevation, inletElevation);
+  }
+
+  return minElevation === 1000 ? 1000 : minElevation;
 }
 
 export function createRoadLayer(roads: any[], timeOfDay: number = 12) {
@@ -59,7 +138,7 @@ export function createRoadLayer(roads: any[], timeOfDay: number = 12) {
       // Add terrain elevation to each road point
       return d.path.map((point: any) => {
         const terrainHeight = getTerrainHeightAt(point.x, point.y);
-        const roadElevation = terrainHeight + 0.5; // Roads sit 0.5m above terrain
+        const roadElevation = terrainHeight + 2.0; // Roads sit 2m above terrain for clear visibility
         return [point.x, point.y, roadElevation];
       });
     },

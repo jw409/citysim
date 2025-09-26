@@ -3,7 +3,7 @@ import { SimulationProvider } from './contexts/SimulationContext';
 import { TerrainProvider } from './contexts/TerrainContext';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { LoadingScreen } from './components/LoadingScreen';
-import { StatusBar } from './components/StatusBar';
+import { DebugOverlay } from './components/DebugOverlay';
 import { ControlPanel } from './components/ControlPanel';
 import { CityVisualization } from './components/CityVisualization';
 import { useSimulation } from './hooks/useSimulation';
@@ -18,7 +18,7 @@ import './styles/components.css';
 function AppContent() {
   const { state, dispatch } = useSimulationContext();
   const { initialize, start, pause, setSpeed } = useSimulation();
-  const [showPerformance, setShowPerformance] = useState(true);
+  const [showDebug, setShowDebug] = useState(true);
   const [optimizationResult, setOptimizationResult] = useState<OptimizationResult | null>(null);
 
   // Performance adaptation system
@@ -67,9 +67,9 @@ function AppContent() {
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if ((event.ctrlKey || event.metaKey) && event.key === 'p') {
+      if ((event.ctrlKey || event.metaKey) && event.key === 'd') {
         event.preventDefault();
-        setShowPerformance(prev => !prev);
+        setShowDebug(prev => !prev);
       }
     };
 
@@ -124,16 +124,7 @@ function AppContent() {
         message="Loading city simulation"
       />
 
-      <StatusBar />
-
-      <div className="app" style={{ paddingTop: '60px' }}>
-        <header className="app-header" style={{ height: '50px', padding: '0.5rem 1.5rem' }}>
-          <h1 className="app-title" style={{ fontSize: '1.25rem' }}>UrbanSynth</h1>
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-            City Simulation Platform
-          </div>
-        </header>
-
+      <div className="app">
         <main className="app-main">
           <div className="visualization-container" data-testid={state.isInitialized ? "city-loaded" : "city-loading"}>
             <CityVisualization
@@ -142,12 +133,18 @@ function AppContent() {
               onPause={pause}
               onSetSpeed={setSpeed}
               isInitialized={state.isInitialized}
-              showPerformance={showPerformance}
-              onTogglePerformance={() => setShowPerformance(prev => !prev)}
+              showPerformance={false}
+              onTogglePerformance={() => {}}
             />
 
             {/* Simple time controls only */}
             <ControlPanel />
+
+            {/* Debug panel with performance monitor integrated - visible by default */}
+            <DebugOverlay
+              isVisible={showDebug}
+              onToggle={() => setShowDebug(prev => !prev)}
+            />
 
           </div>
         </main>
