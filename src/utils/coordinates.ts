@@ -106,6 +106,53 @@ export function convertAllCoordinates(data: any): any {
   return data;
 }
 
+// Mathematical utility functions to reduce code duplication
+
+/**
+ * Calculate Euclidean distance between two points
+ */
+export function distance2D(x1: number, y1: number, x2: number, y2: number): number {
+  return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+}
+
+/**
+ * Calculate squared distance between two points (faster when you don't need the actual distance)
+ */
+export function squaredDistance2D(x1: number, y1: number, x2: number, y2: number): number {
+  return Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2);
+}
+
+/**
+ * Calculate distance between two point objects
+ */
+export function distanceBetweenPoints(p1: { x: number; y: number }, p2: { x: number; y: number }): number {
+  return distance2D(p1.x, p1.y, p2.x, p2.y);
+}
+
+/**
+ * Easing function for smooth animations (cubic ease-out)
+ */
+export function cubicEaseOut(progress: number): number {
+  return 1 - Math.pow(1 - progress, 3);
+}
+
+/**
+ * Calculate hill height with exponential decay
+ */
+export function exponentialDecayHeight(
+  x: number,
+  y: number,
+  hillX: number,
+  hillY: number,
+  maxHeight: number,
+  radius: number,
+  decayFactor: number = 2
+): number {
+  const dist = distance2D(x, y, hillX, hillY);
+  const normalizedDistance = dist / radius;
+  return Math.max(0, maxHeight * Math.exp(-Math.pow(normalizedDistance, decayFactor)));
+}
+
 export function getBoundsFromCityModel(cityModel: any): {
   longitude: number;
   latitude: number;

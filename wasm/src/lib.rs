@@ -65,7 +65,7 @@ pub fn tick() {
 }
 
 #[wasm_bindgen]
-pub fn getAgentStates() -> JsValue {
+pub fn get_agent_states() -> JsValue {
     SIMULATION.with(|sim| {
         if let Some(ref simulation) = *sim.borrow() {
             let agents = simulation.get_agent_states();
@@ -77,7 +77,7 @@ pub fn getAgentStates() -> JsValue {
 }
 
 #[wasm_bindgen]
-pub fn getTrafficData() -> JsValue {
+pub fn get_traffic_data() -> JsValue {
     SIMULATION.with(|sim| {
         if let Some(ref simulation) = *sim.borrow() {
             let traffic_data = simulation.get_traffic_data();
@@ -107,7 +107,7 @@ pub fn pause() {
 }
 
 #[wasm_bindgen]
-pub fn setSpeed(multiplier: f32) {
+pub fn set_speed(multiplier: f32) {
     SIMULATION.with(|sim| {
         if let Some(ref mut simulation) = *sim.borrow_mut() {
             simulation.set_speed(multiplier);
@@ -116,7 +116,7 @@ pub fn setSpeed(multiplier: f32) {
 }
 
 #[wasm_bindgen]
-pub fn isRunning() -> bool {
+pub fn is_running() -> bool {
     SIMULATION.with(|sim| {
         if let Some(ref simulation) = *sim.borrow() {
             simulation.is_running()
@@ -127,7 +127,7 @@ pub fn isRunning() -> bool {
 }
 
 #[wasm_bindgen]
-pub fn getSimulationTime() -> f32 {
+pub fn get_simulation_time() -> f32 {
     SIMULATION.with(|sim| {
         if let Some(ref simulation) = *sim.borrow() {
             simulation.get_time()
@@ -138,7 +138,7 @@ pub fn getSimulationTime() -> f32 {
 }
 
 #[wasm_bindgen]
-pub fn getAgentCount() -> u32 {
+pub fn get_agent_count() -> u32 {
     SIMULATION.with(|sim| {
         if let Some(ref simulation) = *sim.borrow() {
             simulation.get_agent_count()
@@ -149,7 +149,7 @@ pub fn getAgentCount() -> u32 {
 }
 
 #[wasm_bindgen]
-pub fn getSeed() -> u64 {
+pub fn get_seed() -> u64 {
     SIMULATION.with(|sim| {
         if let Some(ref simulation) = *sim.borrow() {
             simulation.get_seed()

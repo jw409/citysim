@@ -1,14 +1,18 @@
 import { test, expect } from '@playwright/test';
+import { ViewportHelpers } from '../../fixtures/viewport-helpers';
 
 test.describe('Visual Terrain Analysis with Camera Angles', () => {
+  let viewport: ViewportHelpers;
+
   test.beforeEach(async ({ page }) => {
+    viewport = new ViewportHelpers(page);
+
     // Set viewport for consistent terrain visualization
     await page.setViewportSize({ width: 1920, height: 1440 });
-    await page.goto('/');
+    await viewport.goto();
 
     // Wait for city to load completely
-    await page.waitForSelector('[data-testid="city-loaded"]', { timeout: 45000 });
-    await page.waitForTimeout(3000); // Allow rendering to stabilize
+    await viewport.waitForViewportStabilization(3000);
   });
 
   test('comprehensive terrain verification with multiple camera angles', async ({ page }) => {
@@ -28,15 +32,18 @@ test.describe('Visual Terrain Analysis with Camera Angles', () => {
     for (const location of testLocations) {
       console.log(`📍 Analyzing ${location.name}: ${location.description}`);
 
-      // Move to location
-      await page.evaluate(({ x, y }) => {
-        if (window.viewport) {
-          window.viewport.panTo([x, y]);
-          window.viewport.setZoom(800); // Medium zoom for terrain analysis
-        }
-      }, location);
+      // Move to location - use camera movements to navigate to different areas
+      // Since we can't directly pan to coordinates, we'll use relative camera movements
+      // to explore different areas of the city based on the location coordinates
 
-      await page.waitForTimeout(1000);
+      // Pan camera based on relative position from center
+      const panFactorX = location.x / 100; // Scale down coordinates for reasonable pan amounts
+      const panFactorY = location.y / 100;
+      await viewport.panCamera(panFactorX, panFactorY);
+
+      // Zoom to medium level for terrain analysis
+      await viewport.zoomCamera(-300); // Zoom in for better terrain visibility
+      await viewport.waitForViewportStabilization(1000);
 
       // Test multiple camera angles for this location
       const cameraAngles = [
@@ -56,15 +63,9 @@ test.describe('Visual Terrain Analysis with Camera Angles', () => {
       for (const angle of cameraAngles) {
         console.log(`  📷 Testing camera angle: ${angle.description}`);
 
-        // Set camera angle
-        await page.evaluate(({ tilt, rotation }) => {
-          if (window.viewport) {
-            // Apply camera rotation and tilt
-            window.viewport.rotateCamera(rotation, tilt);
-          }
-        }, angle);
-
-        await page.waitForTimeout(500); // Wait for camera movement
+        // Set camera angle using proper viewport helpers
+        await viewport.rotateCamera(angle.rotation, angle.tilt);
+        await viewport.waitForViewportStabilization(500);
 
         // Capture screenshot
         const screenshotPath = `tests/temp-screenshots/terrain-analysis-${location.name}-${angle.name}.png`;
@@ -141,12 +142,9 @@ test.describe('Visual Terrain Analysis with Camera Angles', () => {
 
       analysisResults.push(locationResults);
 
-      // Reset camera for next location
-      await page.evaluate(() => {
-        if (window.viewport) {
-          window.viewport.resetCamera();
-        }
-      });
+      // Reset camera for next location by rotating back to center
+      await viewport.rotateCamera(0, -45); // Reset any tilt
+      await viewport.waitForViewportStabilization(500);
     }
 
     // Generate comprehensive analysis report
@@ -229,23 +227,19 @@ test.describe('Visual Terrain Analysis with Camera Angles', () => {
     for (const zone of cityZones) {
       console.log(`📍 Analyzing ${zone.name} (expected: ${zone.expectedDensity} density)`);
 
-      await page.evaluate(({ x, y }) => {
-        if (window.viewport) {
-          window.viewport.panTo([x, y]);
-          window.viewport.setZoom(1000);
-        }
-      }, zone);
+      // Navigate to zone location
+      // Pan camera based on zone coordinates
+      const panFactorX = zone.x / 100;
+      const panFactorY = zone.y / 100;
+      await viewport.panCamera(panFactorX, panFactorY);
 
-      await page.waitForTimeout(800);
+      // Set appropriate zoom for density analysis
+      await viewport.zoomCamera(-500); // Zoom in for building density analysis
+      await viewport.waitForViewportStabilization(800);
 
       // Take angled screenshot for visual verification
-      await page.evaluate(() => {
-        if (window.viewport) {
-          window.viewport.rotateCamera(30, 25); // 30° rotation, 25° tilt
-        }
-      });
-
-      await page.waitForTimeout(500);
+      await viewport.rotateCamera(30, 25); // 30° rotation, 25° tilt
+      await viewport.waitForViewportStabilization(500);
       await page.screenshot({ path: `tests/temp-screenshots/density-analysis-${zone.name}.png` });
 
       const densityAnalysis = await page.evaluate(({ x, y, radius }) => {

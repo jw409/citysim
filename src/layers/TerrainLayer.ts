@@ -1,61 +1,251 @@
 import { PolygonLayer } from '@deck.gl/layers';
+import { TerrainTextureAtlas, TerrainNoiseGenerator, getTerrainTextureKey } from '../utils/terrainTextureGenerator';
+import { distance2D, exponentialDecayHeight } from '../utils/coordinates';
 
-// Simplex noise function for realistic terrain generation
-function noise(x: number, y: number): number {
-  const n = Math.sin(x * 12.9898 + y * 78.233) * 43758.5453;
-  return (n - Math.floor(n));
+// Enhanced terrain generation with multiple noise functions
+class EnhancedTerrainGenerator {
+  private static instance: EnhancedTerrainGenerator;
+  private textureAtlas: TerrainTextureAtlas;
+  private terrainCache: Map<string, { elevation: number; textureKey: string; materials: any; slope: number }> = new Map();
+
+  private constructor() {
+    this.textureAtlas = new TerrainTextureAtlas(2048);
+    this.textureAtlas.generateAtlas();
+  }
+
+  public static getInstance(): EnhancedTerrainGenerator {
+    if (!EnhancedTerrainGenerator.instance) {
+      EnhancedTerrainGenerator.instance = new EnhancedTerrainGenerator();
+    }
+    return EnhancedTerrainGenerator.instance;
+  }
+
+  public getTextureAtlas(): TerrainTextureAtlas {
+    return this.textureAtlas;
+  }
+
+  public getTerrainData(x: number, y: number): { elevation: number; textureKey: string; materials: any; slope: number } {
+    const cacheKey = `${Math.floor(x/10)}_${Math.floor(y/10)}`;
+    let cached = this.terrainCache.get(cacheKey);
+
+    if (!cached) {
+      const elevation = this.calculateTerrainHeight(x, y);
+      const slope = this.calculateSlope(x, y);
+      const urbanFactor = this.calculateUrbanFactor(x, y);
+      const distanceFromWater = this.calculateDistanceFromWater(x, y);
+
+      const textureKey = getTerrainTextureKey(elevation, slope, urbanFactor, distanceFromWater);
+      const materials = this.textureAtlas.getTextureConfig(textureKey)?.materials;
+
+      cached = { elevation, textureKey, materials, slope };
+      this.terrainCache.set(cacheKey, cached);
+    }
+
+    return cached;
+  }
+
+  private calculateTerrainHeight(x: number, y: number): number {
+    // Multi-scale Fractional Brownian Motion for realistic terrain
+    const scale = 0.0008;
+    const primaryTerrain = TerrainNoiseGenerator.fractionalBrownianMotion(
+      x * scale, y * scale, 6, 0.6, 1
+    ) * 25;
+
+    // Ridged noise for mountain ridges and valleys
+    const ridgedTerrain = TerrainNoiseGenerator.ridgedNoise(
+      x * scale * 0.5, y * scale * 0.5, 4
+    ) * 15;
+
+    // Large-scale terrain features using Perlin noise
+    const largeTerrain = TerrainNoiseGenerator.perlinNoise(
+      x * scale * 0.3, y * scale * 0.3
+    ) * 40;
+
+    // Create prominent hills with smooth falloff
+    const hills = this.calculateHillContributions(x, y);
+
+    // Combine all terrain components
+    const baseTerrain = primaryTerrain + ridgedTerrain * 0.7 + largeTerrain * 0.4;
+    const totalElevation = baseTerrain * 0.4 + hills;
+
+    // Realistic urban core: cities are built on flat land, not hills
+    const distanceFromCenter = Math.sqrt(x * x + y * y);
+
+    // Add major river running through city center (like Thames, Seine, Hudson River)
+    const riverElevation = this.calculateRiverElevation(x, y);
+
+    // Create completely flat urban core (0-3km radius) like real cities
+    if (distanceFromCenter < 3000) {
+      const baseElevation = Math.max(-2, Math.min(2, totalElevation * 0.05)); // Nearly flat urban core
+      return Math.min(baseElevation, riverElevation); // River carves through the flat urban area
+    }
+
+    // Gentle suburban transition zone (3-6km)
+    if (distanceFromCenter < 6000) {
+      const suburbanFactor = (distanceFromCenter - 3000) / 3000; // 0 to 1
+      const suburbanElevation = totalElevation * (0.05 + suburbanFactor * 0.3); // Gradual elevation increase
+      return Math.min(suburbanElevation, riverElevation); // River continues through suburbs
+    }
+
+    // Rural areas can have full terrain elevation but still influenced by river
+    const ruralTransition = Math.min(1, (distanceFromCenter - 6000) / 2000);
+    const flatteningFactor = 0.35 + (ruralTransition * 0.65);
+    const ruralElevation = totalElevation * flatteningFactor;
+
+    return Math.min(ruralElevation, riverElevation); // River flows through entire terrain
+  }
+
+  private calculateHillContributions(x: number, y: number): number {
+    // Realistic hill placement: far from city center where real cities build
+    const hills = [
+      { x: 8500, y: 6000, height: 180, radius: 2400 },   // Northeast hills - far from city
+      { x: -9000, y: -7500, height: 200, radius: 2600 }, // Southwest mountains - distant
+      { x: 6500, y: -8500, height: 160, radius: 2200 },  // Southeast ridge - well outside city
+      { x: -7500, y: 9000, height: 140, radius: 2000 },  // Northwest highlands - beyond suburbs
+      { x: 10000, y: -3000, height: 120, radius: 1800 }  // Eastern foothills - far periphery
+    ];
+
+    let totalHillHeight = 0;
+
+    for (const hill of hills) {
+      // Smooth hill profile with natural variation using utility function
+      const hillBase = exponentialDecayHeight(x, y, hill.x, hill.y, hill.height, hill.radius, 1.8);
+
+      if (hillBase > 2) {
+        // Add surface variation to hills
+        const variation = TerrainNoiseGenerator.perlinNoise(
+          x * 0.001 + hill.x * 0.0001,
+          y * 0.001 + hill.y * 0.0001
+        ) * hillBase * 0.12;
+
+        totalHillHeight += hillBase + variation;
+      }
+    }
+
+    return totalHillHeight;
+  }
+
+  public calculateSlope(x: number, y: number): number {
+    const sampleDistance = 50;
+    const elevationEast = this.calculateTerrainHeight(x + sampleDistance, y);
+    const elevationWest = this.calculateTerrainHeight(x - sampleDistance, y);
+    const elevationNorth = this.calculateTerrainHeight(x, y + sampleDistance);
+    const elevationSouth = this.calculateTerrainHeight(x, y - sampleDistance);
+
+    const slopeX = (elevationEast - elevationWest) / (sampleDistance * 2);
+    const slopeY = (elevationNorth - elevationSouth) / (sampleDistance * 2);
+
+    return Math.sqrt(slopeX * slopeX + slopeY * slopeY);
+  }
+
+  private calculateUrbanFactor(x: number, y: number): number {
+    const distanceFromCenter = Math.sqrt(x * x + y * y);
+    return Math.max(0, 1 - (distanceFromCenter / 5000));
+  }
+
+  private calculateDistanceFromWater(x: number, y: number): number {
+    // Simplified water distance calculation
+    // In a real implementation, this would check actual water body positions
+    return Math.min(
+      distance2D(x, y, 2000, -1000), // River 1
+      distance2D(x, y, -1500, 2000)  // River 2
+    );
+  }
+
+  private calculateRiverElevation(x: number, y: number): number {
+    // Main river flowing northwest to southeast through city center
+    // River equation: creates a valley that gets deeper near the center
+
+    // River follows a curved path: starts northwest, curves through center, exits southeast
+    const riverCenterLine = this.getDistanceToRiverCenterline(x, y);
+
+    // River width varies: narrower in hills (200m), wider in city (400m), widest at mouth (800m)
+    const riverWidth = this.getRiverWidth(x, y);
+
+    // River depth: deeper in center, shallower at edges
+    if (riverCenterLine > riverWidth / 2) {
+      return 1000; // Above river elevation - no effect
+    }
+
+    // Calculate river depth based on distance from centerline
+    const normalizedDistance = riverCenterLine / (riverWidth / 2); // 0 at center, 1 at edge
+    const riverDepth = 8 * (1 - normalizedDistance * normalizedDistance); // Parabolic depth profile
+
+    // River elevation decreases toward the southeast (flows to sea)
+    const flowDirection = x + y; // Southeast is positive
+    const baseRiverElevation = -3 + (flowDirection * 0.0001); // Gentle slope toward sea
+
+    return baseRiverElevation - riverDepth;
+  }
+
+  private getDistanceToRiverCenterline(x: number, y: number): number {
+    // River follows S-curve through city: enters from northwest, curves through center, exits southeast
+    // Parametric curve for natural river meandering
+
+    // Project point onto the river's flow direction
+    const flowProgress = (x + y + 8000) / 16000; // Normalize to 0-1 along river length
+
+    // River centerline with natural curves (like a real river)
+    const curveAmplitude = 1500; // How much the river curves
+    const centerlineX = flowProgress * 8000 - 4000; // -4000 to +4000
+    const centerlineY = flowProgress * 8000 - 4000; // -4000 to +4000
+
+    // Add natural meandering curves
+    const meander1 = Math.sin(flowProgress * Math.PI * 2) * curveAmplitude * 0.3;
+    const meander2 = Math.sin(flowProgress * Math.PI * 4 + 1) * curveAmplitude * 0.15;
+
+    // Final river centerline with curves
+    const riverCenterX = centerlineX + meander1;
+    const riverCenterY = centerlineY + meander2;
+
+    // Distance from point to river centerline
+    return Math.sqrt((x - riverCenterX) * (x - riverCenterX) + (y - riverCenterY) * (y - riverCenterY));
+  }
+
+  private getRiverWidth(x: number, y: number): number {
+    const distanceFromCityCenter = Math.sqrt(x * x + y * y);
+
+    // River width varies realistically:
+    // - Narrow in the hills/countryside (150m)
+    // - Medium through suburbs (300m)
+    // - Wide through city center (500m)
+    // - Widest near the mouth (800m at southeast edge)
+
+    if (distanceFromCityCenter < 2000) {
+      return 500; // Wide through dense city center
+    } else if (distanceFromCityCenter < 5000) {
+      return 300; // Medium through suburbs
+    } else {
+      // Varies based on distance to mouth (southeast corner)
+      const distanceToMouth = Math.sqrt((x - 6000) * (x - 6000) + (y - 6000) * (y - 6000));
+      if (distanceToMouth < 3000) {
+        return 800; // Widest near mouth
+      }
+      return 200; // Narrow in rural/mountainous areas
+    }
+  }
+
+  private smoothStep(edge0: number, edge1: number, x: number): number {
+    const t = Math.max(0, Math.min(1, (x - edge0) / (edge1 - edge0)));
+    return t * t * (3 - 2 * t);
+  }
 }
 
-// Generate layered noise for realistic terrain with local hills
+// Legacy function maintained for compatibility - now uses enhanced generator
 function getTerrainHeight(x: number, y: number): number {
-  const scale1 = 0.0003; // Very large terrain features
-  const scale2 = 0.0015; // Medium terrain features
-  const scale3 = 0.006;  // Fine terrain details
-
-  const noise1 = noise(x * scale1, y * scale1) * 20; // ±20m major elevation
-  const noise2 = noise(x * scale2, y * scale2) * 12; // ±12m medium hills
-  const noise3 = noise(x * scale3, y * scale3) * 4;  // ±4m fine details
-
-  // Create 3 large dramatic hills with smooth falloff
-  const hill1CenterX = 2500, hill1CenterY = 2000; // Northeast hill
-  const hill2CenterX = -3000, hill2CenterY = -1500; // Southwest hill
-  const hill3CenterX = 1000, hill3CenterY = -3500; // Southeast hill
-
-  // Calculate distance to each hill center
-  const dist1 = Math.sqrt((x - hill1CenterX) * (x - hill1CenterX) + (y - hill1CenterY) * (y - hill1CenterY));
-  const dist2 = Math.sqrt((x - hill2CenterX) * (x - hill2CenterX) + (y - hill2CenterY) * (y - hill2CenterY));
-  const dist3 = Math.sqrt((x - hill3CenterX) * (x - hill3CenterX) + (y - hill3CenterY) * (y - hill3CenterY));
-
-  // Create dramatic hill profiles with smooth Gaussian falloff
-  const hillRadius = 2200; // 2.2km radius for each hill (slightly larger)
-  const hill1Height = Math.max(0, 180 * Math.exp(-Math.pow(dist1 / hillRadius, 2))); // Peak 180m - DRAMATIC!
-  const hill2Height = Math.max(0, 200 * Math.exp(-Math.pow(dist2 / hillRadius, 2))); // Peak 200m - MASSIVE!
-  const hill3Height = Math.max(0, 160 * Math.exp(-Math.pow(dist3 / hillRadius, 2))); // Peak 160m - BIG!
-
-  // Add noise variation to hill surfaces for naturalness
-  const hillNoise1 = hill1Height > 5 ? noise(x * 0.002, y * 0.002) * hill1Height * 0.15 : 0;
-  const hillNoise2 = hill2Height > 5 ? noise(x * 0.002 + 100, y * 0.002 + 100) * hill2Height * 0.15 : 0;
-  const hillNoise3 = hill3Height > 5 ? noise(x * 0.002 + 200, y * 0.002 + 200) * hill3Height * 0.15 : 0;
-
-  const hills = hill1Height + hill2Height + hill3Height + hillNoise1 + hillNoise2 + hillNoise3;
-
-  // Base terrain (very subtle)
-  const baseTerrain = noise1 + noise2 + noise3;
-
-  // Combine with reduced base terrain influence
-  const totalElevation = baseTerrain * 0.3 + hills;
-
-  // Less flattening near downtown, but still some
-  const distanceFromCenter = Math.sqrt(x * x + y * y);
-  const flatteningFactor = Math.max(0.7, 1 - (distanceFromCenter / 10000)); // Less aggressive flattening
-
-  return totalElevation * flatteningFactor;
+  const generator = EnhancedTerrainGenerator.getInstance();
+  return generator.getTerrainData(x, y).elevation;
 }
 
 export function createTerrainLayer() {
+  // Initialize the enhanced terrain generator
+  const generator = EnhancedTerrainGenerator.getInstance();
+  const textureAtlas = generator.getTextureAtlas();
+  const textureRegions = textureAtlas.getTextureRegions();
+
   // Use the same coordinate system as buildings (meters from city center)
   const terrainSize = 12000; // 12km x 12km to cover entire city
-  const patchSize = 600; // 600m x 600m patches for very smooth borders
+  const patchSize = 400; // Smaller patches (400m x 400m) for better texture resolution
   const patchesPerSide = Math.ceil(terrainSize / patchSize);
   const halfSize = terrainSize / 2;
 
@@ -66,78 +256,37 @@ export function createTerrainLayer() {
       const centerX = -halfSize + (x + 0.5) * patchSize;
       const centerY = -halfSize + (y + 0.5) * patchSize;
 
-      // Get terrain height at this location
-      const elevation = getTerrainHeight(centerX, centerY);
+      // Get enhanced terrain data including texture information
+      const terrainData = generator.getTerrainData(centerX, centerY);
+      const { elevation, textureKey, materials, slope } = terrainData;
 
-      // Ultra-realistic terrain coloring with proper elevation zones and lighting
+      // Get texture UV coordinates from atlas
+      const textureRegion = textureRegions[textureKey];
+      if (!textureRegion) {
+        console.warn(`Missing texture region for key: ${textureKey}`);
+        continue;
+      }
+
+      // Calculate lighting effects based on slope and environment
       const distanceFromCenter = Math.sqrt(centerX * centerX + centerY * centerY);
-      const urbanFactor = Math.max(0, 1 - (distanceFromCenter / 5000)); // 0 = rural, 1 = urban
+      const urbanFactor = Math.max(0, 1 - (distanceFromCenter / 5000));
 
-      // Calculate slope for lighting (approximate using nearby elevation changes)
-      const sampleDistance = 300; // Sample distance for slope calculation
-      const elevationEast = getTerrainHeight(centerX + sampleDistance, centerY);
-      const elevationWest = getTerrainHeight(centerX - sampleDistance, centerY);
-      const elevationNorth = getTerrainHeight(centerX, centerY + sampleDistance);
-      const elevationSouth = getTerrainHeight(centerX, centerY - sampleDistance);
+      // Enhanced slope-based lighting calculation
+      const slopeShading = calculateSlopeShading(slope, centerX, centerY);
+      const atmosphericEffect = calculateAtmosphericEffect(distanceFromCenter);
 
-      const slopeX = (elevationEast - elevationWest) / (sampleDistance * 2);
-      const slopeY = (elevationNorth - elevationSouth) / (sampleDistance * 2);
-      const slopeAngle = Math.sqrt(slopeX * slopeX + slopeY * slopeY);
+      // Base color from texture (we'll still use some color for lighting effects)
+      const baseColor = getTextureBasedColor(textureKey, elevation, urbanFactor);
 
-      // Realistic elevation-based terrain types
-      let baseColor;
-      if (elevation > 150) {
-        // Mountain peaks - rocky gray-brown
-        baseColor = [95, 85, 75];
-      } else if (elevation > 100) {
-        // High hills - exposed rock and sparse vegetation
-        baseColor = [110, 100, 85];
-      } else if (elevation > 50) {
-        // Mid hills - mixed forest and meadow
-        baseColor = [75, 95, 55];
-      } else if (elevation > 20) {
-        // Low hills - dense forest
-        baseColor = [65, 85, 45];
-      } else if (elevation > 5) {
-        // Suburban areas - grass and development
-        baseColor = [85, 100, 65];
-      } else if (elevation > -5) {
-        // Urban lowlands - mixed pavement and vegetation
-        baseColor = [95, 95, 85];
-      } else {
-        // Water level areas - wetlands
-        baseColor = [70, 80, 90];
-      }
-
-      // Add slope-based lighting (north-facing slopes darker, south-facing brighter)
-      const lightDirection = [0, 1, 0.8]; // Light from south-east, slightly from above
-      const slopeShading = 1 + (slopeY * lightDirection[1] + slopeX * lightDirection[0]) * 0.3;
-      const shadingFactor = Math.max(0.6, Math.min(1.4, slopeShading));
-
-      // Apply urban development overlay
-      if (urbanFactor > 0.2) {
-        const concreteAmount = urbanFactor * 0.7;
-        const concreteColor = [115, 115, 120];
-        baseColor = [
-          Math.floor(baseColor[0] * (1 - concreteAmount) + concreteColor[0] * concreteAmount),
-          Math.floor(baseColor[1] * (1 - concreteAmount) + concreteColor[1] * concreteAmount),
-          Math.floor(baseColor[2] * (1 - concreteAmount) + concreteColor[2] * concreteAmount)
-        ];
-      }
-
-      // Add realistic atmospheric perspective (distant areas more blue/hazy)
-      const atmosphericDistance = Math.min(1, distanceFromCenter / 8000);
-      const atmosphericBlue = 20 * atmosphericDistance;
-
-      // Apply all effects
-      const color = [
-        Math.max(30, Math.min(255, Math.floor((baseColor[0] + atmosphericBlue) * shadingFactor))),
-        Math.max(30, Math.min(255, Math.floor((baseColor[1] + atmosphericBlue) * shadingFactor))),
-        Math.max(30, Math.min(255, Math.floor((baseColor[2] + atmosphericBlue * 1.2) * shadingFactor))),
+      // Apply lighting and atmospheric effects
+      const finalColor = [
+        Math.max(20, Math.min(255, Math.floor(baseColor[0] * slopeShading * atmosphericEffect.lighting + atmosphericEffect.haze))),
+        Math.max(20, Math.min(255, Math.floor(baseColor[1] * slopeShading * atmosphericEffect.lighting + atmosphericEffect.haze))),
+        Math.max(20, Math.min(255, Math.floor(baseColor[2] * slopeShading * atmosphericEffect.lighting + atmosphericEffect.haze * 1.1))),
         255
       ];
 
-      // Create terrain patch with local coordinates
+      // Create terrain patch with texture coordinates
       const halfPatch = patchSize / 2;
       terrainPatches.push({
         id: `terrain-${x}-${y}`,
@@ -148,7 +297,20 @@ export function createTerrainLayer() {
           [centerX - halfPatch, centerY + halfPatch]
         ],
         elevation: elevation,
-        color: color
+        color: finalColor,
+        textureKey: textureKey,
+        textureCoords: [
+          [textureRegion.x, textureRegion.y], // Bottom-left
+          [textureRegion.x + textureRegion.width, textureRegion.y], // Bottom-right
+          [textureRegion.x + textureRegion.width, textureRegion.y + textureRegion.height], // Top-right
+          [textureRegion.x, textureRegion.y + textureRegion.height] // Top-left
+        ],
+        materials: materials || {
+          ambient: 0.4,
+          diffuse: 0.8,
+          specular: 0.1,
+          roughness: 0.8
+        }
       });
     }
   }
@@ -169,21 +331,76 @@ export function createTerrainLayer() {
     stroked: false,
     elevationScale: 1.0, // 1:1 scale to match building heights
     pickable: false,
-    material: {
-      ambient: 0.4,   // Reduced ambient for more dramatic shadows
-      diffuse: 0.9,   // High diffuse for realistic light response
-      shininess: 1,   // Very low shininess - natural terrain is not shiny
-      specularColor: [40, 45, 50] // Slightly cool specular highlights
-    },
-    // Enhanced lighting settings for ultra realism
+    // Dynamic material properties based on terrain type
+    material: (d: any) => ({
+      ambient: d.materials?.ambient || 0.4,
+      diffuse: d.materials?.diffuse || 0.8,
+      shininess: 1 / (d.materials?.roughness || 0.8), // Convert roughness to shininess
+      specularColor: d.materials?.metallic > 0.1 ? [100, 100, 120] : [40, 45, 50]
+    }),
+    // Enhanced lighting settings optimized for textured terrain
     lightSettings: {
-      lightsPosition: [-74.0060, 40.7128, 5000, -74.0060, 40.7128, 5000], // High sun position
-      ambientRatio: 0.35,   // Lower ambient ratio for better contrast
-      diffuseRatio: 0.65,   // Higher diffuse for realistic lighting
-      specularRatio: 0.05,  // Minimal specular for natural terrain
+      lightsPosition: [-74.0060, 40.7128, 5000, -74.0060, 40.7128, 5000],
+      ambientRatio: 0.3,   // Lower ambient for better texture definition
+      diffuseRatio: 0.7,   // Higher diffuse for realistic lighting
+      specularRatio: 0.05, // Minimal specular for natural terrain
       numberOfLights: 2
+    },
+    // Note: Actual texture mapping would require a TextureLayer or custom shader
+    // For now, we use enhanced color-based representation
+    updateTriggers: {
+      getFillColor: [terrainPatches.length] // Trigger updates when terrain changes
     }
   });
+}
+
+// Helper functions for enhanced terrain rendering
+function calculateSlopeShading(slope: number, x: number, y: number): number {
+  // Enhanced slope-based shading with directional lighting
+  const lightDirection = { x: 0.5, y: 0.7, z: 0.8 }; // Soft afternoon sun
+  const normalizedSlope = Math.min(slope, 1.0); // Clamp extreme slopes
+
+  // Calculate surface normal approximation
+  const slopeEffect = 1 + (normalizedSlope * lightDirection.y - normalizedSlope * lightDirection.x) * 0.4;
+  return Math.max(0.5, Math.min(1.5, slopeEffect));
+}
+
+function calculateAtmosphericEffect(distanceFromCenter: number): { lighting: number; haze: number } {
+  const atmosphericDistance = Math.min(1, distanceFromCenter / 10000);
+  return {
+    lighting: 1 - (atmosphericDistance * 0.2), // Slight dimming with distance
+    haze: atmosphericDistance * 15 // Blue atmospheric haze
+  };
+}
+
+function getTextureBasedColor(textureKey: string, elevation: number, urbanFactor: number): [number, number, number] {
+  // Base colors that complement our texture atlas
+  const colorMap: Record<string, [number, number, number]> = {
+    lush_grass: [74, 124, 89],
+    dry_grass: [139, 115, 85],
+    rich_soil: [139, 69, 19],
+    rocky_terrain: [105, 105, 105],
+    mountain_stone: [95, 95, 95],
+    smooth_concrete: [192, 192, 192],
+    weathered_concrete: [160, 160, 160],
+    dark_asphalt: [47, 47, 47],
+    forest_floor: [34, 139, 34],
+    sandy_beach: [244, 164, 96],
+    marsh_wetland: [85, 107, 47],
+    coarse_gravel: [128, 128, 128]
+  };
+
+  const baseColor = colorMap[textureKey] || [100, 100, 100];
+
+  // Apply environmental modulations
+  const elevationFactor = 1 + (elevation / 1000); // Slight brightening with elevation
+  const urbanTint = urbanFactor > 0.3 ? 1.1 : 1.0; // Slightly brighter in urban areas
+
+  return [
+    Math.min(255, baseColor[0] * elevationFactor * urbanTint),
+    Math.min(255, baseColor[1] * elevationFactor * urbanTint),
+    Math.min(255, baseColor[2] * elevationFactor * urbanTint)
+  ];
 }
 
 export function createWaterLayer(riverData?: any) {

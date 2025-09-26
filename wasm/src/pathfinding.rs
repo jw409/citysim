@@ -1,9 +1,10 @@
 use crate::agent::Point2D;
-use crate::world::{Road, POI};
+use crate::world::Road;
 use std::collections::{HashMap, BinaryHeap};
 use std::cmp::Ordering;
 
 #[derive(Copy, Clone, PartialEq)]
+#[allow(dead_code)]
 struct State {
     cost: f32,
     position: usize,
@@ -23,11 +24,13 @@ impl PartialOrd for State {
     }
 }
 
+#[allow(dead_code)]
 pub struct PathFinder {
     road_graph: HashMap<usize, Vec<(usize, f32)>>,
     road_nodes: Vec<Point2D>,
 }
 
+#[allow(dead_code)]
 impl PathFinder {
     pub fn new(roads: &[Road]) -> Self {
         let mut road_graph = HashMap::new();
@@ -60,6 +63,7 @@ impl PathFinder {
         }
     }
 
+    #[allow(dead_code)]
     pub fn find_path(&self, start: &Point2D, end: &Point2D) -> Vec<Point2D> {
         let start_node = self.find_nearest_node(start);
         let end_node = self.find_nearest_node(end);
@@ -76,6 +80,7 @@ impl PathFinder {
         }
     }
 
+    #[allow(dead_code)]
     fn find_nearest_node(&self, point: &Point2D) -> usize {
         self.road_nodes
             .iter()
@@ -85,6 +90,7 @@ impl PathFinder {
             .unwrap_or(0)
     }
 
+    #[allow(dead_code)]
     fn dijkstra(&self, start: usize, goal: usize) -> Option<Vec<usize>> {
         let mut dist = vec![f32::INFINITY; self.road_nodes.len()];
         let mut prev = vec![None; self.road_nodes.len()];
@@ -128,6 +134,7 @@ impl PathFinder {
         None
     }
 
+    #[allow(dead_code)]
     fn distance(a: &Point2D, b: &Point2D) -> f32 {
         let dx = a.x - b.x;
         let dy = a.y - b.y;

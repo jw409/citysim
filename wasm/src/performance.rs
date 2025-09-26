@@ -1,5 +1,4 @@
 use wasm_bindgen::prelude::*;
-use web_sys::Performance;
 
 #[wasm_bindgen]
 #[derive(Clone, Debug)]

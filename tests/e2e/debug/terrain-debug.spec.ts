@@ -1,16 +1,20 @@
 import { test, expect } from '@playwright/test';
 import { createScreenshotHelpers } from '../../utils/screenshot-helpers';
 import { createDebugHelpers } from '../../utils/debug-helpers';
+import { ViewportHelpers } from '../../fixtures/viewport-helpers';
 
 test.describe('Terrain Visualization Debug Suite', () => {
+  let viewport: ViewportHelpers;
+
   test.beforeEach(async ({ page }) => {
+    viewport = new ViewportHelpers(page);
+
     // Set viewport for consistent terrain visualization
     await page.setViewportSize({ width: 1920, height: 1440 });
-    await page.goto('/');
+    await viewport.goto();
 
     // Wait for city to load completely
-    await page.waitForSelector('[data-testid="city-loaded"]', { timeout: 30000 });
-    await page.waitForTimeout(2000); // Allow rendering to stabilize
+    await viewport.waitForViewportStabilization(2000); // Allow rendering to stabilize
   });
 
   test('should verify terrain layer is enabled and visible', async ({ page }) => {
@@ -77,15 +81,16 @@ test.describe('Terrain Visualization Debug Suite', () => {
     ];
 
     for (const location of testLocations) {
-      // Pan to location
-      await page.evaluate(({ x, y, zoom }) => {
-        if (window.viewport) {
-          window.viewport.panTo([x, y]);
-          window.viewport.setZoom(zoom);
-        }
-      }, location);
+      // Pan to location using proper viewport helpers
+      // Pan camera based on location coordinates
+      const panFactorX = location.x / 100;
+      const panFactorY = location.y / 100;
+      await viewport.panCamera(panFactorX, panFactorY);
 
-      await page.waitForTimeout(1000); // Allow movement to complete
+      // Set zoom based on location requirements
+      const zoomDelta = location.zoom - 800; // Adjust relative to base zoom
+      await viewport.zoomCamera(zoomDelta);
+      await viewport.waitForViewportStabilization(1000); // Allow movement to complete
 
       // Capture screenshot of terrain at this location
       await screenshots.captureDebug(`terrain-${location.name}`);

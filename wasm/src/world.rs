@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use crate::agent::{Agent, Point2D};
-use rand::{Rng, SeedableRng};
+use rand::SeedableRng;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CityModel {
@@ -73,6 +73,7 @@ impl World {
         }
     }
 
+    #[allow(dead_code)]
     pub fn load_city(&mut self, city_data: CityModel) {
         self.city = city_data;
         self.build_lookups();
@@ -97,6 +98,7 @@ impl World {
         }
     }
 
+    #[allow(dead_code)]
     fn spawn_agents(&mut self) {
         let mut agent_id = 0;
 
@@ -157,6 +159,7 @@ impl World {
         }
     }
 
+    #[allow(dead_code)]
     pub fn find_nearest_poi(&self, position: &Point2D, poi_type: u32) -> Option<&POI> {
         self.city.pois
             .iter()
@@ -168,12 +171,14 @@ impl World {
             })
     }
 
+    #[allow(dead_code)]
     pub fn add_poi(&mut self, poi: POI) {
         let index = self.city.pois.len();
         self.poi_lookup.insert(poi.id.clone(), index);
         self.city.pois.push(poi);
     }
 
+    #[allow(dead_code)]
     pub fn remove_poi(&mut self, poi_id: &str) {
         if let Some(&index) = self.poi_lookup.get(poi_id) {
             self.city.pois.remove(index);

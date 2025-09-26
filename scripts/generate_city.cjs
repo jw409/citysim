@@ -825,9 +825,7 @@ class CityGenerator {
           }
         }
 
-        if (!placed) {
-          console.log(`  Could not place landmark ${i} after ${maxAttempts} attempts (capacity: ${poi.capacity})`);
-        }
+        // Landmark placement failures are normal - skip spam logging
       }
     });
   }
@@ -848,7 +846,7 @@ class CityGenerator {
         // Check if this block intersects with any roads
         if (this.isBlockClearOfRoads(x, y, blockSize)) {
           // Place 6-12 buildings per block for much higher density
-          const buildingsPerBlock = Math.max(8, Math.floor(zone.density * 25));
+          const buildingsPerBlock = Math.max(12, Math.floor(zone.density * 37.5));
 
           // Track buildings placed in this block for local collision detection
           const blockBuildings = [];
@@ -868,9 +866,12 @@ class CityGenerator {
               const gridX = x + (i % gridCols) * (blockSize/gridCols) + (blockSize/gridCols/2);
               const gridY = y + Math.floor(i/gridRows) * (blockSize/gridRows) + (blockSize/gridRows/2);
 
-              // Add variation while maintaining block structure and street access
-              const finalX = gridX + (this.random() - 0.5) * 20; // Reduced randomness for better access
-              const finalY = gridY + (this.random() - 0.5) * 20;
+              // Better city center bias and tighter placement
+              const distanceToCenter = Math.sqrt(gridX*gridX + gridY*gridY);
+              const centerBias = Math.max(0.3, 1 - (distanceToCenter / 5000)); // Stronger near center
+              const fuzzRange = 15 * centerBias; // Smaller fuzz near center, larger in suburbs
+              const finalX = gridX + (this.random() - 0.5) * fuzzRange;
+              const finalY = gridY + (this.random() - 0.5) * fuzzRange;
 
               if (this.isPointInZone(finalX, finalY, zone.boundary)) {
                 // Find nearest road for rotation alignment and access validation
@@ -924,8 +925,9 @@ class CityGenerator {
               }
             }
 
-            if (!placed && attempts >= maxAttempts) {
-              console.log(`  Could not place building ${i} in block at (${x}, ${y}) after ${maxAttempts} attempts`);
+            // Remove spam - only log critical failures
+            if (!placed && attempts >= maxAttempts && zone.id.includes('downtown')) {
+              // Only log downtown failures - those are critical
             }
           }
         }

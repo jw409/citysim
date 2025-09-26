@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { cubicEaseOut } from '../utils/coordinates';
 
 export interface CameraState {
   longitude: number;
@@ -254,8 +255,8 @@ export function useCamera(initialState: CameraState) {
         const elapsed = Date.now() - startTime;
         const progress = Math.min(elapsed / duration, 1);
 
-        // Easing function (ease-out cubic)
-        const eased = 1 - Math.pow(1 - progress, 3);
+        // Easing function (ease-out cubic) using utility function
+        const eased = cubicEaseOut(progress);
 
         setViewState(prev => {
           const newState: CameraState = { ...prev };

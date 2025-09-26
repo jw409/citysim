@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { SimulationProvider } from './contexts/SimulationContext';
 import { TerrainProvider } from './contexts/TerrainContext';
 import { ErrorBoundary } from './components/ErrorBoundary';
@@ -41,9 +41,11 @@ function AppContent() {
       }
     }
   });
+  // Optimization state - temporarily unused but kept for future implementation
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isOptimizing, setIsOptimizing] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [optimizationProgress, setOptimizationProgress] = useState<SolverProgress>();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     initialize();
@@ -75,7 +77,8 @@ function AppContent() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  // Add optimization handler
+  // Add optimization handler - temporarily unused but kept for future implementation
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleOptimize = useCallback(async (config: OptimizationConfig) => {
     if (!state.cityModel || state.agents.length === 0) return;
 

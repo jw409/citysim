@@ -33,14 +33,14 @@ impl DeviceBenchmark {
 
         // CPU-intensive test: prime number calculation + mathematical operations
         let mut primes_found = 0;
-        let mut computation_sum = 0.0;
+        let mut _computation_sum = 0.0;
 
         for n in 2..20000 {
             if self.is_prime(n) {
                 primes_found += 1;
             }
             // Add floating point operations for comprehensive CPU test
-            computation_sum += (n as f64).sqrt() * (n as f64).sin();
+            _computation_sum += (n as f64).sqrt() * (n as f64).sin();
         }
 
         let duration = Date::now() - start;
