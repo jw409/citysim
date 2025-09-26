@@ -96,7 +96,14 @@ class CityGenerator {
       { x: -4500, y: -2500, width: 2000, height: 2000, id: 'southwest' },
       // Fill the gaps with more residential
       { x: 0, y: 4000, width: 2000, height: 1000, id: 'far_north' },
-      { x: 2000, y: 2000, width: 1500, height: 1500, id: 'northeast' }
+      { x: 2000, y: 2000, width: 1500, height: 1500, id: 'northeast' },
+      // Additional areas to fill blank spaces
+      { x: 4000, y: 1500, width: 1800, height: 1800, id: 'far_east' },
+      { x: -5000, y: 500, width: 1500, height: 2000, id: 'far_west' },
+      { x: 500, y: -4500, width: 2500, height: 1500, id: 'deep_south' },
+      { x: -3500, y: 4000, width: 2000, height: 1200, id: 'northwest_suburbs' },
+      { x: 3500, y: -3000, width: 1800, height: 1500, id: 'southeast_suburbs' },
+      { x: -1000, y: -4500, width: 2000, height: 1000, id: 'south_suburbs' }
     ];
 
     residentialAreas.forEach(area => {
@@ -104,7 +111,7 @@ class CityGenerator {
         id: `residential_${area.id}`,
         type: 0, // RESIDENTIAL
         boundary: this.generateRectangularZone(area.x, area.y, area.width, area.height),
-        density: 0.85,
+        density: 0.95,
         properties: { residential_density: 0.85, commercial_density: 0.15, office_density: 0.05 }
       });
     });
@@ -121,7 +128,11 @@ class CityGenerator {
       { x: 2500, y: 0, width: 1000, height: 1000, id: 'east_commercial' },
       { x: -2500, y: -1000, width: 1000, height: 1200, id: 'west_commercial' },
       { x: 500, y: -2000, width: 1200, height: 600, id: 'south_commercial' },
-      { x: -1000, y: 3500, width: 1500, height: 500, id: 'north_commercial' }
+      { x: -1000, y: 3500, width: 1500, height: 500, id: 'north_commercial' },
+      // More commercial areas to fill blank spaces
+      { x: 3500, y: 500, width: 1200, height: 800, id: 'outer_east_commercial' },
+      { x: -4000, y: 1500, width: 1000, height: 1000, id: 'outer_west_commercial' },
+      { x: 1000, y: -3500, width: 1500, height: 800, id: 'far_south_commercial' }
     ];
 
     commercialAreas.forEach(area => {
@@ -846,7 +857,7 @@ class CityGenerator {
         // Check if this block intersects with any roads
         if (this.isBlockClearOfRoads(x, y, blockSize)) {
           // Place 6-12 buildings per block for much higher density
-          const buildingsPerBlock = Math.max(12, Math.floor(zone.density * 37.5));
+          const buildingsPerBlock = Math.max(16, Math.floor(zone.density * 50));
 
           // Track buildings placed in this block for local collision detection
           const blockBuildings = [];
