@@ -12,7 +12,7 @@ export function createAircraftLayer(aircraftData: any[]) {
     new ScatterplotLayer({
       id: 'aircraft',
       data: aircraft,
-      getPosition: (d: any) => [d.x || d.longitude, d.y || d.latitude, d.altitude || 3000],
+      getPosition: (d: any) => [d.lng, d.lat, d.altitude || 3000],
       getRadius: (d: any) => Math.max(10, (d.altitude || 3000) / 300),
       getFillColor: (d: any) => {
         // Color by aircraft type
@@ -193,33 +193,44 @@ function generateFlightPath(aircraft: any[], index: number, bounds: any, type: s
 function generateAirCorridor(aircraft: any[], index: number, bounds: any) {
   const { min_x, min_y, max_x, max_y } = bounds;
 
-  // Create major air corridors crossing the city
+  // Create shorter, localized air corridors instead of city-spanning ones
   const corridorTypes = ['east_west', 'north_south', 'diagonal'];
   const corridorType = corridorTypes[index % corridorTypes.length];
 
   const pathPoints: [number, number, number][] = [];
   const altitude = 9000 + Math.random() * 3000;
 
+  // Limit corridor length to 2km max to prevent planetary-scale artifacts
+  const maxCorridorLength = 2000;
+  const centerX = (min_x + max_x) / 2;
+  const centerY = (min_y + max_y) / 2;
+
   switch (corridorType) {
     case 'east_west':
-      const y = min_y + Math.random() * (max_y - min_y);
-      for (let x = min_x; x <= max_x; x += (max_x - min_x) / 10) {
-        pathPoints.push([x, y + (Math.random() - 0.5) * 100, altitude]);
+      const y = centerY + (Math.random() - 0.5) * 1000; // Within 500m of center
+      const startX = centerX - maxCorridorLength / 2;
+      const endX = centerX + maxCorridorLength / 2;
+      for (let x = startX; x <= endX; x += maxCorridorLength / 5) {
+        pathPoints.push([x, y + (Math.random() - 0.5) * 50, altitude]);
       }
       break;
 
     case 'north_south':
-      const x = min_x + Math.random() * (max_x - min_x);
-      for (let y = min_y; y <= max_y; y += (max_y - min_y) / 10) {
-        pathPoints.push([x + (Math.random() - 0.5) * 100, y, altitude]);
+      const x = centerX + (Math.random() - 0.5) * 1000; // Within 500m of center
+      const startY = centerY - maxCorridorLength / 2;
+      const endY = centerY + maxCorridorLength / 2;
+      for (let y = startY; y <= endY; y += maxCorridorLength / 5) {
+        pathPoints.push([x + (Math.random() - 0.5) * 50, y, altitude]);
       }
       break;
 
     case 'diagonal':
-      for (let i = 0; i <= 10; i++) {
-        const progress = i / 10;
-        const px = min_x + progress * (max_x - min_x);
-        const py = min_y + progress * (max_y - min_y);
+      const startCornerX = centerX - maxCorridorLength / 2;
+      const startCornerY = centerY - maxCorridorLength / 2;
+      for (let i = 0; i <= 5; i++) {
+        const progress = i / 5;
+        const px = startCornerX + progress * maxCorridorLength;
+        const py = startCornerY + progress * maxCorridorLength;
         pathPoints.push([px, py, altitude]);
       }
       break;
@@ -253,11 +264,11 @@ function generateAirportPatterns(aircraft: any[], bounds: any, density: number) 
       const angle = (approach * 90 + Math.random() * 30 - 15) * Math.PI / 180;
       const pathPoints: [number, number, number][] = [];
 
-      // Approach path (descending)
-      for (let distance = 2000; distance >= 0; distance -= 200) {
+      // Approach path (descending) - shortened to prevent planetary artifacts
+      for (let distance = 1000; distance >= 0; distance -= 150) {
         const x = airportX + Math.cos(angle) * distance;
         const y = airportY + Math.sin(angle) * distance;
-        const altitude = Math.max(100, (distance / 2000) * 3000);
+        const altitude = Math.max(100, (distance / 1000) * 2000);
 
         if (x >= min_x && x <= max_x && y >= min_y && y <= max_y) {
           pathPoints.push([x, y, altitude]);

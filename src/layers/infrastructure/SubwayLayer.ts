@@ -12,7 +12,7 @@ export function createSubwayLayer(subwayData: any[]) {
     new PathLayer({
       id: 'subway_tunnels',
       data: tunnels,
-      getPath: (d: any) => d.path || d.coordinates,
+      getPath: (d: any) => d.path || d.coordinates, // Already converted to lat/lng
       getWidth: (d: any) => d.width || 4,
       getColor: (d: any) => {
         // Color by subway line
@@ -48,7 +48,7 @@ export function createSubwayLayer(subwayData: any[]) {
     new ScatterplotLayer({
       id: 'subway_stations',
       data: stations,
-      getPosition: (d: any) => [d.x || d.longitude, d.y || d.latitude, d.elevation || -12],
+      getPosition: (d: any) => [d.lng, d.lat, d.elevation || -12], // Coordinates converted by convertAllCoordinates
       getRadius: (d: any) => d.size || 15,
       getFillColor: [255, 200, 100, 200],
       getLineColor: [0, 0, 0, 100],

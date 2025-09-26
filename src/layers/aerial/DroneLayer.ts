@@ -12,7 +12,7 @@ export function createDroneLayer(droneData: any[]) {
     new ScatterplotLayer({
       id: 'drones',
       data: drones,
-      getPosition: (d: any) => [d.x || d.longitude, d.y || d.latitude, d.altitude || 80],
+      getPosition: (d: any) => [d.lng, d.lat, d.altitude || 80],
       getRadius: (d: any) => Math.max(3, (d.size || 1) * 2),
       getFillColor: (d: any) => {
         // Color by drone type and status

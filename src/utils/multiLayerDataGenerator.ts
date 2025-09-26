@@ -8,6 +8,7 @@ import { generateElevatedTransit } from '../layers/elevated/ElevatedTransitLayer
 import { generateHelicopterTraffic } from '../layers/aerial/HelicopterLayer';
 import { generateAirTraffic } from '../layers/aerial/AircraftLayer';
 import { generateDroneTraffic } from '../layers/aerial/DroneLayer';
+import { convertAllCoordinates } from './coordinates';
 
 export interface MultiLayerCityData {
   infrastructure: {
@@ -80,21 +81,30 @@ export function generateMultiLayerCityData(cityModel: any): MultiLayerCityData {
     drones: drones.length
   });
 
+  // Convert ALL coordinates from meters to lat/lng at one central point
+  console.log('Converting all coordinates from meters to lat/lng...');
+
+  const convertedInfrastructure = convertAllCoordinates({
+    sewers,
+    utilities,
+    subway,
+    parking,
+    elevatedRoads,
+    skyBridges,
+    elevatedTransit
+  });
+
+  const convertedAerialTraffic = convertAllCoordinates({
+    helicopters,
+    aircraft,
+    drones
+  });
+
+  console.log('✅ All coordinates converted to lat/lng');
+
   return {
-    infrastructure: {
-      sewers,
-      utilities,
-      subway,
-      parking,
-      elevatedRoads,
-      skyBridges,
-      elevatedTransit
-    },
-    aerialTraffic: {
-      helicopters,
-      aircraft,
-      drones
-    },
+    infrastructure: convertedInfrastructure,
+    aerialTraffic: convertedAerialTraffic,
     bounds
   };
 }

@@ -7,7 +7,7 @@ export function createSkyBridgeLayer(bridgeData: any[]) {
   return new PathLayer({
     id: 'sky_bridges',
     data: bridgeData,
-    getPath: (d: any) => d.path || [[d.start_x, d.start_y], [d.end_x, d.end_y]],
+    getPath: (d: any) => d.path, // Path coordinates already converted by convertAllCoordinates
     getWidth: (d: any) => d.width || 3,
     getColor: (d: any) => {
       // Color by bridge type

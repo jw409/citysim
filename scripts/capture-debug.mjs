@@ -159,9 +159,9 @@ async function main() {
     await captureScreenshot(page, normalPath, fullPage);
     filepaths.push(normalPath);
 
-    // 2. Panned view
+    // 2. Panned view - DRAMATIC rotation (90 degrees)
     console.log('📸 Capturing panned view...');
-    await rotateCamera(page, 100, 0);
+    await rotateCamera(page, 300, 0);
     await waitForStabilization(page, 1000);
 
     const pannedPath = generateFilename(prefix, 'panned');
@@ -169,13 +169,13 @@ async function main() {
     filepaths.push(pannedPath);
 
     // Reset rotation
-    await rotateCamera(page, -100, 0);
+    await rotateCamera(page, -300, 0);
     await waitForStabilization(page, 500);
 
     if (comprehensive) {
-      // 3. Tilted view
+      // 3. Tilted view - DRAMATIC pitch change (bird's eye)
       console.log('📸 Capturing tilted view...');
-      await rotateCamera(page, 0, 50);
+      await rotateCamera(page, 0, 200);
       await waitForStabilization(page, 1000);
 
       const tiltedPath = generateFilename(prefix, 'tilted');
@@ -183,20 +183,27 @@ async function main() {
       filepaths.push(tiltedPath);
 
       // Reset tilt
-      await rotateCamera(page, 0, -50);
+      await rotateCamera(page, 0, -200);
       await waitForStabilization(page, 500);
 
-      // 4. Zoomed out view
-      console.log('📸 Capturing zoomed out view...');
-      await zoomCamera(page, 300);
-      await waitForStabilization(page, 1000);
+      // 4. EXTREME zoom out view (city becomes a pixel)
+      console.log('📸 Capturing EXTREME zoom out view (city-as-pixel level)...');
+      // Multiple scroll wheel events to zoom WAY out
+      for (let i = 0; i < 15; i++) {
+        await zoomCamera(page, 1000);
+        await page.waitForTimeout(100);
+      }
+      await waitForStabilization(page, 2000);
 
       const zoomedPath = generateFilename(prefix, 'zoomed-out');
       await captureScreenshot(page, zoomedPath, fullPage);
       filepaths.push(zoomedPath);
 
-      // Reset zoom
-      await zoomCamera(page, -300);
+      // Reset zoom by zooming back in
+      for (let i = 0; i < 15; i++) {
+        await zoomCamera(page, -1000);
+        await page.waitForTimeout(100);
+      }
       await waitForStabilization(page, 500);
     }
 

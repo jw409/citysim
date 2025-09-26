@@ -46,7 +46,7 @@ export function createElevatedTransitLayer(transitData: any[]) {
     new ScatterplotLayer({
       id: 'elevated_transit_stations',
       data: stations,
-      getPosition: (d: any) => [d.x || d.longitude, d.y || d.latitude, d.elevation || 40],
+      getPosition: (d: any) => [d.lng, d.lat, d.elevation || 40],
       getRadius: (d: any) => d.size || 20,
       getFillColor: [255, 200, 100, 220],
       getLineColor: [0, 0, 0, 150],

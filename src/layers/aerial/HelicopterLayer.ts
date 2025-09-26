@@ -12,7 +12,7 @@ export function createHelicopterLayer(helicopterData: any[]) {
     new ScatterplotLayer({
       id: 'helicopters',
       data: helicopters,
-      getPosition: (d: any) => [d.x || d.longitude, d.y || d.latitude, d.altitude || 100],
+      getPosition: (d: any) => [d.lng, d.lat, d.altitude || 100],
       getRadius: (d: any) => d.size || 8,
       getFillColor: (d: any) => {
         // Color by helicopter type

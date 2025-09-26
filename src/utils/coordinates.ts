@@ -37,6 +37,75 @@ export function convertPointsToLatLng(points: Array<{x: number, y: number}>): Ar
   return points.map(p => localToLatLng(p.x, p.y));
 }
 
+/**
+ * Universal coordinate converter - recursively converts all x,y coordinates to lat,lng
+ * This ensures we have only one coordinate system throughout the application
+ */
+export function convertAllCoordinates(data: any): any {
+  if (data === null || data === undefined) {
+    return data;
+  }
+
+  // Handle arrays
+  if (Array.isArray(data)) {
+    return data.map(item => convertAllCoordinates(item));
+  }
+
+  // Handle objects
+  if (typeof data === 'object') {
+    const converted: any = {};
+
+    for (const [key, value] of Object.entries(data)) {
+      // Convert coordinate objects {x, y} -> [lng, lat]
+      if (key === 'position' && value && typeof value === 'object' && 'x' in value && 'y' in value) {
+        const [lng, lat] = localToLatLng((value as any).x, (value as any).y);
+        converted[key] = { lng, lat, z: (value as any).z || 0 };
+      }
+      // Convert coordinate arrays [{x, y}, ...] or [[x, y], ...] -> [[lng, lat], ...]
+      else if ((key === 'path' || key === 'coordinates' || key === 'footprint' || key === 'boundary') && Array.isArray(value)) {
+        if (value.length > 0) {
+          // Handle objects with x,y properties [{x, y}, ...]
+          if (typeof value[0] === 'object' && 'x' in value[0] && 'y' in value[0]) {
+            converted[key] = convertPointsToLatLng(value as Array<{x: number, y: number}>);
+          }
+          // Handle arrays of coordinate pairs [[x, y], ...]
+          else if (Array.isArray(value[0]) && value[0].length >= 2 && typeof value[0][0] === 'number' && typeof value[0][1] === 'number') {
+            converted[key] = value.map((coord: any) => {
+              const [lng, lat] = localToLatLng(coord[0], coord[1]);
+              return coord.length === 3 ? [lng, lat, coord[2]] : [lng, lat]; // Preserve altitude if present
+            });
+          }
+          else {
+            converted[key] = convertAllCoordinates(value);
+          }
+        } else {
+          converted[key] = value; // Empty array
+        }
+      }
+      // Convert individual x,y coordinates
+      else if (key === 'x' && typeof value === 'number' && data.y !== undefined) {
+        const [lng, lat] = localToLatLng(value, data.y);
+        converted.lng = lng;
+        converted.lat = lat;
+        // Don't copy the y value, it will be handled when we encounter it
+      }
+      else if (key === 'y' && typeof value === 'number' && data.x !== undefined) {
+        // Skip y, already handled when processing x
+        continue;
+      }
+      // Recursively convert nested objects/arrays
+      else {
+        converted[key] = convertAllCoordinates(value);
+      }
+    }
+
+    return converted;
+  }
+
+  // Return primitive values as-is
+  return data;
+}
+
 export function getBoundsFromCityModel(cityModel: any): {
   longitude: number;
   latitude: number;

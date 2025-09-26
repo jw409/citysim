@@ -64,10 +64,11 @@ export function generateElevatedHighways(bounds: any, density: number = 0.4): an
     type: 'ring'
   });
 
-  // Cross-city highways
+  // Shorter central highways (limit to 3km to prevent planetary artifacts)
+  const maxHighwayLength = 3000;
   highways.push({
     id: 'highway_ns',
-    path: [[centerX, min_y], [centerX, max_y]],
+    path: [[centerX, centerY - maxHighwayLength/2], [centerX, centerY + maxHighwayLength/2]],
     width: 10,
     elevation: 35,
     lanes: 4,
@@ -78,7 +79,7 @@ export function generateElevatedHighways(bounds: any, density: number = 0.4): an
 
   highways.push({
     id: 'highway_ew',
-    path: [[min_x, centerY], [max_x, centerY]],
+    path: [[centerX - maxHighwayLength/2, centerY], [centerX + maxHighwayLength/2, centerY]],
     width: 10,
     elevation: 35,
     lanes: 4,
