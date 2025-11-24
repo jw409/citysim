@@ -26,7 +26,7 @@ export function createAutonomousAgentLayer(agents: AutonomousAgent[]) {
       radiusMaxPixels: 20,
       pickable: true,
       stroked: true,
-      filled: true
+      filled: true,
     }),
 
     // Vehicle paths
@@ -35,31 +35,38 @@ export function createAutonomousAgentLayer(agents: AutonomousAgent[]) {
       data: agents.filter(a => a.path && a.path.length > 1),
       getPath: (d: AutonomousAgent) => d.path!,
       getColor: (d: AutonomousAgent) => [d.color[0], d.color[1], d.color[2], 80],
-      getWidth: (d: AutonomousAgent) => d.type === 'airplane' ? 5 : 2,
+      getWidth: (d: AutonomousAgent) => (d.type === 'airplane' ? 5 : 2),
       widthScale: 1,
       widthMinPixels: 1,
-      pickable: false
-    })
+      pickable: false,
+    }),
   ];
 }
 
-export function generateAutonomousAgents(centerLat: number, centerLng: number, cityData?: any): AutonomousAgent[] {
+export function generateAutonomousAgents(
+  centerLat: number,
+  centerLng: number,
+  cityData?: any
+): AutonomousAgent[] {
   const agents: AutonomousAgent[] = [];
 
   // Generate cars spawned near residential buildings (not randomly in air)
   if (cityData?.buildings) {
-    const residentialBuildings = cityData.buildings.filter((b: any) => b.type === 0 || b.zone_id?.includes('residential'));
+    const residentialBuildings = cityData.buildings.filter(
+      (b: any) => b.type === 0 || b.zone_id?.includes('residential')
+    );
     const maxCars = Math.min(100, residentialBuildings.length * 2); // 2 cars per residential building max
 
     for (let i = 0; i < maxCars; i++) {
-      const building = residentialBuildings[Math.floor(Math.random() * residentialBuildings.length)];
+      const building =
+        residentialBuildings[Math.floor(Math.random() * residentialBuildings.length)];
       if (building?.footprint?.[0]) {
         // Spawn car near building entrance (first footprint point + small offset)
         const buildingPos = building.footprint[0];
         const position: [number, number, number] = [
           buildingPos.x + (Math.random() - 0.5) * 30, // ±15m from building
           buildingPos.y + (Math.random() - 0.5) * 30,
-          1 // 1 meter above ground (realistic car height)
+          1, // 1 meter above ground (realistic car height)
         ];
 
         agents.push({
@@ -71,9 +78,9 @@ export function generateAutonomousAgents(centerLat: number, centerLng: number, c
             Math.random() * 100 + 100, // Car colors (darker than before)
             Math.random() * 100 + 100,
             Math.random() * 100 + 100,
-            255
+            255,
           ],
-          size: 2
+          size: 2,
         });
       }
     }
@@ -84,7 +91,7 @@ export function generateAutonomousAgents(centerLat: number, centerLng: number, c
       const position: [number, number, number] = [
         centerLng + roadOffset,
         centerLat + (Math.random() - 0.5) * 0.01,
-        1
+        1,
       ];
 
       agents.push({
@@ -93,7 +100,7 @@ export function generateAutonomousAgents(centerLat: number, centerLng: number, c
         position,
         velocity: [(Math.random() - 0.5) * 0.0005, (Math.random() - 0.5) * 0.0005, 0],
         color: [150, 150, 150, 255],
-        size: 2
+        size: 2,
       });
     }
   }
@@ -107,16 +114,19 @@ export function generateAutonomousAgents(centerLat: number, centerLng: number, c
       const building = tallBuildings[Math.floor(Math.random() * tallBuildings.length)];
       if (building?.footprint?.[0] && building.height) {
         // Spawn drone on rooftop center
-        const rooftopCenter = building.footprint.reduce((acc: any, point: any) => ({
-          x: acc.x + point.x / building.footprint.length,
-          y: acc.y + point.y / building.footprint.length
-        }), { x: 0, y: 0 });
+        const rooftopCenter = building.footprint.reduce(
+          (acc: any, point: any) => ({
+            x: acc.x + point.x / building.footprint.length,
+            y: acc.y + point.y / building.footprint.length,
+          }),
+          { x: 0, y: 0 }
+        );
 
         const takeoffHeight = building.height + 10; // 10m above rooftop
         const position: [number, number, number] = [
           rooftopCenter.x,
           rooftopCenter.y,
-          takeoffHeight
+          takeoffHeight,
         ];
 
         // Generate patrol path that avoids buildings
@@ -129,7 +139,7 @@ export function generateAutonomousAgents(centerLat: number, centerLng: number, c
           path.push([
             rooftopCenter.x + Math.cos(angle) * patrolRadius,
             rooftopCenter.y + Math.sin(angle) * patrolRadius,
-            safeHeight + Math.sin(j * 0.5) * 20 // Gentle altitude variation
+            safeHeight + Math.sin(j * 0.5) * 20, // Gentle altitude variation
           ]);
         }
 
@@ -140,7 +150,7 @@ export function generateAutonomousAgents(centerLat: number, centerLng: number, c
           velocity: [0, 0, 2],
           path,
           color: [255, 150, 0, 255], // Bright orange for visibility
-          size: 3
+          size: 3,
         });
       }
     }
@@ -151,7 +161,7 @@ export function generateAutonomousAgents(centerLat: number, centerLng: number, c
       const position: [number, number, number] = [
         centerLng + (Math.random() - 0.5) * 0.01,
         centerLat + (Math.random() - 0.5) * 0.01,
-        height
+        height,
       ];
 
       agents.push({
@@ -160,7 +170,7 @@ export function generateAutonomousAgents(centerLat: number, centerLng: number, c
         position,
         velocity: [0, 0, 2],
         color: [255, 150, 0, 255],
-        size: 3
+        size: 3,
       });
     }
   }
@@ -195,7 +205,7 @@ export function generateAutonomousAgents(centerLat: number, centerLng: number, c
         const position: [number, number, number] = [
           finalX,
           finalY,
-          0.1 // Just above ground level
+          0.1, // Just above ground level
         ];
 
         agents.push({
@@ -204,12 +214,12 @@ export function generateAutonomousAgents(centerLat: number, centerLng: number, c
           position,
           velocity: [(Math.random() - 0.5) * 0.0002, (Math.random() - 0.5) * 0.0002, 0], // Slow walking speed
           color: [
-            Math.random() * 50 + 50,  // Darker, more realistic person colors
+            Math.random() * 50 + 50, // Darker, more realistic person colors
             Math.random() * 50 + 50,
             Math.random() * 50 + 50,
-            255
+            255,
           ],
-          size: 1 // Small size for people
+          size: 1, // Small size for people
         });
       }
     }
@@ -229,7 +239,7 @@ export function generateAutonomousAgents(centerLat: number, centerLng: number, c
       path.push([
         startLng + Math.cos(direction) * distance,
         startLat + Math.sin(direction) * distance,
-        altitude + (Math.random() - 0.5) * 100 // Slight altitude variation
+        altitude + (Math.random() - 0.5) * 100, // Slight altitude variation
       ]);
     }
 
@@ -240,7 +250,7 @@ export function generateAutonomousAgents(centerLat: number, centerLng: number, c
       velocity: [Math.cos(direction) * 0.01, Math.sin(direction) * 0.01, 0],
       path,
       color: [255, 255, 255, 255], // White
-      size: 8
+      size: 8,
     });
   }
 
@@ -249,7 +259,7 @@ export function generateAutonomousAgents(centerLat: number, centerLng: number, c
     const position: [number, number, number] = [
       centerLng + (Math.random() - 0.5) * 0.015,
       centerLat + (Math.random() - 0.5) * 0.015,
-      1.7 // Average human height
+      1.7, // Average human height
     ];
 
     agents.push({
@@ -258,7 +268,7 @@ export function generateAutonomousAgents(centerLat: number, centerLng: number, c
       position,
       velocity: [(Math.random() - 0.5) * 0.0001, (Math.random() - 0.5) * 0.0001, 0],
       color: [255, 200, 100, 255], // Skin tone
-      size: 1
+      size: 1,
     });
   }
 

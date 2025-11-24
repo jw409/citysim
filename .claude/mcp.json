@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "zmcp-tools": {
+      "command": "node",
+      "args": ["../game1/ZMCPTools/dist/server/index.js"],
+      "env": {
+        "NODE_ENV": "production",
+        "DATA_DIR": "/home/jw/.mcptools/data",
+        "LOG_DIR": "/home/jw/.mcptools/logs"
+      }
+    }
+  }
+}

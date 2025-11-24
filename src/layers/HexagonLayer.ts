@@ -6,13 +6,16 @@ export interface HexagonDataPoint {
   category?: string;
 }
 
-export function createHexagonLayer(data: HexagonDataPoint[], options: {
-  radius?: number;
-  elevationScale?: number;
-  colorRange?: number[][];
-  coverage?: number;
-  visible?: boolean;
-} = {}) {
+export function createHexagonLayer(
+  data: HexagonDataPoint[],
+  options: {
+    radius?: number;
+    elevationScale?: number;
+    colorRange?: number[][];
+    coverage?: number;
+    visible?: boolean;
+  } = {}
+) {
   const {
     radius = 100,
     elevationScale = 50,
@@ -22,10 +25,10 @@ export function createHexagonLayer(data: HexagonDataPoint[], options: {
       [254, 178, 76, 180],
       [253, 141, 60, 180],
       [240, 59, 32, 180],
-      [189, 0, 38, 180]
+      [189, 0, 38, 180],
     ],
     coverage = 0.8,
-    visible = true
+    visible = true,
   } = options;
 
   return new HexagonLayer({
@@ -44,25 +47,29 @@ export function createHexagonLayer(data: HexagonDataPoint[], options: {
       ambient: 0.3,
       diffuse: 0.6,
       shininess: 32,
-      specularColor: [255, 255, 255]
+      specularColor: [255, 255, 255],
     },
     transitions: {
-      elevationScale: 1000
-    }
+      elevationScale: 1000,
+    },
   });
 }
 
 // Generate sample data for urban density visualization
-export function generateUrbanDensityData(centerLat: number, centerLng: number, count: number = 500): HexagonDataPoint[] {
+export function generateUrbanDensityData(
+  centerLat: number,
+  centerLng: number,
+  count: number = 500
+): HexagonDataPoint[] {
   const data: HexagonDataPoint[] = [];
 
   for (let i = 0; i < count; i++) {
     // Create clusters around urban centers
     const clusterCenters = [
-      [centerLng - 0.01, centerLat + 0.005],  // Downtown cluster
-      [centerLng + 0.005, centerLat - 0.01],  // Residential cluster
+      [centerLng - 0.01, centerLat + 0.005], // Downtown cluster
+      [centerLng + 0.005, centerLat - 0.01], // Residential cluster
       [centerLng - 0.005, centerLat - 0.005], // Commercial cluster
-      [centerLng + 0.01, centerLat + 0.01]    // Industrial cluster
+      [centerLng + 0.01, centerLat + 0.01], // Industrial cluster
     ];
 
     const cluster = clusterCenters[Math.floor(Math.random() * clusterCenters.length)];
@@ -70,13 +77,12 @@ export function generateUrbanDensityData(centerLat: number, centerLng: number, c
 
     const position: [number, number] = [
       cluster[0] + (Math.random() - 0.5) * spread,
-      cluster[1] + (Math.random() - 0.5) * spread
+      cluster[1] + (Math.random() - 0.5) * spread,
     ];
 
     // Weight based on distance from cluster center
     const distanceFromCenter = Math.sqrt(
-      Math.pow(position[0] - cluster[0], 2) +
-      Math.pow(position[1] - cluster[1], 2)
+      Math.pow(position[0] - cluster[0], 2) + Math.pow(position[1] - cluster[1], 2)
     );
 
     const baseWeight = Math.max(0.1, 1 - (distanceFromCenter / spread) * 2);
@@ -85,7 +91,7 @@ export function generateUrbanDensityData(centerLat: number, centerLng: number, c
     data.push({
       position,
       value: weight * 10,
-      category: i % 4 === 0 ? 'high' : i % 3 === 0 ? 'medium' : 'low'
+      category: i % 4 === 0 ? 'high' : i % 3 === 0 ? 'medium' : 'low',
     });
   }
 
@@ -106,7 +112,7 @@ export function generateTrafficData(centerLat: number, centerLng: number): Hexag
     // Vertical roads
     { start: [centerLng, centerLat - 0.015], end: [centerLng, centerLat + 0.015] },
     { start: [centerLng + 0.008, centerLat - 0.015], end: [centerLng + 0.008, centerLat + 0.015] },
-    { start: [centerLng - 0.008, centerLat - 0.015], end: [centerLng - 0.008, centerLat + 0.015] }
+    { start: [centerLng - 0.008, centerLat - 0.015], end: [centerLng - 0.008, centerLat + 0.015] },
   ];
 
   roadNetworks.forEach(road => {
@@ -120,7 +126,7 @@ export function generateTrafficData(centerLat: number, centerLng: number): Hexag
       const offset = 0.0005;
       const position: [number, number] = [
         lng + (Math.random() - 0.5) * offset,
-        lat + (Math.random() - 0.5) * offset
+        lat + (Math.random() - 0.5) * offset,
       ];
 
       // Traffic intensity varies along roads (higher at intersections)
@@ -132,7 +138,7 @@ export function generateTrafficData(centerLat: number, centerLng: number): Hexag
       data.push({
         position,
         value: traffic,
-        category: 'traffic'
+        category: 'traffic',
       });
     }
   });

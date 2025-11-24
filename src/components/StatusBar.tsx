@@ -8,7 +8,9 @@ export function StatusBar() {
   // Format time display
   const formatTime = (time: number) => {
     const hours = Math.floor(time).toString().padStart(2, '0');
-    const minutes = Math.floor((time - Math.floor(time)) * 60).toString().padStart(2, '0');
+    const minutes = Math.floor((time - Math.floor(time)) * 60)
+      .toString()
+      .padStart(2, '0');
     return `${hours}:${minutes}`;
   };
 
@@ -113,8 +115,10 @@ function getStatusValueStyle(isInitialized: boolean, isRunning: boolean) {
 function getValueStyle(value: number, goodThreshold: number, badThreshold: number) {
   const base = { ...valueStyle };
 
-  if (value >= goodThreshold) base.color = '#4ade80'; // green
-  else if (value >= badThreshold) base.color = '#fbbf24'; // yellow
+  if (value >= goodThreshold)
+    base.color = '#4ade80'; // green
+  else if (value >= badThreshold)
+    base.color = '#fbbf24'; // yellow
   else base.color = '#f87171'; // red
 
   return base;
@@ -124,8 +128,10 @@ function getValueStyle(value: number, goodThreshold: number, badThreshold: numbe
 function getCongestionStyle(congestion: number) {
   const base = { ...valueStyle };
 
-  if (congestion < 0.3) base.color = '#4ade80'; // green
-  else if (congestion < 0.7) base.color = '#fbbf24'; // yellow
+  if (congestion < 0.3)
+    base.color = '#4ade80'; // green
+  else if (congestion < 0.7)
+    base.color = '#fbbf24'; // yellow
   else base.color = '#f87171'; // red
 
   return base;

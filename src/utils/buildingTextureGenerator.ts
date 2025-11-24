@@ -51,14 +51,14 @@ export class BuildingTextureAtlas {
           cols: 6,
           windowWidth: 0.8,
           windowHeight: 0.8,
-          spacing: 0.1
+          spacing: 0.1,
         },
         colors: {
-          wall: '#B0C4DE',      // Light steel blue
-          window: '#2F4F4F',    // Dark slate gray (reflective glass)
+          wall: '#B0C4DE', // Light steel blue
+          window: '#2F4F4F', // Dark slate gray (reflective glass)
           windowFrame: '#708090', // Slate gray
-          accent: '#4682B4'     // Steel blue
-        }
+          accent: '#4682B4', // Steel blue
+        },
       },
       residential_brick: {
         type: 'residential',
@@ -69,14 +69,14 @@ export class BuildingTextureAtlas {
           cols: 4,
           windowWidth: 0.6,
           windowHeight: 0.7,
-          spacing: 0.15
+          spacing: 0.15,
         },
         colors: {
-          wall: '#CD853F',      // Peru (brick color)
-          window: '#1E1E1E',    // Dark gray
+          wall: '#CD853F', // Peru (brick color)
+          window: '#1E1E1E', // Dark gray
           windowFrame: '#FFFFFF', // White frames
-          accent: '#8B4513'     // Saddle brown
-        }
+          accent: '#8B4513', // Saddle brown
+        },
       },
       commercial_mixed: {
         type: 'commercial',
@@ -87,14 +87,14 @@ export class BuildingTextureAtlas {
           cols: 8,
           windowWidth: 0.9,
           windowHeight: 0.9,
-          spacing: 0.05
+          spacing: 0.05,
         },
         colors: {
-          wall: '#F5F5DC',      // Beige
-          window: '#000080',    // Navy blue (tinted glass)
+          wall: '#F5F5DC', // Beige
+          window: '#000080', // Navy blue (tinted glass)
           windowFrame: '#C0C0C0', // Silver
-          accent: '#DAA520'     // Goldenrod
-        }
+          accent: '#DAA520', // Goldenrod
+        },
       },
       industrial_concrete: {
         type: 'industrial',
@@ -105,14 +105,14 @@ export class BuildingTextureAtlas {
           cols: 3,
           windowWidth: 0.7,
           windowHeight: 0.5,
-          spacing: 0.2
+          spacing: 0.2,
         },
         colors: {
-          wall: '#696969',      // Dim gray (concrete)
-          window: '#2F2F2F',    // Dark gray
+          wall: '#696969', // Dim gray (concrete)
+          window: '#2F2F2F', // Dark gray
           windowFrame: '#808080', // Gray
-          accent: '#556B2F'     // Dark olive green
-        }
+          accent: '#556B2F', // Dark olive green
+        },
       },
       mixed_modern: {
         type: 'mixed',
@@ -123,14 +123,14 @@ export class BuildingTextureAtlas {
           cols: 5,
           windowWidth: 0.75,
           windowHeight: 0.85,
-          spacing: 0.1
+          spacing: 0.1,
         },
         colors: {
-          wall: '#DCDCDC',      // Gainsboro (light gray)
-          window: '#191970',    // Midnight blue
+          wall: '#DCDCDC', // Gainsboro (light gray)
+          window: '#191970', // Midnight blue
           windowFrame: '#FF6347', // Tomato (accent color)
-          accent: '#4169E1'     // Royal blue
-        }
+          accent: '#4169E1', // Royal blue
+        },
       },
       luxury_tower: {
         type: 'office',
@@ -141,15 +141,15 @@ export class BuildingTextureAtlas {
           cols: 8,
           windowWidth: 0.95,
           windowHeight: 0.9,
-          spacing: 0.02
+          spacing: 0.02,
         },
         colors: {
-          wall: '#2F4F4F',      // Dark slate gray (premium)
-          window: '#000000',    // Black (high-end glass)
+          wall: '#2F4F4F', // Dark slate gray (premium)
+          window: '#000000', // Black (high-end glass)
           windowFrame: '#FFD700', // Gold frames
-          accent: '#1C1C1C'     // Almost black
-        }
-      }
+          accent: '#1C1C1C', // Almost black
+        },
+      },
     };
   }
 
@@ -172,7 +172,7 @@ export class BuildingTextureAtlas {
         x: x / this.atlasSize,
         y: y / this.atlasSize,
         width: textureSize / this.atlasSize,
-        height: textureSize / this.atlasSize
+        height: textureSize / this.atlasSize,
       };
     });
 
@@ -203,7 +203,7 @@ export class BuildingTextureAtlas {
 
     for (let i = 0; i < data.length; i += 4) {
       const variation = (Math.random() - 0.5) * 20; // ±10 brightness variation
-      data[i] = Math.max(0, Math.min(255, data[i] + variation));     // R
+      data[i] = Math.max(0, Math.min(255, data[i] + variation)); // R
       data[i + 1] = Math.max(0, Math.min(255, data[i + 1] + variation)); // G
       data[i + 2] = Math.max(0, Math.min(255, data[i + 2] + variation)); // B
     }
@@ -211,7 +211,14 @@ export class BuildingTextureAtlas {
     this.ctx.putImageData(imageData, x, y);
   }
 
-  private drawWindowGrid(pattern: any, colors: any, offsetX: number, offsetY: number, width: number, height: number) {
+  private drawWindowGrid(
+    pattern: any,
+    colors: any,
+    offsetX: number,
+    offsetY: number,
+    width: number,
+    height: number
+  ) {
     const windowWidth = (width / pattern.cols) * pattern.windowWidth;
     const windowHeight = (height / pattern.rows) * pattern.windowHeight;
     const spacingX = width / pattern.cols;
@@ -249,7 +256,13 @@ export class BuildingTextureAtlas {
     }
   }
 
-  private addBuildingDetails(config: BuildingTextureConfig, x: number, y: number, width: number, height: number) {
+  private addBuildingDetails(
+    config: BuildingTextureConfig,
+    x: number,
+    y: number,
+    width: number,
+    height: number
+  ) {
     // Add accent stripes for modern buildings
     if (config.type === 'office' || config.type === 'mixed') {
       this.ctx.fillStyle = config.colors.accent;
@@ -271,7 +284,10 @@ export class BuildingTextureAtlas {
     }
   }
 
-  public getTextureRegions(): Record<string, { x: number; y: number; width: number; height: number }> {
+  public getTextureRegions(): Record<
+    string,
+    { x: number; y: number; width: number; height: number }
+  > {
     return this.textureRegions;
   }
 

@@ -37,7 +37,10 @@ export function useSimulation() {
       dispatch({ type: 'SET_LOADING', payload: false });
     } catch (error) {
       console.error('Critical initialization error:', error);
-      dispatch({ type: 'SET_ERROR', payload: error instanceof Error ? error.message : 'Unknown error' });
+      dispatch({
+        type: 'SET_ERROR',
+        payload: error instanceof Error ? error.message : 'Unknown error',
+      });
       dispatch({ type: 'SET_LOADING', payload: false });
     }
   }, [dispatch]);
@@ -57,12 +60,12 @@ export function useSimulation() {
             [x - 30, y - 30],
             [x + 30, y - 30],
             [x + 30, y + 30],
-            [x - 30, y + 30]
+            [x - 30, y + 30],
           ],
           height: height,
           stories: Math.ceil(height / 3.5),
           building_type: Math.floor((i + j) % 5),
-          type: Math.floor((i + j) % 5)
+          type: Math.floor((i + j) % 5),
         });
       }
     }
@@ -70,94 +73,105 @@ export function useSimulation() {
   }, []);
 
   // Generate fallback buildings and agents for testing when WASM is unavailable
-  const generateFallbackAgents = useCallback((cityModel: any) => {
-    console.log('🤖 generateFallbackAgents called with cityModel:', {
-      name: cityModel?.name,
-      buildings: cityModel?.buildings?.length || 0,
-      pois: cityModel?.pois?.length || 0,
-      roads: cityModel?.roads?.length || 0
-    });
+  const generateFallbackAgents = useCallback(
+    (cityModel: any) => {
+      console.log('🤖 generateFallbackAgents called with cityModel:', {
+        name: cityModel?.name,
+        buildings: cityModel?.buildings?.length || 0,
+        pois: cityModel?.pois?.length || 0,
+        roads: cityModel?.roads?.length || 0,
+      });
 
-    const agents: any[] = [];
-    const pois = cityModel?.pois || [];
-    const buildings = cityModel?.buildings || [];
+      const agents: any[] = [];
+      const pois = cityModel?.pois || [];
+      const buildings = cityModel?.buildings || [];
 
-    console.log('🏗️ Starting agent generation...', { pois: pois.length, buildings: buildings.length });
+      console.log('🏗️ Starting agent generation...', {
+        pois: pois.length,
+        buildings: buildings.length,
+      });
 
-    // Generate agents from POIs
-    let agentsFromPOIs = 0;
-    pois.forEach((poi: any, index: number) => {
-      if (poi.type === 0 && agents.length < 20) { // HOME POIs, limit to 20 agents
-        const numAgents = Math.min(3, Math.floor((poi.capacity || 50) / 20));
-        agentsFromPOIs += numAgents;
+      // Generate agents from POIs
+      let agentsFromPOIs = 0;
+      pois.forEach((poi: any, index: number) => {
+        if (poi.type === 0 && agents.length < 20) {
+          // HOME POIs, limit to 20 agents
+          const numAgents = Math.min(3, Math.floor((poi.capacity || 50) / 20));
+          agentsFromPOIs += numAgents;
 
-        for (let i = 0; i < numAgents; i++) {
-          const agentId = agents.length;
-          // Use deterministic positioning based on agent ID
-          const offsetSeed = (agentId * 17 + index * 5) % 100;
-          const offsetX = ((offsetSeed % 50) - 25);
-          const offsetY = (((offsetSeed * 3) % 50) - 25);
+          for (let i = 0; i < numAgents; i++) {
+            const agentId = agents.length;
+            // Use deterministic positioning based on agent ID
+            const offsetSeed = (agentId * 17 + index * 5) % 100;
+            const offsetX = (offsetSeed % 50) - 25;
+            const offsetY = ((offsetSeed * 3) % 50) - 25;
 
-          const agent = {
-            id: agentId,
-            position: {
-              x: poi.position.x + offsetX,
-              y: poi.position.y + offsetY,
-              z: 5
-            },
-            agent_type: (agentId % 3) === 0 ? 'Car' : 'Pedestrian',
-            speed: 5 + (agentId % 15),
-            state: 'Traveling',
-            destination: `poi_${agentId % pois.length}`,
-            path: [],
-            path_progress: 0,
-            initialPosition: {
-              x: poi.position.x + offsetX,
-              y: poi.position.y + offsetY,
-              z: 5
-            }
-          };
-          agents.push(agent);
-        }
-      }
-    });
-
-    console.log('👥 Created agents from POIs:', agentsFromPOIs);
-
-    // If no POIs or few agents, generate agents from buildings
-    if (agents.length < 5 && buildings.length > 0) {
-      console.log('🏢 Generating agents from buildings since POI agents are insufficient...');
-      buildings.slice(0, 15).forEach((building: any, index: number) => {
-        if (building.footprint && building.footprint.length > 0 && agents.length < 20) {
-          const centerX = building.footprint.reduce((sum: number, p: any) => sum + (p.x || p[0]), 0) / building.footprint.length;
-          const centerY = building.footprint.reduce((sum: number, p: any) => sum + (p.y || p[1]), 0) / building.footprint.length;
-
-          const agentId = agents.length;
-          const agent = {
-            id: agentId,
-            position: { x: centerX, y: centerY, z: 5 },
-            agent_type: (agentId % 3) === 0 ? 'Car' : 'Pedestrian',
-            speed: 5 + (agentId % 15),
-            state: 'Traveling',
-            destination: `building_${agentId % buildings.length}`,
-            path: [],
-            path_progress: 0,
-            initialPosition: { x: centerX, y: centerY, z: 5 }
-          };
-          agents.push(agent);
+            const agent = {
+              id: agentId,
+              position: {
+                x: poi.position.x + offsetX,
+                y: poi.position.y + offsetY,
+                z: 5,
+              },
+              agent_type: agentId % 3 === 0 ? 'Car' : 'Pedestrian',
+              speed: 5 + (agentId % 15),
+              state: 'Traveling',
+              destination: `poi_${agentId % pois.length}`,
+              path: [],
+              path_progress: 0,
+              initialPosition: {
+                x: poi.position.x + offsetX,
+                y: poi.position.y + offsetY,
+                z: 5,
+              },
+            };
+            agents.push(agent);
+          }
         }
       });
-      console.log('🏢 Created additional agents from buildings:', agents.length - agentsFromPOIs);
-    }
 
-    console.log(`Generated ${agents.length} fallback agents`);
-    dispatch({ type: 'SET_AGENTS', payload: agents });
+      console.log('👥 Created agents from POIs:', agentsFromPOIs);
 
-    // Start basic agent animation if we have agents
-    if (agents.length > 0) {
-      startFallbackAnimation();
-    }
-  }, [dispatch]);
+      // If no POIs or few agents, generate agents from buildings
+      if (agents.length < 5 && buildings.length > 0) {
+        console.log('🏢 Generating agents from buildings since POI agents are insufficient...');
+        buildings.slice(0, 15).forEach((building: any, index: number) => {
+          if (building.footprint && building.footprint.length > 0 && agents.length < 20) {
+            const centerX =
+              building.footprint.reduce((sum: number, p: any) => sum + (p.x || p[0]), 0) /
+              building.footprint.length;
+            const centerY =
+              building.footprint.reduce((sum: number, p: any) => sum + (p.y || p[1]), 0) /
+              building.footprint.length;
+
+            const agentId = agents.length;
+            const agent = {
+              id: agentId,
+              position: { x: centerX, y: centerY, z: 5 },
+              agent_type: agentId % 3 === 0 ? 'Car' : 'Pedestrian',
+              speed: 5 + (agentId % 15),
+              state: 'Traveling',
+              destination: `building_${agentId % buildings.length}`,
+              path: [],
+              path_progress: 0,
+              initialPosition: { x: centerX, y: centerY, z: 5 },
+            };
+            agents.push(agent);
+          }
+        });
+        console.log('🏢 Created additional agents from buildings:', agents.length - agentsFromPOIs);
+      }
+
+      console.log(`Generated ${agents.length} fallback agents`);
+      dispatch({ type: 'SET_AGENTS', payload: agents });
+
+      // Start basic agent animation if we have agents
+      if (agents.length > 0) {
+        startFallbackAnimation();
+      }
+    },
+    [dispatch]
+  );
 
   // Store initial agent state to prevent re-creating animation
   const initialAgentsRef = useRef<any[]>([]);
@@ -170,7 +184,7 @@ export function useSimulation() {
       initialPosition: agent.initialPosition || agent.position,
       animationStartTime: Date.now(),
       targetPosition: null,
-      movementPath: []
+      movementPath: [],
     }));
 
     console.log(`${initialAgentsRef.current.length} agents created with movement animation`);
@@ -178,44 +192,57 @@ export function useSimulation() {
 
   // Start simulation
   const start = useCallback(() => {
-    if (!state.isInitialized) return;
+    console.log('🎬 START called, isInitialized:', state.isInitialized);
+    if (!state.isInitialized) {
+      console.warn('⚠️ Cannot start - simulation not initialized yet!');
+      return;
+    }
 
     if (wasmModuleRef.current) {
+      console.log('Starting WASM simulation');
       wasmModuleRef.current.start();
+    } else {
+      console.log('Starting fallback simulation (no WASM)');
     }
     dispatch({ type: 'SET_RUNNING', payload: true });
-    console.log('Simulation started');
+    console.log('✅ Simulation started - isRunning should now be TRUE');
   }, [state.isInitialized, dispatch]);
 
   // Pause simulation
   const pause = useCallback(() => {
+    console.log('⏸️ PAUSE called');
     // Cancel animation frame to stop the time loop
     if (animationFrameRef.current) {
       cancelAnimationFrame(animationFrameRef.current);
       animationFrameRef.current = undefined;
+      console.log('Animation frame canceled');
     }
 
     // Also pause WASM if available
     if (wasmModuleRef.current) {
       wasmModuleRef.current.pause();
+      console.log('WASM paused');
     }
 
     dispatch({ type: 'SET_RUNNING', payload: false });
-    console.log('Simulation paused');
+    console.log('✅ Simulation paused - isRunning should now be FALSE');
   }, [dispatch]);
 
   // Set simulation speed
-  const setSpeed = useCallback((speed: number) => {
-    // Update speed in state (works even without WASM)
-    dispatch({ type: 'SET_SPEED', payload: speed });
+  const setSpeed = useCallback(
+    (speed: number) => {
+      // Update speed in state (works even without WASM)
+      dispatch({ type: 'SET_SPEED', payload: speed });
 
-    // Also update WASM speed if available
-    if (wasmModuleRef.current) {
-      wasmModuleRef.current.setSpeed(speed);
-    }
+      // Also update WASM speed if available
+      if (wasmModuleRef.current) {
+        wasmModuleRef.current.setSpeed(speed);
+      }
 
-    console.log(`Simulation speed set to ${speed}x`);
-  }, [dispatch]);
+      console.log(`Simulation speed set to ${speed}x`);
+    },
+    [dispatch]
+  );
 
   // Update simulation (called every frame)
   const updateSimulation = useCallback(() => {
@@ -244,7 +271,9 @@ export function useSimulation() {
           payload: {
             totalAgents: agents.length,
             activeAgents: agents.filter((a: any) => a.state === 'Traveling').length,
-            averageSpeed: agents.reduce((sum: number, a: any) => sum + (a.speed || 0), 0) / Math.max(agents.length, 1),
+            averageSpeed:
+              agents.reduce((sum: number, a: any) => sum + (a.speed || 0), 0) /
+              Math.max(agents.length, 1),
           },
         });
       } else {
@@ -263,7 +292,7 @@ export function useSimulation() {
 
             // Create smooth, repeating movement patterns
             const radiusScale = 50 + (agentSeed % 100); // 50-150 unit radius
-            const speedScale = 0.3 + ((agentSeed % 20) / 100); // Speed variation
+            const speedScale = 0.3 + (agentSeed % 20) / 100; // Speed variation
             const phaseOffset = (agentSeed % 360) * (Math.PI / 180); // Different starting phases
 
             // Use sine/cosine for smooth circular movement
@@ -274,7 +303,7 @@ export function useSimulation() {
             const newPosition = {
               x: agent.initialPosition.x + offsetX,
               y: agent.initialPosition.y + offsetY,
-              z: agent.initialPosition.z + Math.sin(angle * 2) * 2 // Slight vertical movement
+              z: agent.initialPosition.z + Math.sin(angle * 2) * 2, // Slight vertical movement
             };
 
             // Calculate speed for stats
@@ -284,7 +313,7 @@ export function useSimulation() {
               ...agent,
               position: newPosition,
               speed: speed,
-              state: 'Traveling'
+              state: 'Traveling',
             };
           });
 
@@ -306,39 +335,55 @@ export function useSimulation() {
       }
     } catch (error) {
       console.error('Simulation update error:', error);
-      dispatch({ type: 'SET_ERROR', payload: error instanceof Error ? error.message : 'Unknown error' });
+      dispatch({
+        type: 'SET_ERROR',
+        payload: error instanceof Error ? error.message : 'Unknown error',
+      });
     }
   }, [state.isRunning, state.currentTime, state.day, state.speed, state.agents.length, dispatch]);
 
   // Handle world updates (adding/removing POIs)
-  const updateWorld = useCallback((event: any) => {
-    if (!wasmModuleRef.current) return;
+  const updateWorld = useCallback(
+    (event: any) => {
+      if (!wasmModuleRef.current) return;
 
-    try {
-      wasmModuleRef.current.updateWorld(event);
-    } catch (error) {
-      console.error('World update error:', error);
-      dispatch({ type: 'SET_ERROR', payload: error instanceof Error ? error.message : 'Unknown error' });
-    }
-  }, [dispatch]);
+      try {
+        wasmModuleRef.current.updateWorld(event);
+      } catch (error) {
+        console.error('World update error:', error);
+        dispatch({
+          type: 'SET_ERROR',
+          payload: error instanceof Error ? error.message : 'Unknown error',
+        });
+      }
+    },
+    [dispatch]
+  );
 
   // Animation loop
   useEffect(() => {
+    console.log('🔄 Animation loop effect triggered, isRunning:', state.isRunning);
+
     function animate() {
       updateSimulation();
       animationFrameRef.current = requestAnimationFrame(animate);
     }
 
     if (state.isRunning) {
+      console.log('🎬 Starting animation loop...');
       animationFrameRef.current = requestAnimationFrame(animate);
+    } else {
+      console.log('⏹️ Animation loop not started (simulation not running)');
     }
 
     return () => {
       if (animationFrameRef.current) {
+        console.log('🧹 Cleaning up animation frame');
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
-  }, [state.isRunning, updateSimulation]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.isRunning]);
 
   // Cleanup on unmount
   useEffect(() => {

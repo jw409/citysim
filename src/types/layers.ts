@@ -26,7 +26,7 @@ export const LAYER_DEFINITIONS: Record<string, LayerConfig> = {
     maxElevation: -20,
     visible: false,
     opacity: 0.7,
-    color: [100, 100, 100, 180]
+    color: [100, 100, 100, 180],
   },
 
   subway_tunnels: {
@@ -36,7 +36,7 @@ export const LAYER_DEFINITIONS: Record<string, LayerConfig> = {
     maxElevation: -10,
     visible: false,
     opacity: 0.8,
-    color: [255, 165, 0, 200]
+    color: [255, 165, 0, 200],
   },
 
   sewer_system: {
@@ -46,7 +46,7 @@ export const LAYER_DEFINITIONS: Record<string, LayerConfig> = {
     maxElevation: -5,
     visible: false,
     opacity: 0.6,
-    color: [139, 69, 19, 150]
+    color: [139, 69, 19, 150],
   },
 
   underground_parking: {
@@ -56,7 +56,7 @@ export const LAYER_DEFINITIONS: Record<string, LayerConfig> = {
     maxElevation: -2,
     visible: false,
     opacity: 0.8,
-    color: [70, 70, 70, 200]
+    color: [70, 70, 70, 200],
   },
 
   utility_tunnels: {
@@ -66,7 +66,7 @@ export const LAYER_DEFINITIONS: Record<string, LayerConfig> = {
     maxElevation: -2,
     visible: false,
     opacity: 0.7,
-    color: [255, 255, 0, 180]
+    color: [255, 255, 0, 180],
   },
 
   basements: {
@@ -76,7 +76,7 @@ export const LAYER_DEFINITIONS: Record<string, LayerConfig> = {
     maxElevation: 0,
     visible: false,
     opacity: 0.6,
-    color: [128, 128, 128, 150]
+    color: [128, 128, 128, 150],
   },
 
   // Street Level (0m to 30m)
@@ -87,7 +87,7 @@ export const LAYER_DEFINITIONS: Record<string, LayerConfig> = {
     maxElevation: 4,
     visible: true,
     opacity: 1.0,
-    color: [64, 64, 64, 255]
+    color: [64, 64, 64, 255],
   },
 
   sidewalks: {
@@ -97,7 +97,7 @@ export const LAYER_DEFINITIONS: Record<string, LayerConfig> = {
     maxElevation: 1,
     visible: true,
     opacity: 1.0,
-    color: [200, 200, 200, 255]
+    color: [200, 200, 200, 255],
   },
 
   buildings_low: {
@@ -107,7 +107,7 @@ export const LAYER_DEFINITIONS: Record<string, LayerConfig> = {
     maxElevation: 30,
     visible: true,
     opacity: 1.0,
-    color: [150, 150, 150, 255]
+    color: [150, 150, 150, 255],
   },
 
   pedestrians: {
@@ -117,7 +117,7 @@ export const LAYER_DEFINITIONS: Record<string, LayerConfig> = {
     maxElevation: 2,
     visible: true,
     opacity: 1.0,
-    color: [0, 255, 0, 255]
+    color: [0, 255, 0, 255],
   },
 
   vehicles: {
@@ -127,7 +127,7 @@ export const LAYER_DEFINITIONS: Record<string, LayerConfig> = {
     maxElevation: 3,
     visible: true,
     opacity: 1.0,
-    color: [255, 0, 0, 255]
+    color: [255, 0, 0, 255],
   },
 
   // Elevated Level (30m to 200m)
@@ -138,7 +138,7 @@ export const LAYER_DEFINITIONS: Record<string, LayerConfig> = {
     maxElevation: 200,
     visible: true,
     opacity: 1.0,
-    color: [120, 120, 180, 255]
+    color: [120, 120, 180, 255],
   },
 
   elevated_highways: {
@@ -148,7 +148,7 @@ export const LAYER_DEFINITIONS: Record<string, LayerConfig> = {
     maxElevation: 50,
     visible: true,
     opacity: 0.9,
-    color: [100, 100, 100, 230]
+    color: [100, 100, 100, 230],
   },
 
   sky_bridges: {
@@ -158,7 +158,7 @@ export const LAYER_DEFINITIONS: Record<string, LayerConfig> = {
     maxElevation: 100,
     visible: true,
     opacity: 0.8,
-    color: [200, 200, 255, 200]
+    color: [200, 200, 255, 200],
   },
 
   elevated_transit: {
@@ -168,7 +168,7 @@ export const LAYER_DEFINITIONS: Record<string, LayerConfig> = {
     maxElevation: 60,
     visible: true,
     opacity: 0.9,
-    color: [255, 100, 100, 230]
+    color: [255, 100, 100, 230],
   },
 
   // Aerial Level (200m+)
@@ -179,7 +179,7 @@ export const LAYER_DEFINITIONS: Record<string, LayerConfig> = {
     maxElevation: 300,
     visible: true,
     opacity: 1.0,
-    color: [255, 255, 0, 255]
+    color: [255, 255, 0, 255],
   },
 
   aircraft: {
@@ -189,7 +189,7 @@ export const LAYER_DEFINITIONS: Record<string, LayerConfig> = {
     maxElevation: 1000,
     visible: true,
     opacity: 0.8,
-    color: [0, 255, 255, 200]
+    color: [0, 255, 255, 200],
   },
 
   drones: {
@@ -199,15 +199,22 @@ export const LAYER_DEFINITIONS: Record<string, LayerConfig> = {
     maxElevation: 150,
     visible: true,
     opacity: 0.9,
-    color: [255, 0, 255, 230]
-  }
+    color: [255, 0, 255, 230],
+  },
 };
 
 export const LAYER_GROUPS = {
-  underground: ['deep_utilities', 'subway_tunnels', 'sewer_system', 'underground_parking', 'utility_tunnels', 'basements'],
+  underground: [
+    'deep_utilities',
+    'subway_tunnels',
+    'sewer_system',
+    'underground_parking',
+    'utility_tunnels',
+    'basements',
+  ],
   street: ['roads', 'sidewalks', 'buildings_low', 'pedestrians', 'vehicles'],
   elevated: ['buildings_high', 'elevated_highways', 'sky_bridges', 'elevated_transit'],
-  aerial: ['helicopters', 'aircraft', 'drones']
+  aerial: ['helicopters', 'aircraft', 'drones'],
 };
 
 export interface ViewMode {
@@ -228,36 +235,48 @@ export const VIEW_MODES: Record<string, ViewMode> = {
     id: 'overview',
     name: 'City Overview',
     visibleLayers: ['roads', 'buildings_low', 'buildings_high', 'vehicles', 'pedestrians'],
-    cameraAngle: 'isometric'
+    cameraAngle: 'isometric',
   },
 
   infrastructure: {
     id: 'infrastructure',
     name: 'Infrastructure View',
-    visibleLayers: ['roads', 'utility_tunnels', 'sewer_system', 'deep_utilities', 'elevated_highways'],
+    visibleLayers: [
+      'roads',
+      'utility_tunnels',
+      'sewer_system',
+      'deep_utilities',
+      'elevated_highways',
+    ],
     cameraAngle: 'cross_section',
-    crossSectionPlane: { z: 0, normal: [0, 0, 1] }
+    crossSectionPlane: { z: 0, normal: [0, 0, 1] },
   },
 
   transit: {
     id: 'transit',
     name: 'Transit Systems',
     visibleLayers: ['roads', 'subway_tunnels', 'elevated_transit', 'vehicles'],
-    cameraAngle: 'isometric'
+    cameraAngle: 'isometric',
   },
 
   underground: {
     id: 'underground',
     name: 'Underground Only',
-    visibleLayers: ['subway_tunnels', 'sewer_system', 'utility_tunnels', 'underground_parking', 'basements'],
-    cameraAngle: 'top'
+    visibleLayers: [
+      'subway_tunnels',
+      'sewer_system',
+      'utility_tunnels',
+      'underground_parking',
+      'basements',
+    ],
+    cameraAngle: 'top',
   },
 
   aerial: {
     id: 'aerial',
     name: 'Aerial Traffic',
     visibleLayers: ['buildings_high', 'helicopters', 'aircraft', 'drones'],
-    cameraAngle: 'isometric'
+    cameraAngle: 'isometric',
   },
 
   cross_section: {
@@ -265,6 +284,6 @@ export const VIEW_MODES: Record<string, ViewMode> = {
     name: 'Cross Section',
     visibleLayers: Object.keys(LAYER_DEFINITIONS),
     cameraAngle: 'cross_section',
-    crossSectionPlane: { x: 0, normal: [1, 0, 0] }
-  }
+    crossSectionPlane: { x: 0, normal: [1, 0, 0] },
+  },
 };

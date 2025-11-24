@@ -23,7 +23,7 @@ export function getTerrainProfilePresets(): Record<string, TerrainProfile> {
         waterLevel: 0, // Sea level
         hilliness: 0.1, // Very flat overall
         riverProbability: 0.9, // Surrounded by Hudson, East rivers
-        coastalDistance: 800 // Island - very close to water
+        coastalDistance: 800, // Island - very close to water
       },
       recommendedScale: 1,
       characteristics: [
@@ -31,9 +31,10 @@ export function getTerrainProfilePresets(): Record<string, TerrainProfile> {
         'Multiple rivers and harbors',
         'Extremely flat terrain',
         'Dense waterfront development',
-        'Bridge and tunnel connections'
+        'Bridge and tunnel connections',
       ],
-      realWorldContext: 'Manhattan is a narrow island between two rivers, leading to intense vertical development due to limited land area. The flat terrain enabled the famous grid system.'
+      realWorldContext:
+        'Manhattan is a narrow island between two rivers, leading to intense vertical development due to limited land area. The flat terrain enabled the famous grid system.',
     },
 
     san_francisco: {
@@ -44,7 +45,7 @@ export function getTerrainProfilePresets(): Record<string, TerrainProfile> {
         waterLevel: 0,
         hilliness: 0.8, // Very hilly - famous for steep streets
         riverProbability: 0.2, // Few rivers, mostly bay
-        coastalDistance: 1500 // Peninsula with bay on multiple sides
+        coastalDistance: 1500, // Peninsula with bay on multiple sides
       },
       recommendedScale: 1,
       characteristics: [
@@ -52,9 +53,10 @@ export function getTerrainProfilePresets(): Record<string, TerrainProfile> {
         'Peninsula location',
         'San Francisco Bay',
         'Varied neighborhood elevations',
-        'Cable car terrain'
+        'Cable car terrain',
       ],
-      realWorldContext: 'San Francisco is built on steep hills that dictated its unique development pattern. The peninsula location creates microclimates and stunning water views from elevated areas.'
+      realWorldContext:
+        'San Francisco is built on steep hills that dictated its unique development pattern. The peninsula location creates microclimates and stunning water views from elevated areas.',
     },
 
     denver: {
@@ -65,7 +67,7 @@ export function getTerrainProfilePresets(): Record<string, TerrainProfile> {
         waterLevel: -1600, // 1 mile high - 1609m above sea level
         hilliness: 0.3, // Moderate terrain variation
         riverProbability: 0.4, // South Platte River system
-        coastalDistance: 1600000 // Landlocked - ~1000 miles to nearest coast
+        coastalDistance: 1600000, // Landlocked - ~1000 miles to nearest coast
       },
       recommendedScale: 10, // Regional scale to show mountain context
       characteristics: [
@@ -73,9 +75,10 @@ export function getTerrainProfilePresets(): Record<string, TerrainProfile> {
         'Great Plains setting',
         'Rocky Mountain foothills',
         'Continental climate',
-        'Grid system possible due to flat terrain'
+        'Grid system possible due to flat terrain',
       ],
-      realWorldContext: 'Denver sits on the high plains at the base of the Rocky Mountains. The high elevation and continental location create a unique urban environment with dramatic mountain views.'
+      realWorldContext:
+        'Denver sits on the high plains at the base of the Rocky Mountains. The high elevation and continental location create a unique urban environment with dramatic mountain views.',
     },
 
     miami: {
@@ -86,7 +89,7 @@ export function getTerrainProfilePresets(): Record<string, TerrainProfile> {
         waterLevel: 2, // Slightly above sea level, flood prone
         hilliness: 0.02, // Virtually no elevation change
         riverProbability: 0.6, // Miami River, Everglades canals
-        coastalDistance: 400 // Right on Atlantic coast
+        coastalDistance: 400, // Right on Atlantic coast
       },
       recommendedScale: 1,
       characteristics: [
@@ -94,9 +97,10 @@ export function getTerrainProfilePresets(): Record<string, TerrainProfile> {
         'Barrier island system',
         'Coastal flooding risk',
         'Subtropical wetlands',
-        'Artificial waterways'
+        'Artificial waterways',
       ],
-      realWorldContext: 'Miami is built on former swampland with virtually no elevation. The flat terrain and proximity to sea level make it highly vulnerable to flooding and hurricanes.'
+      realWorldContext:
+        'Miami is built on former swampland with virtually no elevation. The flat terrain and proximity to sea level make it highly vulnerable to flooding and hurricanes.',
     },
 
     seattle: {
@@ -107,7 +111,7 @@ export function getTerrainProfilePresets(): Record<string, TerrainProfile> {
         waterLevel: 0,
         hilliness: 0.6, // Rolling hills throughout
         riverProbability: 0.5, // Limited rivers, but lots of water
-        coastalDistance: 1200 // Puget Sound, Lake Washington
+        coastalDistance: 1200, // Puget Sound, Lake Washington
       },
       recommendedScale: 1,
       characteristics: [
@@ -115,9 +119,10 @@ export function getTerrainProfilePresets(): Record<string, TerrainProfile> {
         'Multiple water bodies',
         'Puget Sound waterfront',
         'Distinct neighborhoods on hills',
-        'Rain shadow effects'
+        'Rain shadow effects',
       ],
-      realWorldContext: 'Seattle is built on hills between Puget Sound and Lake Washington, creating distinct neighborhoods with water views. The terrain influenced the city\'s organic growth pattern.'
+      realWorldContext:
+        "Seattle is built on hills between Puget Sound and Lake Washington, creating distinct neighborhoods with water views. The terrain influenced the city's organic growth pattern.",
     },
 
     chicago: {
@@ -128,7 +133,7 @@ export function getTerrainProfilePresets(): Record<string, TerrainProfile> {
         waterLevel: 0,
         hilliness: 0.03, // Almost perfectly flat
         riverProbability: 0.3, // Chicago River system
-        coastalDistance: 600 // Lake Michigan shoreline
+        coastalDistance: 600, // Lake Michigan shoreline
       },
       recommendedScale: 5, // Larger scale to show Great Lakes context
       characteristics: [
@@ -136,9 +141,10 @@ export function getTerrainProfilePresets(): Record<string, TerrainProfile> {
         'Great Lakes shoreline',
         'Former prairie landscape',
         'Grid system enabled by flatness',
-        'Engineered river reversal'
+        'Engineered river reversal',
       ],
-      realWorldContext: 'Chicago was built on flat prairie land next to Lake Michigan. The extremely flat terrain enabled the famous grid system and made large-scale urban planning possible.'
+      realWorldContext:
+        'Chicago was built on flat prairie land next to Lake Michigan. The extremely flat terrain enabled the famous grid system and made large-scale urban planning possible.',
     },
 
     las_vegas: {
@@ -149,7 +155,7 @@ export function getTerrainProfilePresets(): Record<string, TerrainProfile> {
         waterLevel: -600, // ~600m above sea level, desert valley
         hilliness: 0.4, // Valley with surrounding mountains
         riverProbability: 0.1, // Desert - very little water
-        coastalDistance: 400000 // Desert - hundreds of miles from coast
+        coastalDistance: 400000, // Desert - hundreds of miles from coast
       },
       recommendedScale: 10,
       characteristics: [
@@ -157,9 +163,10 @@ export function getTerrainProfilePresets(): Record<string, TerrainProfile> {
         'Surrounded by mountains',
         'Arid environment',
         'Planned city development',
-        'Water scarcity'
+        'Water scarcity',
       ],
-      realWorldContext: 'Las Vegas sits in a desert valley surrounded by mountains. The scarcity of water and extreme climate shaped its development as a modern planned city.'
+      realWorldContext:
+        'Las Vegas sits in a desert valley surrounded by mountains. The scarcity of water and extreme climate shaped its development as a modern planned city.',
     },
 
     new_orleans: {
@@ -170,7 +177,7 @@ export function getTerrainProfilePresets(): Record<string, TerrainProfile> {
         waterLevel: 3, // Much of city below sea level
         hilliness: 0.05, // Very flat, bowl-shaped
         riverProbability: 0.8, // Mississippi River, Lake Pontchartrain
-        coastalDistance: 160000 // ~100 miles from Gulf of Mexico
+        coastalDistance: 160000, // ~100 miles from Gulf of Mexico
       },
       recommendedScale: 1,
       characteristics: [
@@ -178,9 +185,10 @@ export function getTerrainProfilePresets(): Record<string, TerrainProfile> {
         'Bowl-shaped topography',
         'Levee system required',
         'Flood risk',
-        'River delta location'
+        'River delta location',
       ],
-      realWorldContext: 'New Orleans sits in a natural bowl below sea level in the Mississippi River delta. The unique topography requires extensive levee systems and creates perpetual flood risk.'
+      realWorldContext:
+        'New Orleans sits in a natural bowl below sea level in the Mississippi River delta. The unique topography requires extensive levee systems and creates perpetual flood risk.',
     },
 
     custom: {
@@ -191,26 +199,28 @@ export function getTerrainProfilePresets(): Record<string, TerrainProfile> {
         waterLevel: 0,
         hilliness: 0.5,
         riverProbability: 0.3,
-        coastalDistance: 5000
+        coastalDistance: 5000,
       },
       recommendedScale: 1,
-      characteristics: [
-        'Fully customizable',
-        'Experimental terrain',
-        'User-defined parameters'
-      ],
-      realWorldContext: 'Create your own unique geographic setting to explore how different terrain shapes urban development patterns.'
-    }
+      characteristics: ['Fully customizable', 'Experimental terrain', 'User-defined parameters'],
+      realWorldContext:
+        'Create your own unique geographic setting to explore how different terrain shapes urban development patterns.',
+    },
   };
 }
 
-export function getTerrainProfileList(): { value: string; label: string; description: string; context: string }[] {
+export function getTerrainProfileList(): {
+  value: string;
+  label: string;
+  description: string;
+  context: string;
+}[] {
   const profiles = getTerrainProfilePresets();
   return Object.entries(profiles).map(([key, profile]) => ({
     value: key,
     label: profile.name,
     description: profile.description,
-    context: profile.realWorldContext
+    context: profile.realWorldContext,
   }));
 }
 
@@ -225,7 +235,7 @@ export function getTerrainDifficulty(profile: TerrainProfile): 'easy' | 'moderat
   const { hilliness, mountainHeight, waterLevel } = profile.parameters;
 
   // Calculate difficulty based on terrain factors
-  const slopeChallenge = hilliness * mountainHeight / 100;
+  const slopeChallenge = (hilliness * mountainHeight) / 100;
   const floodRisk = waterLevel > 0 ? waterLevel / 10 : 0;
   const elevationChallenge = Math.abs(waterLevel) / 1000;
 
@@ -246,20 +256,24 @@ export function getDevelopmentRecommendations(profile: TerrainProfile): {
   const { hilliness, coastalDistance, riverProbability, waterLevel } = profile.parameters;
 
   return {
-    downtown: hilliness < 0.3 ?
-      'Flat areas near water for easy access and trade' :
-      'Elevated areas with good views and drainage',
+    downtown:
+      hilliness < 0.3
+        ? 'Flat areas near water for easy access and trade'
+        : 'Elevated areas with good views and drainage',
 
-    residential: hilliness > 0.5 ?
-      'Hills and elevated areas for views and status' :
-      'Flat areas for efficient development',
+    residential:
+      hilliness > 0.5
+        ? 'Hills and elevated areas for views and status'
+        : 'Flat areas for efficient development',
 
-    industrial: hilliness < 0.2 && waterLevel < 10 ?
-      'Flat areas near water for transport and utilities' :
-      'Level ground away from flood zones',
+    industrial:
+      hilliness < 0.2 && waterLevel < 10
+        ? 'Flat areas near water for transport and utilities'
+        : 'Level ground away from flood zones',
 
-    transportation: hilliness > 0.6 ?
-      'Winding roads following contours, bridges and tunnels' :
-      'Grid system possible, efficient straight routes'
+    transportation:
+      hilliness > 0.6
+        ? 'Winding roads following contours, bridges and tunnels'
+        : 'Grid system possible, efficient straight routes',
   };
 }

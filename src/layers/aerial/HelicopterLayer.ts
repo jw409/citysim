@@ -17,12 +17,18 @@ export function createHelicopterLayer(helicopterData: any[]) {
       getFillColor: (d: any) => {
         // Color by helicopter type
         switch (d.helicopter_type) {
-          case 'emergency': return [255, 0, 0, 255]; // Red for emergency
-          case 'police': return [0, 0, 255, 255]; // Blue for police
-          case 'news': return [255, 255, 0, 255]; // Yellow for news
-          case 'medical': return [255, 255, 255, 255]; // White for medical
-          case 'civilian': return [0, 255, 0, 255]; // Green for civilian
-          default: return layerConfig.color;
+          case 'emergency':
+            return [255, 0, 0, 255]; // Red for emergency
+          case 'police':
+            return [0, 0, 255, 255]; // Blue for police
+          case 'news':
+            return [255, 255, 0, 255]; // Yellow for news
+          case 'medical':
+            return [255, 255, 255, 255]; // White for medical
+          case 'civilian':
+            return [0, 255, 0, 255]; // Green for civilian
+          default:
+            return layerConfig.color;
         }
       },
       getLineColor: [0, 0, 0, 100],
@@ -33,12 +39,12 @@ export function createHelicopterLayer(helicopterData: any[]) {
       material: {
         ambient: 0.6,
         diffuse: 0.8,
-        shininess: 32
+        shininess: 32,
       },
       transitions: {
         getPosition: 1000,
-        getFillColor: 500
-      }
+        getFillColor: 500,
+      },
     }),
 
     // Flight paths
@@ -51,8 +57,8 @@ export function createHelicopterLayer(helicopterData: any[]) {
       opacity: 0.6,
       pickable: false,
       widthMinPixels: 1,
-      widthMaxPixels: 4
-    })
+      widthMaxPixels: 4,
+    }),
   ];
 }
 
@@ -81,7 +87,7 @@ export function generateHelicopterTraffic(bounds: any, density: number = 0.1): a
       heading: Math.random() * 360,
       mission: generateMission(type),
       fuel_level: 0.3 + Math.random() * 0.7,
-      registration: `H-${Math.random().toString(36).substr(2, 4).toUpperCase()}`
+      registration: `H-${Math.random().toString(36).substr(2, 4).toUpperCase()}`,
     });
 
     // Generate flight path for this helicopter
@@ -96,7 +102,7 @@ export function generateHelicopterTraffic(bounds: any, density: number = 0.1): a
       pathPoints.push([
         Math.max(min_x, Math.min(max_x, pathX)),
         Math.max(min_y, Math.min(max_y, pathY)),
-        Math.max(50, pathAltitude)
+        Math.max(50, pathAltitude),
       ]);
     }
 
@@ -104,7 +110,7 @@ export function generateHelicopterTraffic(bounds: any, density: number = 0.1): a
       id: `helicopter_path_${i}`,
       type: 'flight_path',
       helicopter_id: `helicopter_${i}`,
-      path: pathPoints
+      path: pathPoints,
     });
   }
 
@@ -134,7 +140,7 @@ export function generateHelicopterTraffic(bounds: any, density: number = 0.1): a
       type: 'flight_path',
       path: routePoints,
       route_type: 'corridor',
-      traffic_level: Math.random()
+      traffic_level: Math.random(),
     });
   }
 
@@ -143,12 +149,18 @@ export function generateHelicopterTraffic(bounds: any, density: number = 0.1): a
 
 function getHelicopterSpeed(type: string): number {
   switch (type) {
-    case 'emergency': return 180;
-    case 'police': return 160;
-    case 'news': return 140;
-    case 'medical': return 170;
-    case 'civilian': return 120;
-    default: return 140;
+    case 'emergency':
+      return 180;
+    case 'police':
+      return 160;
+    case 'news':
+      return 140;
+    case 'medical':
+      return 170;
+    case 'civilian':
+      return 120;
+    default:
+      return 140;
   }
 }
 
@@ -158,7 +170,7 @@ function generateMission(type: string): string {
     police: ['Patrol', 'Pursuit', 'Surveillance', 'Traffic Monitoring'],
     news: ['Live Broadcast', 'Event Coverage', 'Traffic Report', 'Breaking News'],
     medical: ['Medevac', 'Hospital Transfer', 'Emergency Transport', 'Organ Transport'],
-    civilian: ['Sightseeing', 'Business Flight', 'Private Transport', 'Training Flight']
+    civilian: ['Sightseeing', 'Business Flight', 'Private Transport', 'Training Flight'],
   };
 
   const typeMissions = missions[type] || missions.civilian;

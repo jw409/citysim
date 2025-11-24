@@ -21,18 +21,22 @@ export function createWeatherLayer(weatherData: WeatherData[]) {
       d.color[0],
       d.color[1],
       d.color[2],
-      Math.floor(d.color[3] * d.intensity * (d.lifespan / 100))
+      Math.floor(d.color[3] * d.intensity * (d.lifespan / 100)),
     ],
     radiusScale: 1,
     radiusMinPixels: 1,
     radiusMaxPixels: 15,
     pickable: false,
     stroked: false,
-    filled: true
+    filled: true,
   });
 }
 
-export function generateWeatherSystem(centerLat: number, centerLng: number, weatherType: 'clear' | 'rain' | 'snow' | 'fog' = 'clear'): WeatherData[] {
+export function generateWeatherSystem(
+  centerLat: number,
+  centerLng: number,
+  weatherType: 'clear' | 'rain' | 'snow' | 'fog' = 'clear'
+): WeatherData[] {
   const weather: WeatherData[] = [];
 
   if (weatherType === 'clear') {
@@ -44,13 +48,13 @@ export function generateWeatherSystem(centerLat: number, centerLng: number, weat
         position: [
           centerLng + (Math.random() - 0.5) * 0.05,
           centerLat + (Math.random() - 0.5) * 0.05,
-          100 + Math.random() * 500
+          100 + Math.random() * 500,
         ],
         intensity: 0.1,
         velocity: [(Math.random() - 0.5) * 0.0001, (Math.random() - 0.5) * 0.0001, 0],
         size: 2,
         color: [200, 200, 200, 30],
-        lifespan: 100
+        lifespan: 100,
       });
     }
     return weather;
@@ -65,13 +69,13 @@ export function generateWeatherSystem(centerLat: number, centerLng: number, weat
         position: [
           centerLng + (Math.random() - 0.5) * 0.08,
           centerLat + (Math.random() - 0.5) * 0.08,
-          200 + Math.random() * 800
+          200 + Math.random() * 800,
         ],
         intensity: 0.6 + Math.random() * 0.4,
         velocity: [0.0001, 0, -20], // Falling down
         size: 0.5,
         color: [100, 150, 255, 120],
-        lifespan: 50 + Math.random() * 50
+        lifespan: 50 + Math.random() * 50,
       });
     }
 
@@ -83,13 +87,13 @@ export function generateWeatherSystem(centerLat: number, centerLng: number, weat
         position: [
           centerLng + (Math.random() - 0.5) * 0.1,
           centerLat + (Math.random() - 0.5) * 0.1,
-          800 + Math.random() * 400
+          800 + Math.random() * 400,
         ],
         intensity: 0.3 + Math.random() * 0.4,
         velocity: [(Math.random() - 0.5) * 0.001, (Math.random() - 0.5) * 0.001, 0],
         size: 50,
         color: [80, 80, 80, 100],
-        lifespan: 100
+        lifespan: 100,
       });
     }
   }
@@ -103,17 +107,17 @@ export function generateWeatherSystem(centerLat: number, centerLng: number, weat
         position: [
           centerLng + (Math.random() - 0.5) * 0.08,
           centerLat + (Math.random() - 0.5) * 0.08,
-          100 + Math.random() * 600
+          100 + Math.random() * 600,
         ],
         intensity: 0.7 + Math.random() * 0.3,
         velocity: [
           (Math.random() - 0.5) * 0.0002, // Slight horizontal drift
           (Math.random() - 0.5) * 0.0002,
-          -5 - Math.random() * 10 // Slower fall than rain
+          -5 - Math.random() * 10, // Slower fall than rain
         ],
         size: 1 + Math.random() * 2,
         color: [255, 255, 255, 180],
-        lifespan: 80 + Math.random() * 40
+        lifespan: 80 + Math.random() * 40,
       });
     }
   }
@@ -127,13 +131,13 @@ export function generateWeatherSystem(centerLat: number, centerLng: number, weat
         position: [
           centerLng + (Math.random() - 0.5) * 0.06,
           centerLat + (Math.random() - 0.5) * 0.06,
-          10 + Math.random() * 200 // Low altitude fog
+          10 + Math.random() * 200, // Low altitude fog
         ],
         intensity: 0.2 + Math.random() * 0.4,
         velocity: [(Math.random() - 0.5) * 0.0003, (Math.random() - 0.5) * 0.0003, 0],
         size: 10 + Math.random() * 20,
         color: [220, 220, 220, 80],
-        lifespan: 100
+        lifespan: 100,
       });
     }
   }
@@ -163,9 +167,9 @@ export function createWindLayer(centerLat: number, centerLng: number): PathLayer
         id: `wind-${x}-${y}`,
         path: [
           [startLng, startLat, 50],
-          [endLng, endLat, 50]
+          [endLng, endLat, 50],
         ],
-        intensity: Math.random()
+        intensity: Math.random(),
       });
     }
   }
@@ -177,6 +181,6 @@ export function createWindLayer(centerLat: number, centerLng: number): PathLayer
     getColor: (d: any) => [100, 200, 255, Math.floor(100 * d.intensity)],
     getWidth: 2,
     widthScale: 1,
-    pickable: false
+    pickable: false,
   });
 }

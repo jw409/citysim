@@ -1,0 +1,6 @@
+{"level":30,"time":"2025-11-24T07:12:42.863Z","pid":610490,"category":"caller-verification","msg":"Verifying stdio caller","event":"info","ppid":610449,"platform":"linux"}
+{"level":30,"time":"2025-11-24T07:12:42.912Z","pid":610490,"category":"caller-verification","msg":"Trusted caller verified","event":"info","ppid":610449,"cmdline":"claude","platform":"linux"}
+{"level":30,"time":"2025-11-24T07:12:59.756Z","pid":610797,"category":"caller-verification","msg":"Verifying stdio caller","event":"info","ppid":610642,"platform":"linux"}
+{"level":30,"time":"2025-11-24T07:12:59.757Z","pid":610797,"category":"caller-verification","msg":"Trusted caller verified","event":"info","ppid":610642,"cmdline":"claude","platform":"linux"}
+{"level":30,"time":"2025-11-24T07:22:07.916Z","pid":615856,"category":"caller-verification","msg":"Verifying stdio caller","event":"info","ppid":615701,"platform":"linux"}
+{"level":30,"time":"2025-11-24T07:22:07.916Z","pid":615856,"category":"caller-verification","msg":"Trusted caller verified","event":"info","ppid":615701,"cmdline":"claude","platform":"linux"}

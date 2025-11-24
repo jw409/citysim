@@ -21,12 +21,12 @@ export function createSewerLayer(sewerData: any[]) {
       ambient: 0.1,
       diffuse: 0.4,
       shininess: 16,
-      specularColor: [100, 60, 40]
+      specularColor: [100, 60, 40],
     },
     transitions: {
       getColor: 500,
-      getWidth: 300
-    }
+      getWidth: 300,
+    },
   });
 }
 
@@ -41,22 +41,28 @@ export function generateSewerNetwork(bounds: any, density: number = 0.5): any[] 
   for (let x = min_x; x <= max_x; x += gridSpacing) {
     sewers.push({
       id: `sewer_main_ns_${x}`,
-      path: [[x, min_y], [x, max_y]],
+      path: [
+        [x, min_y],
+        [x, max_y],
+      ],
       diameter: 3,
       elevation: -18,
       type: 'main',
-      flow_rate: Math.random() * 100
+      flow_rate: Math.random() * 100,
     });
   }
 
   for (let y = min_y; y <= max_y; y += gridSpacing) {
     sewers.push({
       id: `sewer_main_ew_${y}`,
-      path: [[min_x, y], [max_x, y]],
+      path: [
+        [min_x, y],
+        [max_x, y],
+      ],
       diameter: 3,
       elevation: -18,
       type: 'main',
-      flow_rate: Math.random() * 100
+      flow_rate: Math.random() * 100,
     });
   }
 
@@ -69,11 +75,14 @@ export function generateSewerNetwork(bounds: any, density: number = 0.5): any[] 
 
     sewers.push({
       id: `sewer_branch_${i}`,
-      path: [[startX, startY], [endX, endY]],
+      path: [
+        [startX, startY],
+        [endX, endY],
+      ],
       diameter: 1.5,
       elevation: -12,
       type: 'branch',
-      flow_rate: Math.random() * 20
+      flow_rate: Math.random() * 20,
     });
   }
 

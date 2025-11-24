@@ -28,15 +28,10 @@ export class ErrorBoundary extends Component<Props, State> {
         <div className="error-boundary">
           <h2>Something went wrong</h2>
           <p>The application encountered an unexpected error.</p>
-          <button
-            className="button button-primary"
-            onClick={() => window.location.reload()}
-          >
+          <button className="button button-primary" onClick={() => window.location.reload()}>
             Reload Application
           </button>
-          {this.state.error && (
-            <pre>{this.state.error.toString()}</pre>
-          )}
+          {this.state.error && <pre>{this.state.error.toString()}</pre>}
         </div>
       );
     }

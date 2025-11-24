@@ -21,11 +21,11 @@ function getTerrainHeightAt(x: number, y: number): number {
 
   // EXTREME CLIFFSIDE CITY - Same dramatic cliffs as TerrainLayer
   const hills = [
-    { x: 7000, y: 0, height: 1600, radius: 4000 },      // Eastern cliff wall
-    { x: -7000, y: 0, height: 1500, radius: 3800 },     // Western cliff wall
-    { x: 0, y: 8000, height: 1400, radius: 4200 },      // Northern highlands
-    { x: 4000, y: -6000, height: 1300, radius: 3600 },  // Southeast cliff
-    { x: -4000, y: 6000, height: 1200, radius: 3400 }   // Northwest peaks
+    { x: 7000, y: 0, height: 1600, radius: 4000 }, // Eastern cliff wall
+    { x: -7000, y: 0, height: 1500, radius: 3800 }, // Western cliff wall
+    { x: 0, y: 8000, height: 1400, radius: 4200 }, // Northern highlands
+    { x: 4000, y: -6000, height: 1300, radius: 3600 }, // Southeast cliff
+    { x: -4000, y: 6000, height: 1200, radius: 3400 }, // Northwest peaks
   ];
 
   let hillContribution = 0;
@@ -33,7 +33,8 @@ function getTerrainHeightAt(x: number, y: number): number {
     const hillHeight = exponentialDecayHeight(x, y, hill.x, hill.y, hill.height, hill.radius, 1.8);
     if (hillHeight > 2) {
       // Add surface variation to hills
-      const variation = perlinNoise(x * 0.001 + hill.x * 0.0001, y * 0.001 + hill.y * 0.0001) * hillHeight * 0.12;
+      const variation =
+        perlinNoise(x * 0.001 + hill.x * 0.0001, y * 0.001 + hill.y * 0.0001) * hillHeight * 0.12;
       hillContribution += hillHeight + variation;
     } else {
       hillContribution += hillHeight;
@@ -63,7 +64,7 @@ function getTerrainHeightAt(x: number, y: number): number {
 
   // Rural areas with full elevation
   const ruralTransition = Math.min(1, (distanceFromCenter - 6000) / 2000);
-  const flatteningFactor = 0.35 + (ruralTransition * 0.65);
+  const flatteningFactor = 0.35 + ruralTransition * 0.65;
   const ruralElevation = totalElevation * flatteningFactor;
 
   return Math.min(ruralElevation, riverElevation);
@@ -80,7 +81,7 @@ function calculateRiverElevation(x: number, y: number): number {
   const distanceFromMainBay = Math.abs(y - mainBayY);
   if (distanceFromMainBay <= mainBayWidth / 2) {
     const normalizedDist = distanceFromMainBay / (mainBayWidth / 2);
-    const depthFactor = 1 - (normalizedDist * normalizedDist);
+    const depthFactor = 1 - normalizedDist * normalizedDist;
     const oceanElevation = -mainBayDepth * depthFactor;
     minElevation = Math.min(minElevation, oceanElevation);
   }
@@ -92,7 +93,7 @@ function calculateRiverElevation(x: number, y: number): number {
   const distanceFromNorthFjord = Math.abs(y - northFjordY);
   if (distanceFromNorthFjord <= northFjordWidth / 2) {
     const normalizedDist = distanceFromNorthFjord / (northFjordWidth / 2);
-    const depthFactor = 1 - (normalizedDist * normalizedDist);
+    const depthFactor = 1 - normalizedDist * normalizedDist;
     const fjordElevation = -northFjordDepth * depthFactor;
     minElevation = Math.min(minElevation, fjordElevation);
   }
@@ -104,7 +105,7 @@ function calculateRiverElevation(x: number, y: number): number {
   const distanceFromSouthFjord = Math.abs(y - southFjordY);
   if (distanceFromSouthFjord <= southFjordWidth / 2) {
     const normalizedDist = distanceFromSouthFjord / (southFjordWidth / 2);
-    const depthFactor = 1 - (normalizedDist * normalizedDist);
+    const depthFactor = 1 - normalizedDist * normalizedDist;
     const fjordElevation = -southFjordDepth * depthFactor;
     minElevation = Math.min(minElevation, fjordElevation);
   }
@@ -116,7 +117,7 @@ function calculateRiverElevation(x: number, y: number): number {
   const distanceFromEastInlet = Math.abs(x - eastInletX);
   if (distanceFromEastInlet <= eastInletWidth / 2) {
     const normalizedDist = distanceFromEastInlet / (eastInletWidth / 2);
-    const depthFactor = 1 - (normalizedDist * normalizedDist);
+    const depthFactor = 1 - normalizedDist * normalizedDist;
     const inletElevation = -eastInletDepth * depthFactor;
     minElevation = Math.min(minElevation, inletElevation);
   }
@@ -131,7 +132,7 @@ export function createRoadLayer(roads: any[], timeOfDay: number = 12) {
     id: 'roads',
     data: roads,
     coordinateSystem: 2, // COORDINATE_SYSTEM.METER_OFFSETS to match buildings/terrain
-    coordinateOrigin: [-74.0060, 40.7128, 0], // NYC center
+    coordinateOrigin: [-74.006, 40.7128, 0], // NYC center
     getPath: (d: any) => {
       if (!d.path) return [];
 

@@ -27,7 +27,6 @@ export function PerformanceMonitor({ metrics, onClose }: PerformanceMonitorProps
       panelType="performance"
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-
         {/* Performance Metrics */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
           <div style={metricRowStyle}>
@@ -57,13 +56,15 @@ export function PerformanceMonitor({ metrics, onClose }: PerformanceMonitorProps
         </div>
 
         {/* Controls */}
-        <div style={{
-          borderTop: '1px solid var(--border-color)',
-          paddingTop: '0.5rem',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '0.5rem'
-        }}>
+        <div
+          style={{
+            borderTop: '1px solid var(--border-color)',
+            paddingTop: '0.5rem',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '0.5rem',
+          }}
+        >
           <button
             onClick={onClose}
             className="button button-secondary"
@@ -71,32 +72,42 @@ export function PerformanceMonitor({ metrics, onClose }: PerformanceMonitorProps
           >
             Hide Monitor
           </button>
-          <div style={{
-            fontSize: '0.7rem',
-            color: 'var(--text-secondary)',
-            textAlign: 'center',
-            fontStyle: 'italic'
-          }}>
+          <div
+            style={{
+              fontSize: '0.7rem',
+              color: 'var(--text-secondary)',
+              textAlign: 'center',
+              fontStyle: 'italic',
+            }}
+          >
             Press Ctrl+P to toggle
           </div>
         </div>
-
       </div>
     </DraggablePanel>
   );
 }
 
 // Helper function to get colored value style based on thresholds
-function getValueStyle(value: number, goodThreshold: number, badThreshold: number, inverse = false) {
+function getValueStyle(
+  value: number,
+  goodThreshold: number,
+  badThreshold: number,
+  inverse = false
+) {
   const base = { ...valueStyle };
 
   if (inverse) {
-    if (value <= goodThreshold) base.color = '#4ade80'; // green
-    else if (value <= badThreshold) base.color = '#fbbf24'; // yellow
+    if (value <= goodThreshold)
+      base.color = '#4ade80'; // green
+    else if (value <= badThreshold)
+      base.color = '#fbbf24'; // yellow
     else base.color = '#f87171'; // red
   } else {
-    if (value >= goodThreshold) base.color = '#4ade80'; // green
-    else if (value >= badThreshold) base.color = '#fbbf24'; // yellow
+    if (value >= goodThreshold)
+      base.color = '#4ade80'; // green
+    else if (value >= badThreshold)
+      base.color = '#fbbf24'; // yellow
     else base.color = '#f87171'; // red
   }
 

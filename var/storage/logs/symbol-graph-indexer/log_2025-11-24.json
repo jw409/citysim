@@ -1,0 +1,4 @@
+{"level":30,"time":"2025-11-24T07:14:09.011Z","pid":610797,"category":"symbol-graph-indexer","msg":"Initializing SymbolGraphIndexer","event":"info","dbPath":"/home/jw/dev/citysim/var/db/zmcp_local.db","projectPath":"/home/jw/dev/citysim"}
+{"level":30,"time":"2025-11-24T07:14:36.762Z","pid":610797,"category":"symbol-graph-indexer","msg":"Initializing SymbolGraphIndexer","event":"info","dbPath":"/home/jw/dev/citysim/var/db/zmcp_local.db","projectPath":"/home/jw/dev/citysim"}
+{"level":30,"time":"2025-11-24T07:28:16.968Z","pid":615856,"category":"symbol-graph-indexer","msg":"Initializing SymbolGraphIndexer","event":"info","dbPath":"/home/jw/dev/citysim/var/db/zmcp_local.db","projectPath":"/home/jw/dev/citysim"}
+{"level":30,"time":"2025-11-24T07:28:21.562Z","pid":615856,"category":"symbol-graph-indexer","msg":"Initializing SymbolGraphIndexer","event":"info","dbPath":"/home/jw/dev/citysim/var/db/zmcp_local.db","projectPath":"/home/jw/dev/citysim"}

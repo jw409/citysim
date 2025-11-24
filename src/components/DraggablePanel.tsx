@@ -22,11 +22,12 @@ export function DraggablePanel({
   initiallyCollapsed = false,
   zIndex,
   storageKey,
-  panelType
+  panelType,
 }: DraggablePanelProps) {
   // Load saved position/size from localStorage if storageKey provided
   const loadSavedState = () => {
-    if (!storageKey) return { position: defaultPosition, size: defaultSize, collapsed: initiallyCollapsed };
+    if (!storageKey)
+      return { position: defaultPosition, size: defaultSize, collapsed: initiallyCollapsed };
 
     try {
       const saved = localStorage.getItem(`draggable-panel-${storageKey}`);
@@ -58,7 +59,7 @@ export function DraggablePanel({
 
   // Handle panel focus management
   useEffect(() => {
-    const unsubscribe = panelZIndexManager.subscribe((activePanelId) => {
+    const unsubscribe = panelZIndexManager.subscribe(activePanelId => {
       setIsActive(activePanelId === panelId);
     });
     return unsubscribe;
@@ -69,14 +70,18 @@ export function DraggablePanel({
   };
 
   // Save state to localStorage
-  const saveState = (newPosition?: { x: number; y: number }, newSize?: { width: number; height: number }, newCollapsed?: boolean) => {
+  const saveState = (
+    newPosition?: { x: number; y: number },
+    newSize?: { width: number; height: number },
+    newCollapsed?: boolean
+  ) => {
     if (!storageKey) return;
 
     try {
       const state = {
         position: newPosition || position,
         size: newSize || size,
-        collapsed: newCollapsed !== undefined ? newCollapsed : isCollapsed
+        collapsed: newCollapsed !== undefined ? newCollapsed : isCollapsed,
       };
       localStorage.setItem(`draggable-panel-${storageKey}`, JSON.stringify(state));
     } catch (e) {
@@ -93,7 +98,7 @@ export function DraggablePanel({
       setIsDragging(true);
       setDragStart({
         x: e.clientX - position.x,
-        y: e.clientY - position.y
+        y: e.clientY - position.y,
       });
     }
   };
@@ -106,7 +111,7 @@ export function DraggablePanel({
       x: e.clientX,
       y: e.clientY,
       width: size.width,
-      height: size.height
+      height: size.height,
     });
   };
 
@@ -121,13 +126,13 @@ export function DraggablePanel({
       if (isDragging) {
         const newPosition = {
           x: Math.max(0, Math.min(window.innerWidth - size.width, e.clientX - dragStart.x)),
-          y: Math.max(0, Math.min(window.innerHeight - 50, e.clientY - dragStart.y)) // Ensure title bar stays visible
+          y: Math.max(0, Math.min(window.innerHeight - 50, e.clientY - dragStart.y)), // Ensure title bar stays visible
         };
         setPosition(newPosition);
       } else if (isResizing) {
         const newSize = {
           width: Math.max(250, resizeStart.width + (e.clientX - resizeStart.x)),
-          height: Math.max(200, resizeStart.height + (e.clientY - resizeStart.y))
+          height: Math.max(200, resizeStart.height + (e.clientY - resizeStart.y)),
         };
         setSize(newSize);
       }
@@ -175,7 +180,7 @@ export function DraggablePanel({
         boxShadow: isActive ? 'var(--shadow-xl)' : 'var(--shadow-lg)',
         userSelect: 'none',
         fontFamily: 'inherit',
-        transition: 'border-color 0.2s ease, box-shadow 0.2s ease'
+        transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
       }}
     >
       <div
@@ -191,7 +196,7 @@ export function DraggablePanel({
           fontSize: '0.875rem',
           fontWeight: 600,
           cursor: isDragging ? 'grabbing' : 'grab',
-          color: 'var(--text-primary)'
+          color: 'var(--text-primary)',
         }}
         onMouseDown={handleMouseDown}
       >
@@ -209,9 +214,9 @@ export function DraggablePanel({
                 fontSize: '0.75rem',
                 padding: '0.25rem',
                 color: 'var(--text-secondary)',
-                borderRadius: '2px'
+                borderRadius: '2px',
               }}
-              onMouseDown={(e) => e.stopPropagation()} // Prevent drag when clicking collapse
+              onMouseDown={e => e.stopPropagation()} // Prevent drag when clicking collapse
             >
               {isCollapsed ? '▼' : '▲'}
             </button>
@@ -227,9 +232,9 @@ export function DraggablePanel({
               padding: '1rem',
               overflow: 'auto',
               height: size.height - 60, // Account for header height
-              cursor: 'default'
+              cursor: 'default',
             }}
-            onMouseDown={(e) => e.stopPropagation()} // Prevent drag when interacting with content
+            onMouseDown={e => e.stopPropagation()} // Prevent drag when interacting with content
           >
             {children}
           </div>
@@ -261,7 +266,7 @@ export function DraggablePanel({
                   transparent 100%
                 )
               `,
-              opacity: 0.5
+              opacity: 0.5,
             }}
             onMouseDown={handleResizeMouseDown}
           />

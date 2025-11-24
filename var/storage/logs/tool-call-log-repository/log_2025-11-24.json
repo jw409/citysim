@@ -1,0 +1,8 @@
+{"level":50,"time":"2025-11-24T07:14:09.020Z","pid":610797,"category":"tool-call-log-repository","msg":"Failed to create record","event":"error","table":"tool_call_logs","error":"no such table: tool_call_logs"}
+{"level":50,"time":"2025-11-24T07:14:22.253Z","pid":610797,"category":"tool-call-log-repository","msg":"Failed to create record","event":"error","table":"tool_call_logs","error":"no such table: tool_call_logs"}
+{"level":50,"time":"2025-11-24T07:14:22.821Z","pid":610797,"category":"tool-call-log-repository","msg":"Failed to create record","event":"error","table":"tool_call_logs","error":"no such table: tool_call_logs"}
+{"level":50,"time":"2025-11-24T07:14:36.763Z","pid":610797,"category":"tool-call-log-repository","msg":"Failed to create record","event":"error","table":"tool_call_logs","error":"no such table: tool_call_logs"}
+{"level":50,"time":"2025-11-24T07:27:56.409Z","pid":615856,"category":"tool-call-log-repository","msg":"Failed to create record","event":"error","table":"tool_call_logs","error":"no such table: tool_call_logs"}
+{"level":50,"time":"2025-11-24T07:28:00.984Z","pid":615856,"category":"tool-call-log-repository","msg":"Failed to create record","event":"error","table":"tool_call_logs","error":"no such table: tool_call_logs"}
+{"level":50,"time":"2025-11-24T07:28:16.971Z","pid":615856,"category":"tool-call-log-repository","msg":"Failed to create record","event":"error","table":"tool_call_logs","error":"no such table: tool_call_logs"}
+{"level":50,"time":"2025-11-24T07:28:21.563Z","pid":615856,"category":"tool-call-log-repository","msg":"Failed to create record","event":"error","table":"tool_call_logs","error":"no such table: tool_call_logs"}

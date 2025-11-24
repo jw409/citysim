@@ -17,11 +17,16 @@ export function createAircraftLayer(aircraftData: any[]) {
       getFillColor: (d: any) => {
         // Color by aircraft type
         switch (d.aircraft_type) {
-          case 'commercial': return [0, 150, 255, 255]; // Blue for commercial
-          case 'cargo': return [255, 150, 0, 255]; // Orange for cargo
-          case 'private': return [255, 255, 255, 255]; // White for private
-          case 'military': return [100, 100, 100, 255]; // Gray for military
-          default: return layerConfig.color;
+          case 'commercial':
+            return [0, 150, 255, 255]; // Blue for commercial
+          case 'cargo':
+            return [255, 150, 0, 255]; // Orange for cargo
+          case 'private':
+            return [255, 255, 255, 255]; // White for private
+          case 'military':
+            return [100, 100, 100, 255]; // Gray for military
+          default:
+            return layerConfig.color;
         }
       },
       getLineColor: [0, 0, 0, 80],
@@ -32,12 +37,12 @@ export function createAircraftLayer(aircraftData: any[]) {
       material: {
         ambient: 0.5,
         diffuse: 0.8,
-        shininess: 64
+        shininess: 64,
       },
       transitions: {
         getPosition: 2000,
-        getFillColor: 500
-      }
+        getFillColor: 500,
+      },
     }),
 
     // Flight paths
@@ -55,8 +60,8 @@ export function createAircraftLayer(aircraftData: any[]) {
       opacity: 0.4,
       pickable: true,
       widthMinPixels: 1,
-      widthMaxPixels: 8
-    })
+      widthMaxPixels: 8,
+    }),
   ];
 }
 
@@ -89,7 +94,7 @@ export function generateAirTraffic(bounds: any, density: number = 0.05): any[] {
       origin: generateAirport(),
       destination: generateAirport(),
       fuel_level: 0.4 + Math.random() * 0.6,
-      passengers: type === 'commercial' ? Math.floor(50 + Math.random() * 300) : 0
+      passengers: type === 'commercial' ? Math.floor(50 + Math.random() * 300) : 0,
     });
 
     // Generate flight path for this aircraft
@@ -111,21 +116,31 @@ export function generateAirTraffic(bounds: any, density: number = 0.05): any[] {
 
 function getAltitudeRange(type: string): number {
   switch (type) {
-    case 'commercial': return 8000 + Math.random() * 4000; // 8000-12000m
-    case 'cargo': return 7000 + Math.random() * 5000; // 7000-12000m
-    case 'private': return 3000 + Math.random() * 6000; // 3000-9000m
-    case 'military': return 5000 + Math.random() * 10000; // 5000-15000m
-    default: return 5000;
+    case 'commercial':
+      return 8000 + Math.random() * 4000; // 8000-12000m
+    case 'cargo':
+      return 7000 + Math.random() * 5000; // 7000-12000m
+    case 'private':
+      return 3000 + Math.random() * 6000; // 3000-9000m
+    case 'military':
+      return 5000 + Math.random() * 10000; // 5000-15000m
+    default:
+      return 5000;
   }
 }
 
 function getAircraftSpeed(type: string): number {
   switch (type) {
-    case 'commercial': return 850;
-    case 'cargo': return 800;
-    case 'private': return 500;
-    case 'military': return 1200;
-    default: return 600;
+    case 'commercial':
+      return 850;
+    case 'cargo':
+      return 800;
+    case 'private':
+      return 500;
+    case 'military':
+      return 1200;
+    default:
+      return 600;
   }
 }
 
@@ -134,7 +149,7 @@ function generateFlightNumber(type: string): string {
     commercial: ['AA', 'UA', 'DL', 'SW', 'JB'],
     cargo: ['FX', 'UP', 'CK', 'GL'],
     private: ['N'],
-    military: ['AF', 'NV', 'AR']
+    military: ['AF', 'NV', 'AR'],
   };
 
   const typePrefix = prefixes[type] || prefixes.private;
@@ -146,13 +161,37 @@ function generateFlightNumber(type: string): string {
 
 function generateAirport(): string {
   const airports = [
-    'LAX', 'JFK', 'ORD', 'ATL', 'DFW', 'DEN', 'LAS', 'PHX', 'MIA', 'SEA',
-    'BOS', 'SFO', 'LGA', 'BWI', 'IAD', 'MSP', 'DTW', 'PHL', 'CLT', 'MCO'
+    'LAX',
+    'JFK',
+    'ORD',
+    'ATL',
+    'DFW',
+    'DEN',
+    'LAS',
+    'PHX',
+    'MIA',
+    'SEA',
+    'BOS',
+    'SFO',
+    'LGA',
+    'BWI',
+    'IAD',
+    'MSP',
+    'DTW',
+    'PHL',
+    'CLT',
+    'MCO',
   ];
   return airports[Math.floor(Math.random() * airports.length)];
 }
 
-function generateFlightPath(aircraft: any[], index: number, bounds: any, type: string, altitude: number) {
+function generateFlightPath(
+  aircraft: any[],
+  index: number,
+  bounds: any,
+  type: string,
+  altitude: number
+) {
   const { min_x, min_y, max_x, max_y } = bounds;
   const currentAircraft = aircraft[aircraft.length - 1];
 
@@ -186,7 +225,7 @@ function generateFlightPath(aircraft: any[], index: number, bounds: any, type: s
     path: pathPoints,
     aircraft_type: type,
     average_altitude: altitude,
-    width: type === 'commercial' ? 4 : 3
+    width: type === 'commercial' ? 4 : 3,
   });
 }
 
@@ -243,7 +282,7 @@ function generateAirCorridor(aircraft: any[], index: number, bounds: any) {
     corridor_type: corridorType,
     average_altitude: altitude,
     traffic_density: Math.random(),
-    width: 5
+    width: 5,
   });
 }
 
@@ -254,14 +293,14 @@ function generateAirportPatterns(aircraft: any[], bounds: any, density: number) 
   const airportCount = Math.floor(density * 3) + 1;
 
   for (let i = 0; i < airportCount; i++) {
-    const airportX = min_x + (i + 1) * (max_x - min_x) / (airportCount + 1);
+    const airportX = min_x + ((i + 1) * (max_x - min_x)) / (airportCount + 1);
     const airportY = min_y + Math.random() * (max_y - min_y);
 
     // Generate approach patterns
     const approaches = 4; // 4 approach directions
 
     for (let approach = 0; approach < approaches; approach++) {
-      const angle = (approach * 90 + Math.random() * 30 - 15) * Math.PI / 180;
+      const angle = ((approach * 90 + Math.random() * 30 - 15) * Math.PI) / 180;
       const pathPoints: [number, number, number][] = [];
 
       // Approach path (descending) - shortened to prevent planetary artifacts
@@ -283,7 +322,7 @@ function generateAirportPatterns(aircraft: any[], bounds: any, density: number) 
           pattern_type: 'approach',
           airport_id: i,
           average_altitude: 1500,
-          width: 3
+          width: 3,
         });
       }
     }

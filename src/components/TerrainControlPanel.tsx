@@ -29,7 +29,7 @@ export function TerrainControlPanel() {
     regenerateTerrain,
     resetToDefaults,
     exportConfiguration,
-    importConfiguration
+    importConfiguration,
   } = useTerrainControls();
 
   const [showAdvanced, setShowAdvanced] = useState(false);
@@ -57,7 +57,7 @@ export function TerrainControlPanel() {
     const file = event.target.files?.[0];
     if (file) {
       const reader = new FileReader();
-      reader.onload = (e) => {
+      reader.onload = e => {
         try {
           const config = JSON.parse(e.target?.result as string);
           importConfiguration(config);
@@ -80,14 +80,16 @@ export function TerrainControlPanel() {
       panelType="terrain"
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-
         {/* Master Toggle */}
         <div className="control-group">
-          <label className="control-label" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <label
+            className="control-label"
+            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+          >
             <input
               type="checkbox"
               checked={state.isEnabled}
-              onChange={(e) => toggleTerrain(e.target.checked)}
+              onChange={e => toggleTerrain(e.target.checked)}
             />
             <span>Enable Terrain System</span>
           </label>
@@ -100,7 +102,7 @@ export function TerrainControlPanel() {
               <label className="control-label">Terrain Profile</label>
               <select
                 value={state.terrainProfile}
-                onChange={(e) => setTerrainProfile(e.target.value)}
+                onChange={e => setTerrainProfile(e.target.value)}
                 style={{
                   width: '100%',
                   padding: '0.5rem',
@@ -108,32 +110,48 @@ export function TerrainControlPanel() {
                   borderRadius: 'var(--border-radius)',
                   background: 'var(--surface-color)',
                   color: 'var(--text-primary)',
-                  fontSize: '0.875rem'
+                  fontSize: '0.875rem',
                 }}
               >
                 {availableProfiles.map(profile => (
                   <option key={profile.value} value={profile.value}>
-                    {profile.label} {profile.difficulty === 'challenging' ? '⚠️' : profile.difficulty === 'moderate' ? '📊' : '✅'}
+                    {profile.label}{' '}
+                    {profile.difficulty === 'challenging'
+                      ? '⚠️'
+                      : profile.difficulty === 'moderate'
+                        ? '📊'
+                        : '✅'}
                   </option>
                 ))}
               </select>
 
               {currentProfile && (
-                <div style={{
-                  fontSize: '0.75rem',
-                  color: 'var(--text-secondary)',
-                  marginTop: '0.25rem',
-                  padding: '0.5rem',
-                  background: 'var(--background-color)',
-                  borderRadius: 'var(--border-radius)',
-                  border: '1px solid var(--border-color)'
-                }}>
-                  <div><strong>{currentProfile.description}</strong></div>
+                <div
+                  style={{
+                    fontSize: '0.75rem',
+                    color: 'var(--text-secondary)',
+                    marginTop: '0.25rem',
+                    padding: '0.5rem',
+                    background: 'var(--background-color)',
+                    borderRadius: 'var(--border-radius)',
+                    border: '1px solid var(--border-color)',
+                  }}
+                >
+                  <div>
+                    <strong>{currentProfile.description}</strong>
+                  </div>
                   <div style={{ marginTop: '0.25rem' }}>
-                    Difficulty: <span style={{
-                      color: terrainDifficulty === 'challenging' ? 'var(--error-color)' :
-                             terrainDifficulty === 'moderate' ? 'var(--warning-color)' : 'var(--success-color)'
-                    }}>
+                    Difficulty:{' '}
+                    <span
+                      style={{
+                        color:
+                          terrainDifficulty === 'challenging'
+                            ? 'var(--error-color)'
+                            : terrainDifficulty === 'moderate'
+                              ? 'var(--warning-color)'
+                              : 'var(--success-color)',
+                      }}
+                    >
                       {terrainDifficulty}
                     </span>
                   </div>
@@ -152,16 +170,18 @@ export function TerrainControlPanel() {
                 max="1000"
                 step="1"
                 value={state.scale}
-                onChange={(e) => setScale(parseInt(e.target.value))}
+                onChange={e => setScale(parseInt(e.target.value))}
                 className="speed-slider"
               />
-              <div style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                fontSize: '0.75rem',
-                color: 'var(--text-secondary)',
-                marginTop: '0.25rem'
-              }}>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  fontSize: '0.75rem',
+                  color: 'var(--text-secondary)',
+                  marginTop: '0.25rem',
+                }}
+              >
                 <span>City</span>
                 <span>Regional</span>
                 <span>Planetary</span>
@@ -175,7 +195,7 @@ export function TerrainControlPanel() {
                 <input
                   type="number"
                   value={state.seed}
-                  onChange={(e) => handleSeedInput(e.target.value)}
+                  onChange={e => handleSeedInput(e.target.value)}
                   style={{
                     flex: 1,
                     padding: '0.5rem',
@@ -183,7 +203,7 @@ export function TerrainControlPanel() {
                     borderRadius: 'var(--border-radius)',
                     background: 'var(--surface-color)',
                     color: 'var(--text-primary)',
-                    fontSize: '0.875rem'
+                    fontSize: '0.875rem',
                   }}
                 />
                 <button
@@ -208,16 +228,18 @@ export function TerrainControlPanel() {
                 max="23"
                 step="1"
                 value={state.timeOfDay}
-                onChange={(e) => setTimeOfDay(parseInt(e.target.value))}
+                onChange={e => setTimeOfDay(parseInt(e.target.value))}
                 className="speed-slider"
               />
-              <div style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                fontSize: '0.75rem',
-                color: 'var(--text-secondary)',
-                marginTop: '0.25rem'
-              }}>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  fontSize: '0.75rem',
+                  color: 'var(--text-secondary)',
+                  marginTop: '0.25rem',
+                }}
+              >
                 <span>🌅 6AM</span>
                 <span>☀️ 12PM</span>
                 <span>🌅 6PM</span>
@@ -228,11 +250,14 @@ export function TerrainControlPanel() {
             {/* Atmosphere Toggle */}
             {canShowAtmosphere && (
               <div className="control-group">
-                <label className="control-label" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <label
+                  className="control-label"
+                  style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+                >
                   <input
                     type="checkbox"
                     checked={state.showAtmosphere}
-                    onChange={(e) => toggleAtmosphere(e.target.checked)}
+                    onChange={e => toggleAtmosphere(e.target.checked)}
                   />
                   <span>Show Atmospheric Effects</span>
                 </label>
@@ -241,11 +266,14 @@ export function TerrainControlPanel() {
 
             {/* Auto-regenerate City */}
             <div className="control-group">
-              <label className="control-label" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <label
+                className="control-label"
+                style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+              >
                 <input
                   type="checkbox"
                   checked={state.autoRegenerateCity}
-                  onChange={(e) => toggleAutoRegenerate(e.target.checked)}
+                  onChange={e => toggleAutoRegenerate(e.target.checked)}
                 />
                 <span>Auto-regenerate City</span>
               </label>
@@ -257,16 +285,18 @@ export function TerrainControlPanel() {
             {/* Custom Parameters (only for custom profile) */}
             {isCustomProfile && (
               <div className="control-group">
-                <div style={{
-                  fontSize: '0.875rem',
-                  fontWeight: 600,
-                  marginBottom: '0.75rem',
-                  padding: '0.5rem',
-                  background: 'var(--primary-color)',
-                  color: 'white',
-                  borderRadius: 'var(--border-radius)',
-                  textAlign: 'center'
-                }}>
+                <div
+                  style={{
+                    fontSize: '0.875rem',
+                    fontWeight: 600,
+                    marginBottom: '0.75rem',
+                    padding: '0.5rem',
+                    background: 'var(--primary-color)',
+                    color: 'white',
+                    borderRadius: 'var(--border-radius)',
+                    textAlign: 'center',
+                  }}
+                >
                   Custom Parameters
                 </div>
 
@@ -281,7 +311,7 @@ export function TerrainControlPanel() {
                       max="500"
                       step="10"
                       value={state.customParameters.mountainHeight}
-                      onChange={(e) => setMountainHeight(parseInt(e.target.value))}
+                      onChange={e => setMountainHeight(parseInt(e.target.value))}
                       className="speed-slider"
                     />
                   </div>
@@ -296,7 +326,7 @@ export function TerrainControlPanel() {
                       max="50"
                       step="5"
                       value={state.customParameters.waterLevel}
-                      onChange={(e) => setWaterLevel(parseInt(e.target.value))}
+                      onChange={e => setWaterLevel(parseInt(e.target.value))}
                       className="speed-slider"
                     />
                   </div>
@@ -311,14 +341,15 @@ export function TerrainControlPanel() {
                       max="1"
                       step="0.05"
                       value={state.customParameters.hilliness}
-                      onChange={(e) => setHilliness(parseFloat(e.target.value))}
+                      onChange={e => setHilliness(parseFloat(e.target.value))}
                       className="speed-slider"
                     />
                   </div>
 
                   <div>
                     <label className="control-label">
-                      River Probability: {(state.customParameters.riverProbability * 100).toFixed(0)}%
+                      River Probability:{' '}
+                      {(state.customParameters.riverProbability * 100).toFixed(0)}%
                     </label>
                     <input
                       type="range"
@@ -326,14 +357,15 @@ export function TerrainControlPanel() {
                       max="1"
                       step="0.1"
                       value={state.customParameters.riverProbability}
-                      onChange={(e) => setRiverProbability(parseFloat(e.target.value))}
+                      onChange={e => setRiverProbability(parseFloat(e.target.value))}
                       className="speed-slider"
                     />
                   </div>
 
                   <div>
                     <label className="control-label">
-                      Coastal Distance: {(state.customParameters.coastalDistance / 1000).toFixed(1)}km
+                      Coastal Distance: {(state.customParameters.coastalDistance / 1000).toFixed(1)}
+                      km
                     </label>
                     <input
                       type="range"
@@ -341,7 +373,7 @@ export function TerrainControlPanel() {
                       max="100000"
                       step="500"
                       value={state.customParameters.coastalDistance}
-                      onChange={(e) => setCoastalDistance(parseInt(e.target.value))}
+                      onChange={e => setCoastalDistance(parseInt(e.target.value))}
                       className="speed-slider"
                     />
                   </div>
@@ -361,13 +393,15 @@ export function TerrainControlPanel() {
                 </button>
 
                 {showRecommendations && (
-                  <div style={{
-                    background: 'var(--background-color)',
-                    padding: '0.75rem',
-                    borderRadius: 'var(--border-radius)',
-                    fontSize: '0.75rem',
-                    border: '1px solid var(--border-color)'
-                  }}>
+                  <div
+                    style={{
+                      background: 'var(--background-color)',
+                      padding: '0.75rem',
+                      borderRadius: 'var(--border-radius)',
+                      fontSize: '0.75rem',
+                      border: '1px solid var(--border-color)',
+                    }}
+                  >
                     <div style={{ marginBottom: '0.5rem' }}>
                       <strong>🏢 Downtown:</strong> {developmentRecommendations.downtown}
                     </div>
@@ -378,7 +412,8 @@ export function TerrainControlPanel() {
                       <strong>🏭 Industrial:</strong> {developmentRecommendations.industrial}
                     </div>
                     <div>
-                      <strong>🛣️ Transportation:</strong> {developmentRecommendations.transportation}
+                      <strong>🛣️ Transportation:</strong>{' '}
+                      {developmentRecommendations.transportation}
                     </div>
                   </div>
                 )}
@@ -405,7 +440,10 @@ export function TerrainControlPanel() {
                     >
                       💾 Export
                     </button>
-                    <label className="button button-secondary" style={{ flex: 1, fontSize: '0.75rem', cursor: 'pointer' }}>
+                    <label
+                      className="button button-secondary"
+                      style={{ flex: 1, fontSize: '0.75rem', cursor: 'pointer' }}
+                    >
                       📂 Import
                       <input
                         type="file"
@@ -440,21 +478,35 @@ export function TerrainControlPanel() {
             </div>
 
             {/* Status Display */}
-            <div style={{
-              background: 'var(--background-color)',
-              padding: '0.75rem',
-              borderRadius: 'var(--border-radius)',
-              fontSize: '0.75rem',
-              color: 'var(--text-secondary)',
-              border: '1px solid var(--border-color)'
-            }}>
+            <div
+              style={{
+                background: 'var(--background-color)',
+                padding: '0.75rem',
+                borderRadius: 'var(--border-radius)',
+                fontSize: '0.75rem',
+                color: 'var(--text-secondary)',
+                border: '1px solid var(--border-color)',
+              }}
+            >
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
-                <div><strong>Profile:</strong> {currentProfile?.name || 'Custom'}</div>
-                <div><strong>Scale:</strong> {currentScaleDescription}</div>
-                <div><strong>Layer:</strong> {state.activeLayer}</div>
-                <div><strong>Seed:</strong> {state.seed}</div>
-                <div><strong>Time:</strong> {currentTimeDescription}</div>
-                <div><strong>Difficulty:</strong> {terrainDifficulty}</div>
+                <div>
+                  <strong>Profile:</strong> {currentProfile?.name || 'Custom'}
+                </div>
+                <div>
+                  <strong>Scale:</strong> {currentScaleDescription}
+                </div>
+                <div>
+                  <strong>Layer:</strong> {state.activeLayer}
+                </div>
+                <div>
+                  <strong>Seed:</strong> {state.seed}
+                </div>
+                <div>
+                  <strong>Time:</strong> {currentTimeDescription}
+                </div>
+                <div>
+                  <strong>Difficulty:</strong> {terrainDifficulty}
+                </div>
               </div>
             </div>
           </>

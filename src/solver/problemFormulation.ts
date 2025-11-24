@@ -36,7 +36,7 @@ export class FacilityLocationProblem {
       traffic_data.forEach((trafficPoint, j) => {
         const distance = Math.sqrt(
           Math.pow(candidate.x - trafficPoint.position.x, 2) +
-          Math.pow(candidate.y - trafficPoint.position.y, 2)
+            Math.pow(candidate.y - trafficPoint.position.y, 2)
         );
 
         if (distance <= config.coverage_radius) {
@@ -73,8 +73,10 @@ export class FacilityLocationProblem {
     });
 
     const totalTraffic = traffic_data.reduce((sum, point) => sum + point.density, 0);
-    const coveredTraffic = Array.from(coveredTrafficPoints)
-      .reduce((sum, index) => sum + traffic_data[index].density, 0);
+    const coveredTraffic = Array.from(coveredTrafficPoints).reduce(
+      (sum, index) => sum + traffic_data[index].density,
+      0
+    );
 
     return totalTraffic > 0 ? coveredTraffic / totalTraffic : 0;
   }

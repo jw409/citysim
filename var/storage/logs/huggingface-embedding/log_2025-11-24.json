@@ -1,0 +1,3 @@
+{"level":40,"time":"2025-11-24T07:12:42.815Z","pid":610490,"category":"huggingface-embedding","msg":"Could not configure thread count","event":"warn"}
+{"level":40,"time":"2025-11-24T07:12:59.727Z","pid":610797,"category":"huggingface-embedding","msg":"Could not configure thread count","event":"warn"}
+{"level":40,"time":"2025-11-24T07:22:07.879Z","pid":615856,"category":"huggingface-embedding","msg":"Could not configure thread count","event":"warn"}

@@ -2,7 +2,12 @@
  * Debug utilities for inspecting the 3D visualization system
  */
 
-import { QuadTree, SpatialObject, createSpatialObjectsFromLayerData, ObjectCluster } from './spatialIndex';
+import {
+  QuadTree,
+  SpatialObject,
+  createSpatialObjectsFromLayerData,
+  ObjectCluster,
+} from './spatialIndex';
 
 interface LayerInfo {
   id: string;
@@ -82,8 +87,8 @@ class DebugManager {
           extruded: layer.props?.extruded,
           elevationScale: layer.props?.elevationScale,
           pickable: layer.props?.pickable,
-          ...(layer.props || {})
-        }
+          ...(layer.props || {}),
+        },
       };
 
       this.layers.set(layer.id, layerInfo);
@@ -101,7 +106,7 @@ class DebugManager {
     if (layer) {
       layer.performance = {
         updateTime,
-        renderTime
+        renderTime,
       };
     }
   }
@@ -149,7 +154,7 @@ class DebugManager {
         minX: Math.min(...allObjects.map(o => o.longitude)),
         maxX: Math.max(...allObjects.map(o => o.longitude)),
         minY: Math.min(...allObjects.map(o => o.latitude)),
-        maxY: Math.max(...allObjects.map(o => o.latitude))
+        maxY: Math.max(...allObjects.map(o => o.latitude)),
       };
 
       // Add some padding
@@ -170,7 +175,7 @@ class DebugManager {
       console.log('🗺️ Spatial index built:', {
         objects: allObjects.length,
         clusters: this.clusters.length,
-        stats: this.spatialIndex.getStats()
+        stats: this.spatialIndex.getStats(),
       });
     } catch (error) {
       console.warn('Error building spatial index:', error);
@@ -222,8 +227,10 @@ class DebugManager {
    */
   private updatePerformance(): void {
     this.performance.layerCount = this.layers.size;
-    this.performance.totalObjects = Array.from(this.layers.values())
-      .reduce((total, layer) => total + layer.objectCount, 0);
+    this.performance.totalObjects = Array.from(this.layers.values()).reduce(
+      (total, layer) => total + layer.objectCount,
+      0
+    );
   }
 
   /**
@@ -236,7 +243,7 @@ class DebugManager {
       spatialIndexInfo = {
         type: 'QuadTree',
         nodeCount: stats.nodeCount,
-        maxDepth: stats.maxDepth
+        maxDepth: stats.maxDepth,
       };
     }
 
@@ -245,7 +252,7 @@ class DebugManager {
       clusters: this.clusters,
       viewState: this.viewState,
       performance: { ...this.performance },
-      spatialIndex: spatialIndexInfo
+      spatialIndex: spatialIndexInfo,
     };
   }
 
@@ -263,9 +270,17 @@ class DebugManager {
     const objects: any[] = [];
     for (const cluster of this.clusters) {
       if (this.isPointInBounds(longitude, latitude, cluster.bounds, radius)) {
-        objects.push(...cluster.objects.filter(obj =>
-          this.getDistance(longitude, latitude, obj.longitude || obj.x, obj.latitude || obj.y) <= radius
-        ));
+        objects.push(
+          ...cluster.objects.filter(
+            obj =>
+              this.getDistance(
+                longitude,
+                latitude,
+                obj.longitude || obj.x,
+                obj.latitude || obj.y
+              ) <= radius
+          )
+        );
       }
     }
 
@@ -327,8 +342,12 @@ class DebugManager {
    * Helper methods
    */
   private isPointInBounds(lng: number, lat: number, bounds: any, radius: number): boolean {
-    return lng + radius >= bounds.minX && lng - radius <= bounds.maxX &&
-           lat + radius >= bounds.minY && lat - radius <= bounds.maxY;
+    return (
+      lng + radius >= bounds.minX &&
+      lng - radius <= bounds.maxX &&
+      lat + radius >= bounds.minY &&
+      lat - radius <= bounds.maxY
+    );
   }
 
   private getDistance(lng1: number, lat1: number, lng2: number, lat2: number): number {
@@ -360,13 +379,15 @@ class DebugManager {
     console.log('FPS:', info.performance.fps);
     console.log('Frame Time:', info.performance.frameTime.toFixed(2) + 'ms');
     console.log('View State:', info.viewState);
-    console.table(info.layers.map(l => ({
-      id: l.id,
-      type: l.type,
-      objects: l.objectCount,
-      visible: l.visible,
-      extruded: l.props.extruded
-    })));
+    console.table(
+      info.layers.map(l => ({
+        id: l.id,
+        type: l.type,
+        objects: l.objectCount,
+        visible: l.visible,
+        extruded: l.props.extruded,
+      }))
+    );
     console.groupEnd();
   }
 }
@@ -378,10 +399,11 @@ export const debugManager = DebugManager.getInstance();
 (window as any).urbanSynthDebug = {
   manager: debugManager,
   getInfo: () => debugManager.getDebugInfo(),
-  findAt: (lng: number, lat: number, radius?: number) => debugManager.findObjectsAt(lng, lat, radius),
+  findAt: (lng: number, lat: number, radius?: number) =>
+    debugManager.findObjectsAt(lng, lat, radius),
   search: (query: string) => debugManager.searchObjects(query),
   export: () => debugManager.exportDebugData(),
-  log: () => debugManager.logDebugSummary()
+  log: () => debugManager.logDebugSummary(),
 };
 
 console.log('🔍 UrbanSynth Debug Tools loaded. Use `urbanSynthDebug` in console for debugging.');

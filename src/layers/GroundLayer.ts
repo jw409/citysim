@@ -22,7 +22,7 @@ export function createGroundLayer() {
 
       // Determine appropriate ground texture based on location characteristics
       const distanceFromCenter = Math.sqrt(centerX * centerX + centerY * centerY);
-      const urbanFactor = Math.max(0, 1 - (distanceFromCenter / 6000)); // Urban influence radius
+      const urbanFactor = Math.max(0, 1 - distanceFromCenter / 6000); // Urban influence radius
       const elevation = getSimpleTerrainHeight(centerX, centerY); // Simplified elevation for ground layer
       const slope = calculateSimpleSlope(centerX, centerY);
 
@@ -36,10 +36,28 @@ export function createGroundLayer() {
       const environmentalEffects = calculateGroundEnvironmentalEffects(centerX, centerY, elevation);
 
       const finalColor = [
-        Math.max(30, Math.min(255, Math.floor(baseColor[0] * environmentalEffects.lighting + environmentalEffects.ambient))),
-        Math.max(30, Math.min(255, Math.floor(baseColor[1] * environmentalEffects.lighting + environmentalEffects.ambient))),
-        Math.max(30, Math.min(255, Math.floor(baseColor[2] * environmentalEffects.lighting + environmentalEffects.ambient))),
-        255
+        Math.max(
+          30,
+          Math.min(
+            255,
+            Math.floor(baseColor[0] * environmentalEffects.lighting + environmentalEffects.ambient)
+          )
+        ),
+        Math.max(
+          30,
+          Math.min(
+            255,
+            Math.floor(baseColor[1] * environmentalEffects.lighting + environmentalEffects.ambient)
+          )
+        ),
+        Math.max(
+          30,
+          Math.min(
+            255,
+            Math.floor(baseColor[2] * environmentalEffects.lighting + environmentalEffects.ambient)
+          )
+        ),
+        255,
       ];
 
       const halfTile = tileSize / 2;
@@ -49,7 +67,7 @@ export function createGroundLayer() {
           [centerX - halfTile, centerY - halfTile],
           [centerX + halfTile, centerY - halfTile],
           [centerX + halfTile, centerY + halfTile],
-          [centerX - halfTile, centerY + halfTile]
+          [centerX - halfTile, centerY + halfTile],
         ],
         elevation: elevation - 0.5, // Slightly below terrain level
         color: finalColor,
@@ -58,14 +76,14 @@ export function createGroundLayer() {
           [textureRegion.x, textureRegion.y],
           [textureRegion.x + textureRegion.width, textureRegion.y],
           [textureRegion.x + textureRegion.width, textureRegion.y + textureRegion.height],
-          [textureRegion.x, textureRegion.y + textureRegion.height]
+          [textureRegion.x, textureRegion.y + textureRegion.height],
         ],
         materials: textureConfig?.materials || {
           ambient: 0.5,
           diffuse: 0.7,
           roughness: 0.9,
-          metallic: 0.0
-        }
+          metallic: 0.0,
+        },
       });
     }
   }
@@ -74,7 +92,7 @@ export function createGroundLayer() {
     id: 'ground-layer',
     data: groundTiles,
     coordinateSystem: 2, // COORDINATE_SYSTEM.METER_OFFSETS to match terrain
-    coordinateOrigin: [-74.0060, 40.7128, 0], // NYC center
+    coordinateOrigin: [-74.006, 40.7128, 0], // NYC center
     getPolygon: (d: any) => d.polygon,
     getElevation: (d: any) => d.elevation,
     getFillColor: (d: any) => d.color,
@@ -91,19 +109,19 @@ export function createGroundLayer() {
       ambient: d.materials?.ambient || 0.5,
       diffuse: d.materials?.diffuse || 0.7,
       shininess: 1 / (d.materials?.roughness || 0.9),
-      specularColor: d.materials?.metallic > 0.1 ? [60, 60, 70] : [20, 20, 20]
+      specularColor: d.materials?.metallic > 0.1 ? [60, 60, 70] : [20, 20, 20],
     }),
     // Optimized lighting for ground surfaces
     lightSettings: {
-      lightsPosition: [-74.0060, 40.7128, 3000, -74.0060, 40.7128, 3000],
-      ambientRatio: 0.4,   // Higher ambient for ground visibility
-      diffuseRatio: 0.6,   // Moderate diffuse lighting
+      lightsPosition: [-74.006, 40.7128, 3000, -74.006, 40.7128, 3000],
+      ambientRatio: 0.4, // Higher ambient for ground visibility
+      diffuseRatio: 0.6, // Moderate diffuse lighting
       specularRatio: 0.02, // Minimal specular for natural ground
-      numberOfLights: 2
+      numberOfLights: 2,
     },
     updateTriggers: {
-      getFillColor: [groundTiles.length]
-    }
+      getFillColor: [groundTiles.length],
+    },
   });
 }
 
@@ -119,7 +137,7 @@ function getSimpleTerrainHeight(x: number, y: number): number {
 
   // Add some larger terrain features
   const distanceFromCenter = Math.sqrt(x * x + y * y);
-  const flatteningFactor = Math.max(0.8, 1 - (distanceFromCenter / 12000));
+  const flatteningFactor = Math.max(0.8, 1 - distanceFromCenter / 12000);
 
   return baseHeight * flatteningFactor;
 }
@@ -137,7 +155,12 @@ function calculateSimpleSlope(x: number, y: number): number {
   return Math.sqrt(slopeX * slopeX + slopeY * slopeY);
 }
 
-function getGroundTextureKey(elevation: number, slope: number, urbanFactor: number, distanceFromCenter: number): string {
+function getGroundTextureKey(
+  elevation: number,
+  slope: number,
+  urbanFactor: number,
+  distanceFromCenter: number
+): string {
   // Ground textures are typically more basic than terrain textures
   if (urbanFactor > 0.8) {
     return elevation > 0 ? 'smooth_concrete' : 'dark_asphalt';
@@ -159,7 +182,11 @@ function getGroundTextureKey(elevation: number, slope: number, urbanFactor: numb
   }
 }
 
-function getGroundBaseColor(textureKey: string, elevation: number, urbanFactor: number): [number, number, number] {
+function getGroundBaseColor(
+  textureKey: string,
+  elevation: number,
+  urbanFactor: number
+): [number, number, number] {
   // Slightly muted base colors for ground layer to avoid competing with terrain
   const colorMap: Record<string, [number, number, number]> = {
     lush_grass: [60, 100, 70],
@@ -169,13 +196,17 @@ function getGroundBaseColor(textureKey: string, elevation: number, urbanFactor: 
     smooth_concrete: [160, 160, 160],
     weathered_concrete: [130, 130, 130],
     dark_asphalt: [35, 35, 35],
-    marsh_wetland: [70, 85, 40]
+    marsh_wetland: [70, 85, 40],
   };
 
   return colorMap[textureKey] || [80, 80, 80];
 }
 
-function calculateGroundEnvironmentalEffects(x: number, y: number, elevation: number): { lighting: number; ambient: number } {
+function calculateGroundEnvironmentalEffects(
+  x: number,
+  y: number,
+  elevation: number
+): { lighting: number; ambient: number } {
   const distanceFromCenter = Math.sqrt(x * x + y * y);
 
   // Ground gets less direct lighting than elevated terrain
@@ -185,6 +216,6 @@ function calculateGroundEnvironmentalEffects(x: number, y: number, elevation: nu
 
   return {
     lighting: baseLighting + elevationLighting - distanceDimming,
-    ambient: 10 + (elevation > 0 ? 5 : 0) // Basic ambient lighting
+    ambient: 10 + (elevation > 0 ? 5 : 0), // Basic ambient lighting
   };
 }

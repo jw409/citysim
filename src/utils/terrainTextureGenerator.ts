@@ -3,7 +3,17 @@
  */
 
 export interface TerrainTextureConfig {
-  type: 'grass' | 'dirt' | 'rock' | 'concrete' | 'asphalt' | 'sand' | 'forest' | 'wetland' | 'snow' | 'gravel';
+  type:
+    | 'grass'
+    | 'dirt'
+    | 'rock'
+    | 'concrete'
+    | 'asphalt'
+    | 'sand'
+    | 'forest'
+    | 'wetland'
+    | 'snow'
+    | 'gravel';
   width: number;
   height: number;
   baseColor: string;
@@ -57,7 +67,7 @@ export class TerrainTextureAtlas {
           type: 'organic',
           scale: 0.8,
           density: 0.7,
-          variation: 0.9
+          variation: 0.9,
         },
         materials: {
           roughness: 0.9,
@@ -65,8 +75,8 @@ export class TerrainTextureAtlas {
           normal: 0.3,
           ambient: 0.5,
           diffuse: 0.8,
-          specular: 0.1
-        }
+          specular: 0.1,
+        },
       },
       dry_grass: {
         type: 'grass',
@@ -78,7 +88,7 @@ export class TerrainTextureAtlas {
           type: 'organic',
           scale: 0.6,
           density: 0.5,
-          variation: 0.8
+          variation: 0.8,
         },
         materials: {
           roughness: 0.8,
@@ -86,8 +96,8 @@ export class TerrainTextureAtlas {
           normal: 0.2,
           ambient: 0.6,
           diffuse: 0.7,
-          specular: 0.1
-        }
+          specular: 0.1,
+        },
       },
       rich_soil: {
         type: 'dirt',
@@ -99,7 +109,7 @@ export class TerrainTextureAtlas {
           type: 'noise',
           scale: 0.4,
           density: 0.8,
-          variation: 0.6
+          variation: 0.6,
         },
         materials: {
           roughness: 1.0,
@@ -107,8 +117,8 @@ export class TerrainTextureAtlas {
           normal: 0.4,
           ambient: 0.4,
           diffuse: 0.9,
-          specular: 0.05
-        }
+          specular: 0.05,
+        },
       },
       rocky_terrain: {
         type: 'rock',
@@ -120,7 +130,7 @@ export class TerrainTextureAtlas {
           type: 'geometric',
           scale: 1.2,
           density: 0.6,
-          variation: 0.7
+          variation: 0.7,
         },
         materials: {
           roughness: 0.7,
@@ -128,8 +138,8 @@ export class TerrainTextureAtlas {
           normal: 0.8,
           ambient: 0.3,
           diffuse: 0.8,
-          specular: 0.3
-        }
+          specular: 0.3,
+        },
       },
       mountain_stone: {
         type: 'rock',
@@ -141,7 +151,7 @@ export class TerrainTextureAtlas {
           type: 'mixed',
           scale: 1.5,
           density: 0.4,
-          variation: 0.9
+          variation: 0.9,
         },
         materials: {
           roughness: 0.6,
@@ -149,8 +159,8 @@ export class TerrainTextureAtlas {
           normal: 1.0,
           ambient: 0.2,
           diffuse: 0.9,
-          specular: 0.4
-        }
+          specular: 0.4,
+        },
       },
 
       // Urban terrain textures
@@ -164,7 +174,7 @@ export class TerrainTextureAtlas {
           type: 'geometric',
           scale: 0.2,
           density: 0.3,
-          variation: 0.4
+          variation: 0.4,
         },
         materials: {
           roughness: 0.4,
@@ -172,8 +182,8 @@ export class TerrainTextureAtlas {
           normal: 0.2,
           ambient: 0.6,
           diffuse: 0.8,
-          specular: 0.2
-        }
+          specular: 0.2,
+        },
       },
       weathered_concrete: {
         type: 'concrete',
@@ -185,7 +195,7 @@ export class TerrainTextureAtlas {
           type: 'noise',
           scale: 0.6,
           density: 0.5,
-          variation: 0.7
+          variation: 0.7,
         },
         materials: {
           roughness: 0.8,
@@ -193,8 +203,8 @@ export class TerrainTextureAtlas {
           normal: 0.4,
           ambient: 0.4,
           diffuse: 0.9,
-          specular: 0.1
-        }
+          specular: 0.1,
+        },
       },
       dark_asphalt: {
         type: 'asphalt',
@@ -206,7 +216,7 @@ export class TerrainTextureAtlas {
           type: 'noise',
           scale: 0.3,
           density: 0.4,
-          variation: 0.5
+          variation: 0.5,
         },
         materials: {
           roughness: 0.9,
@@ -214,8 +224,8 @@ export class TerrainTextureAtlas {
           normal: 0.3,
           ambient: 0.3,
           diffuse: 0.7,
-          specular: 0.1
-        }
+          specular: 0.1,
+        },
       },
 
       // Specialized terrain textures
@@ -229,7 +239,7 @@ export class TerrainTextureAtlas {
           type: 'organic',
           scale: 1.0,
           density: 0.9,
-          variation: 1.0
+          variation: 1.0,
         },
         materials: {
           roughness: 1.0,
@@ -237,8 +247,8 @@ export class TerrainTextureAtlas {
           normal: 0.5,
           ambient: 0.3,
           diffuse: 0.9,
-          specular: 0.05
-        }
+          specular: 0.05,
+        },
       },
       sandy_beach: {
         type: 'sand',
@@ -250,7 +260,7 @@ export class TerrainTextureAtlas {
           type: 'noise',
           scale: 0.5,
           density: 0.6,
-          variation: 0.4
+          variation: 0.4,
         },
         materials: {
           roughness: 0.8,
@@ -258,8 +268,8 @@ export class TerrainTextureAtlas {
           normal: 0.2,
           ambient: 0.7,
           diffuse: 0.8,
-          specular: 0.1
-        }
+          specular: 0.1,
+        },
       },
       marsh_wetland: {
         type: 'wetland',
@@ -271,7 +281,7 @@ export class TerrainTextureAtlas {
           type: 'mixed',
           scale: 0.9,
           density: 0.7,
-          variation: 0.8
+          variation: 0.8,
         },
         materials: {
           roughness: 0.9,
@@ -279,8 +289,8 @@ export class TerrainTextureAtlas {
           normal: 0.4,
           ambient: 0.4,
           diffuse: 0.8,
-          specular: 0.3
-        }
+          specular: 0.3,
+        },
       },
       coarse_gravel: {
         type: 'gravel',
@@ -292,7 +302,7 @@ export class TerrainTextureAtlas {
           type: 'geometric',
           scale: 0.8,
           density: 0.8,
-          variation: 0.6
+          variation: 0.6,
         },
         materials: {
           roughness: 0.9,
@@ -300,9 +310,9 @@ export class TerrainTextureAtlas {
           normal: 0.6,
           ambient: 0.5,
           diffuse: 0.8,
-          specular: 0.2
-        }
-      }
+          specular: 0.2,
+        },
+      },
     };
   }
 
@@ -325,7 +335,7 @@ export class TerrainTextureAtlas {
         x: x / this.atlasSize,
         y: y / this.atlasSize,
         width: textureSize / this.atlasSize,
-        height: textureSize / this.atlasSize
+        height: textureSize / this.atlasSize,
       };
     });
 
@@ -359,7 +369,13 @@ export class TerrainTextureAtlas {
     this.addSurfaceDetails(config, offsetX, offsetY, width, height);
   }
 
-  private applyOrganicPattern(config: TerrainTextureConfig, x: number, y: number, width: number, height: number) {
+  private applyOrganicPattern(
+    config: TerrainTextureConfig,
+    x: number,
+    y: number,
+    width: number,
+    height: number
+  ) {
     const { accentColors, pattern } = config;
     // Use accentColors to avoid unused variable warning
     const colorCount = accentColors.length;
@@ -396,7 +412,13 @@ export class TerrainTextureAtlas {
     this.ctx.globalAlpha = 1.0;
   }
 
-  private applyGeometricPattern(config: TerrainTextureConfig, x: number, y: number, width: number, height: number) {
+  private applyGeometricPattern(
+    config: TerrainTextureConfig,
+    x: number,
+    y: number,
+    width: number,
+    height: number
+  ) {
     const { accentColors, pattern } = config;
 
     // Create geometric patterns like rock formations or concrete patterns
@@ -452,7 +474,13 @@ export class TerrainTextureAtlas {
     this.ctx.globalAlpha = 1.0;
   }
 
-  private applyNoisePattern(config: TerrainTextureConfig, x: number, y: number, width: number, height: number) {
+  private applyNoisePattern(
+    config: TerrainTextureConfig,
+    x: number,
+    y: number,
+    width: number,
+    height: number
+  ) {
     // Apply procedural noise for natural-looking variation
     const imageData = this.ctx.getImageData(x, y, width, height);
     const data = imageData.data;
@@ -473,7 +501,7 @@ export class TerrainTextureAtlas {
         const totalNoise = (noise1 + noise2 + noise3) * pattern.variation;
         const variation = totalNoise * 60; // ±30 brightness variation
 
-        data[index] = Math.max(0, Math.min(255, data[index] + variation));     // R
+        data[index] = Math.max(0, Math.min(255, data[index] + variation)); // R
         data[index + 1] = Math.max(0, Math.min(255, data[index + 1] + variation)); // G
         data[index + 2] = Math.max(0, Math.min(255, data[index + 2] + variation)); // B
       }
@@ -482,7 +510,13 @@ export class TerrainTextureAtlas {
     this.ctx.putImageData(imageData, x, y);
   }
 
-  private applyMixedPattern(config: TerrainTextureConfig, x: number, y: number, width: number, height: number) {
+  private applyMixedPattern(
+    config: TerrainTextureConfig,
+    x: number,
+    y: number,
+    width: number,
+    height: number
+  ) {
     // Combine multiple pattern types for complex terrain
     this.applyNoisePattern(config, x, y, width, height);
 
@@ -492,7 +526,13 @@ export class TerrainTextureAtlas {
     this.applyOrganicPattern(organicConfig, x, y, width, height);
   }
 
-  private addSurfaceDetails(config: TerrainTextureConfig, x: number, y: number, width: number, height: number) {
+  private addSurfaceDetails(
+    config: TerrainTextureConfig,
+    x: number,
+    y: number,
+    width: number,
+    height: number
+  ) {
     const { materials, accentColors } = config;
 
     // Add surface features based on material type
@@ -515,7 +555,14 @@ export class TerrainTextureAtlas {
     }
   }
 
-  private addGrassDetails(x: number, y: number, width: number, height: number, colors: string[], _materials: any) {
+  private addGrassDetails(
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    colors: string[],
+    _materials: any
+  ) {
     // Add grass blade details
     for (let i = 0; i < width * height * 0.002; i++) {
       const px = x + Math.random() * width;
@@ -534,7 +581,14 @@ export class TerrainTextureAtlas {
     this.ctx.globalAlpha = 1.0;
   }
 
-  private addRockDetails(x: number, y: number, width: number, height: number, colors: string[], _materials: any) {
+  private addRockDetails(
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    colors: string[],
+    _materials: any
+  ) {
     // Add rock cracks and mineral veins
     for (let i = 0; i < 10; i++) {
       const startX = x + Math.random() * width;
@@ -563,7 +617,14 @@ export class TerrainTextureAtlas {
     this.ctx.globalAlpha = 1.0;
   }
 
-  private addConcreteDetails(x: number, y: number, width: number, height: number, colors: string[], _materials: any) {
+  private addConcreteDetails(
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    colors: string[],
+    _materials: any
+  ) {
     // Add concrete seams and wear patterns
     const seams = 4 + Math.floor(Math.random() * 4);
 
@@ -592,7 +653,14 @@ export class TerrainTextureAtlas {
     this.ctx.globalAlpha = 1.0;
   }
 
-  private addDirtDetails(x: number, y: number, width: number, height: number, colors: string[], _materials: any) {
+  private addDirtDetails(
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    colors: string[],
+    _materials: any
+  ) {
     // Add dirt clumps and pebbles
     for (let i = 0; i < width * height * 0.001; i++) {
       const px = x + Math.random() * width;
@@ -610,7 +678,14 @@ export class TerrainTextureAtlas {
     this.ctx.globalAlpha = 1.0;
   }
 
-  private addAsphaltDetails(x: number, y: number, width: number, height: number, colors: string[], _materials: any) {
+  private addAsphaltDetails(
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    colors: string[],
+    _materials: any
+  ) {
     // Add asphalt aggregate and wear patterns
     for (let i = 0; i < width * height * 0.003; i++) {
       const px = x + Math.random() * width;
@@ -632,7 +707,10 @@ export class TerrainTextureAtlas {
     return (n - Math.floor(n)) * 2 - 1; // Return -1 to 1
   }
 
-  public getTextureRegions(): Record<string, { x: number; y: number; width: number; height: number }> {
+  public getTextureRegions(): Record<
+    string,
+    { x: number; y: number; width: number; height: number }
+  > {
     return this.textureRegions;
   }
 
@@ -653,7 +731,12 @@ export class TerrainTextureAtlas {
 }
 
 // Utility function to determine appropriate terrain texture based on elevation, slope, and urban factors
-export function getTerrainTextureKey(elevation: number, slope: number, urbanFactor: number, distanceFromWater: number = 1000): string {
+export function getTerrainTextureKey(
+  elevation: number,
+  slope: number,
+  urbanFactor: number,
+  distanceFromWater: number = 1000
+): string {
   // Water proximity factor
   const nearWater = distanceFromWater < 500;
 
@@ -709,19 +792,28 @@ export class TerrainNoiseGenerator {
     const A = TerrainNoiseGenerator.permutation[X] + Y;
     const B = TerrainNoiseGenerator.permutation[X + 1] + Y;
 
-    return TerrainNoiseGenerator.lerp(v,
-      TerrainNoiseGenerator.lerp(u,
+    return TerrainNoiseGenerator.lerp(
+      v,
+      TerrainNoiseGenerator.lerp(
+        u,
         TerrainNoiseGenerator.grad(TerrainNoiseGenerator.permutation[A], x, y),
         TerrainNoiseGenerator.grad(TerrainNoiseGenerator.permutation[B], x - 1, y)
       ),
-      TerrainNoiseGenerator.lerp(u,
+      TerrainNoiseGenerator.lerp(
+        u,
         TerrainNoiseGenerator.grad(TerrainNoiseGenerator.permutation[A + 1], x, y - 1),
         TerrainNoiseGenerator.grad(TerrainNoiseGenerator.permutation[B + 1], x - 1, y - 1)
       )
     );
   }
 
-  public static fractionalBrownianMotion(x: number, y: number, octaves: number = 4, persistence: number = 0.5, scale: number = 1): number {
+  public static fractionalBrownianMotion(
+    x: number,
+    y: number,
+    octaves: number = 4,
+    persistence: number = 0.5,
+    scale: number = 1
+  ): number {
     let value = 0;
     let amplitude = 1;
     let frequency = scale;

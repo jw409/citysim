@@ -73,11 +73,18 @@ class PerlinNoise {
     const BA = this.permutation[B];
     const BB = this.permutation[B + 1];
 
-    return this.lerp(v,
-      this.lerp(u, this.grad(this.permutation[AA], x, y),
-                   this.grad(this.permutation[BA], x - 1, y)),
-      this.lerp(u, this.grad(this.permutation[AB], x, y - 1),
-                   this.grad(this.permutation[BB], x - 1, y - 1))
+    return this.lerp(
+      v,
+      this.lerp(
+        u,
+        this.grad(this.permutation[AA], x, y),
+        this.grad(this.permutation[BA], x - 1, y)
+      ),
+      this.lerp(
+        u,
+        this.grad(this.permutation[AB], x, y - 1),
+        this.grad(this.permutation[BB], x - 1, y - 1)
+      )
     );
   }
 
@@ -112,28 +119,31 @@ export function generateTerrainLayers(bounds: any, timeOfDay: number = 12, seed:
   // Generate smooth terrain mesh for continuous surface
   const terrainMesh = generateTerrainMesh(bounds, padding, perlin, timeOfDay);
   if (terrainMesh.length > 0) {
-    layers.push(new PolygonLayer({
-      id: 'continuous_terrain',
-      data: terrainMesh,
-      getPolygon: (d: any) => d.vertices.map((v: any) => {
-        const [lng, lat] = localToLatLng(v.x, v.y);
-        return [lng, lat];
-      }),
-      getElevation: (d: any) => Math.max(0, d.elevation),
-      getFillColor: (d: any) => d.color,
-      getLineColor: [0, 0, 0, 0],
-      filled: true,
-      stroked: false,
-      extruded: true,
-      elevationScale: 1,
-      pickable: false,
-      material: {
-        ambient: 0.6,
-        diffuse: 0.8,
-        shininess: 32,
-        specularColor: [255, 255, 255]
-      }
-    }));
+    layers.push(
+      new PolygonLayer({
+        id: 'continuous_terrain',
+        data: terrainMesh,
+        getPolygon: (d: any) =>
+          d.vertices.map((v: any) => {
+            const [lng, lat] = localToLatLng(v.x, v.y);
+            return [lng, lat];
+          }),
+        getElevation: (d: any) => Math.max(0, d.elevation),
+        getFillColor: (d: any) => d.color,
+        getLineColor: [0, 0, 0, 0],
+        filled: true,
+        stroked: false,
+        extruded: true,
+        elevationScale: 1,
+        pickable: false,
+        material: {
+          ambient: 0.6,
+          diffuse: 0.8,
+          shininess: 32,
+          specularColor: [255, 255, 255],
+        },
+      })
+    );
   }
 
   // Add river if it exists in the city model
@@ -145,28 +155,35 @@ export function generateTerrainLayers(bounds: any, timeOfDay: number = 12, seed:
   // Generate natural vegetation using noise patterns with elevation
   const vegetation = generateNaturalVegetation(bounds, perlin, timeOfDay);
   if (vegetation.length > 0) {
-    layers.push(new ScatterplotLayer({
-      id: 'natural_vegetation',
-      data: vegetation,
-      getPosition: (d: any) => {
-        const [lng, lat] = localToLatLng(d.x, d.y);
-        // Get terrain elevation at vegetation position
-        const terrainElevation = perlin.octaveNoise2D(d.x * 0.001, d.y * 0.001, 4, 0.5) * 100;
-        return [lng, lat, Math.max(0, terrainElevation + d.size/2)]; // Place vegetation on terrain
-      },
-      getRadius: (d: any) => d.size,
-      getFillColor: (d: any) => d.color,
-      pickable: false,
-      radiusMinPixels: 3,
-      radiusMaxPixels: 12,
-    }));
+    layers.push(
+      new ScatterplotLayer({
+        id: 'natural_vegetation',
+        data: vegetation,
+        getPosition: (d: any) => {
+          const [lng, lat] = localToLatLng(d.x, d.y);
+          // Get terrain elevation at vegetation position
+          const terrainElevation = perlin.octaveNoise2D(d.x * 0.001, d.y * 0.001, 4, 0.5) * 100;
+          return [lng, lat, Math.max(0, terrainElevation + d.size / 2)]; // Place vegetation on terrain
+        },
+        getRadius: (d: any) => d.size,
+        getFillColor: (d: any) => d.color,
+        pickable: false,
+        radiusMinPixels: 3,
+        radiusMaxPixels: 12,
+      })
+    );
   }
 
   return layers;
 }
 
 // Professional terrain colors for realistic urban visualization
-function getTerrainColor(elevation: number, terrainType: string, timeOfDay: number, distanceFromCity: number): number[] {
+function getTerrainColor(
+  elevation: number,
+  terrainType: string,
+  timeOfDay: number,
+  distanceFromCity: number
+): number[] {
   const isDaytime = timeOfDay >= 6 && timeOfDay <= 18;
   const urbanFactor = Math.max(0, 1 - distanceFromCity);
 
@@ -209,7 +226,7 @@ function getTerrainColor(elevation: number, terrainType: string, timeOfDay: numb
     Math.round(baseColor[0] * brightness),
     Math.round(baseColor[1] * brightness),
     Math.round(baseColor[2] * brightness),
-    240 // More opaque for professional look
+    240, // More opaque for professional look
   ];
 }
 
@@ -234,7 +251,15 @@ function generateTerrainMesh(bounds: any, padding: number, perlin: PerlinNoise, 
   const noiseScale = 0.001;
 
   // Generate height map grid
-  const heightMap: { [key: string]: { x: number; y: number; elevation: number; terrainType: string; color: number[] } } = {};
+  const heightMap: {
+    [key: string]: {
+      x: number;
+      y: number;
+      elevation: number;
+      terrainType: string;
+      color: number[];
+    };
+  } = {};
 
   for (let x = min_x - padding; x <= max_x + padding; x += resolution) {
     for (let y = min_y - padding; y <= max_y + padding; y += resolution) {
@@ -260,8 +285,11 @@ function generateTerrainMesh(bounds: any, padding: number, perlin: PerlinNoise, 
 
       const key = `${x},${y}`;
       heightMap[key] = {
-        x, y, elevation, terrainType,
-        color: getTerrainColor(elevation, terrainType, timeOfDay, distanceFromCity)
+        x,
+        y,
+        elevation,
+        terrainType,
+        color: getTerrainColor(elevation, terrainType, timeOfDay, distanceFromCity),
       };
     }
   }
@@ -284,10 +312,10 @@ function generateTerrainMesh(bounds: any, padding: number, perlin: PerlinNoise, 
           vertices: [
             { x: p1.x, y: p1.y },
             { x: p2.x, y: p2.y },
-            { x: p3.x, y: p3.y }
+            { x: p3.x, y: p3.y },
           ],
           elevation: avgElevation1,
-          color: avgColor1
+          color: avgColor1,
         });
 
         // Triangle 2: p2, p3, p4
@@ -298,10 +326,10 @@ function generateTerrainMesh(bounds: any, padding: number, perlin: PerlinNoise, 
           vertices: [
             { x: p2.x, y: p2.y },
             { x: p3.x, y: p3.y },
-            { x: p4.x, y: p4.y }
+            { x: p4.x, y: p4.y },
           ],
           elevation: avgElevation2,
-          color: avgColor2
+          color: avgColor2,
         });
       }
     }
@@ -352,10 +380,11 @@ function generateRiverLayer(bounds: any, timeOfDay: number, seed: number) {
   return new PathLayer({
     id: 'river',
     data: [{ path: riverPath }],
-    getPath: (d: any) => d.path.map((p: any) => {
-      const [lng, lat] = localToLatLng(p.x, p.y);
-      return [lng, lat, -2]; // Slightly below ground level
-    }),
+    getPath: (d: any) =>
+      d.path.map((p: any) => {
+        const [lng, lat] = localToLatLng(p.x, p.y);
+        return [lng, lat, -2]; // Slightly below ground level
+      }),
     getColor: waterColor,
     getWidth: riverWidth,
     widthMinPixels: 8,
@@ -367,8 +396,8 @@ function generateRiverLayer(bounds: any, timeOfDay: number, seed: number) {
       ambient: 0.8,
       diffuse: 0.6,
       shininess: 128,
-      specularColor: [200, 220, 255]
-    }
+      specularColor: [200, 220, 255],
+    },
   });
 }
 
@@ -398,7 +427,7 @@ function generateNaturalVegetation(bounds: any, perlin: PerlinNoise, timeOfDay: 
           y: scatterY,
           type: vegetationType,
           size: vegetationType === 'tree' ? 8 + Math.random() * 6 : 4 + Math.random() * 3,
-          color: getVegetationColor(timeOfDay, vegetationType)
+          color: getVegetationColor(timeOfDay, vegetationType),
         });
       }
     }

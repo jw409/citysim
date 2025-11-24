@@ -9,7 +9,7 @@ export function createZoneLayer(zones: any[], timeOfDay: number = 12, visible: b
     id: 'zones',
     data: zones,
     coordinateSystem: 2, // COORDINATE_SYSTEM.METER_OFFSETS to match terrain/buildings
-    coordinateOrigin: [-74.0060, 40.7128, 0], // NYC center - same as other layers
+    coordinateOrigin: [-74.006, 40.7128, 0], // NYC center - same as other layers
     getPolygon: (d: any) => {
       if (!d.boundary) return [];
       // Convert from {x, y} objects to [x, y] arrays (meters) - don't convert to lat/lng
@@ -34,7 +34,7 @@ export function createZoneLayer(zones: any[], timeOfDay: number = 12, visible: b
     // Use polygon offset to prevent z-fighting
     parameters: {
       polygonOffsetUnits: 1,
-      polygonOffsetFactor: 1
+      polygonOffsetFactor: 1,
     },
     transitions: {
       getFillColor: 1000,

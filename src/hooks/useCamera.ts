@@ -33,11 +33,11 @@ interface DeviceMotionState {
 export function useCamera(initialState: CameraState) {
   // Ensure initial state has all required properties
   const safeInitialState: CameraState = {
-    longitude: initialState.longitude ?? -74.0060,
+    longitude: initialState.longitude ?? -74.006,
     latitude: initialState.latitude ?? 40.7128,
     zoom: initialState.zoom ?? 12,
     pitch: initialState.pitch ?? 45,
-    bearing: initialState.bearing ?? 0
+    bearing: initialState.bearing ?? 0,
   };
 
   const [viewState, setViewState] = useState<CameraState>(safeInitialState);
@@ -45,7 +45,7 @@ export function useCamera(initialState: CameraState) {
     enableGyroscope: false,
     enableVR: false,
     followTarget: null,
-    smoothTransitions: true
+    smoothTransitions: true,
   });
 
   const [deviceMotion, setDeviceMotion] = useState<DeviceMotionState>({
@@ -53,7 +53,7 @@ export function useCamera(initialState: CameraState) {
     beta: null,
     gamma: null,
     supported: false,
-    permissionGranted: false
+    permissionGranted: false,
   });
 
   const [followTargets, setFollowTargets] = useState<Map<string, FollowTarget>>(new Map());
@@ -67,7 +67,7 @@ export function useCamera(initialState: CameraState) {
 
     setDeviceMotion(prev => ({
       ...prev,
-      supported: hasDeviceMotion
+      supported: hasDeviceMotion,
     }));
 
     // Auto-enable gyroscope on mobile devices if supported
@@ -144,7 +144,7 @@ export function useCamera(initialState: CameraState) {
           ...prev,
           alpha: event.rotationRate!.alpha,
           beta: event.rotationRate!.beta,
-          gamma: event.rotationRate!.gamma
+          gamma: event.rotationRate!.gamma,
         }));
 
         // Convert device orientation to camera rotation
@@ -152,7 +152,7 @@ export function useCamera(initialState: CameraState) {
           setViewState(prev => ({
             ...prev,
             bearing: prev.bearing + (event.rotationRate!.alpha || 0) * 0.1,
-            pitch: Math.max(0, Math.min(60, prev.pitch + (event.rotationRate!.beta || 0) * 0.1))
+            pitch: Math.max(0, Math.min(60, prev.pitch + (event.rotationRate!.beta || 0) * 0.1)),
           }));
         }
       }
@@ -192,7 +192,7 @@ export function useCamera(initialState: CameraState) {
           // Adjust zoom based on target type and elevation
           zoom: target.type === 'aircraft' ? 12 : target.type === 'vehicle' ? 16 : 18,
           // Adjust pitch to look down at target
-          pitch: z > 50 ? 60 : 45
+          pitch: z > 50 ? 60 : 45,
         };
       });
 
@@ -208,14 +208,20 @@ export function useCamera(initialState: CameraState) {
     };
   }, [controls.followTarget, followTargets]);
 
-  const updateFollowTarget = useCallback((id: string, position: [number, number, number], type: 'agent' | 'vehicle' | 'aircraft') => {
-    setFollowTargets(prev => new Map(prev.set(id, { id, position, type })));
-  }, []);
+  const updateFollowTarget = useCallback(
+    (id: string, position: [number, number, number], type: 'agent' | 'vehicle' | 'aircraft') => {
+      setFollowTargets(prev => new Map(prev.set(id, { id, position, type })));
+    },
+    []
+  );
 
-  const startFollowing = useCallback((targetId: string) => {
-    setControls(prev => ({ ...prev, followTarget: targetId }));
-    baseViewState.current = viewState;
-  }, [viewState]);
+  const startFollowing = useCallback(
+    (targetId: string) => {
+      setControls(prev => ({ ...prev, followTarget: targetId }));
+      baseViewState.current = viewState;
+    },
+    [viewState]
+  );
 
   const stopFollowing = useCallback(() => {
     setControls(prev => ({ ...prev, followTarget: null }));
@@ -241,89 +247,97 @@ export function useCamera(initialState: CameraState) {
     }
   }, [controls.enableVR, requestVRSession]);
 
-  const smoothTransitionTo = useCallback((targetState: Partial<CameraState>, duration: number = 1000) => {
-    if (!controls.smoothTransitions) {
-      setViewState(prev => ({ ...prev, ...targetState }));
-      return Promise.resolve();
-    }
+  const smoothTransitionTo = useCallback(
+    (targetState: Partial<CameraState>, duration: number = 1000) => {
+      if (!controls.smoothTransitions) {
+        setViewState(prev => ({ ...prev, ...targetState }));
+        return Promise.resolve();
+      }
 
-    return new Promise<void>((resolve) => {
-      const startTime = Date.now();
-      const initialState = viewState;
+      return new Promise<void>(resolve => {
+        const startTime = Date.now();
+        const initialState = viewState;
 
-      const animate = () => {
-        const elapsed = Date.now() - startTime;
-        const progress = Math.min(elapsed / duration, 1);
+        const animate = () => {
+          const elapsed = Date.now() - startTime;
+          const progress = Math.min(elapsed / duration, 1);
 
-        // Easing function (ease-out cubic) using utility function
-        const eased = cubicEaseOut(progress);
+          // Easing function (ease-out cubic) using utility function
+          const eased = cubicEaseOut(progress);
 
-        setViewState(prev => {
-          const newState: CameraState = { ...prev };
+          setViewState(prev => {
+            const newState: CameraState = { ...prev };
 
-          Object.entries(targetState).forEach(([key, value]) => {
-            if (value !== undefined && key in initialState) {
-              const startValue = initialState[key as keyof CameraState];
-              const diff = value - startValue;
-              (newState as any)[key] = startValue + diff * eased;
-            }
+            Object.entries(targetState).forEach(([key, value]) => {
+              if (value !== undefined && key in initialState) {
+                const startValue = initialState[key as keyof CameraState];
+                const diff = value - startValue;
+                (newState as any)[key] = startValue + diff * eased;
+              }
+            });
+
+            return newState;
           });
 
-          return newState;
-        });
+          if (progress < 1) {
+            requestAnimationFrame(animate);
+          } else {
+            resolve();
+          }
+        };
 
-        if (progress < 1) {
-          requestAnimationFrame(animate);
-        } else {
-          resolve();
-        }
-      };
-
-      animate();
-    });
-  }, [viewState, controls.smoothTransitions]);
+        animate();
+      });
+    },
+    [viewState, controls.smoothTransitions]
+  );
 
   // Preset camera positions - preserve current lat/lng
   const presets = {
-    overview: () => smoothTransitionTo({
-      ...viewState,
-      zoom: 12,
-      pitch: 45,
-      bearing: 0
-    }),
-    street: () => smoothTransitionTo({
-      ...viewState,
-      zoom: 18,
-      pitch: 0,
-      bearing: 0
-    }),
-    aerial: () => smoothTransitionTo({
-      ...viewState,
-      zoom: 10,
-      pitch: 75,
-      bearing: 0
-    }),
-    underground: () => smoothTransitionTo({
-      ...viewState,
-      zoom: 16,
-      pitch: 60,
-      bearing: 0
-    }),
-    isometric: () => smoothTransitionTo({
-      ...viewState,
-      zoom: 14,
-      pitch: 45,
-      bearing: 45
-    })
+    overview: () =>
+      smoothTransitionTo({
+        ...viewState,
+        zoom: 12,
+        pitch: 45,
+        bearing: 0,
+      }),
+    street: () =>
+      smoothTransitionTo({
+        ...viewState,
+        zoom: 18,
+        pitch: 0,
+        bearing: 0,
+      }),
+    aerial: () =>
+      smoothTransitionTo({
+        ...viewState,
+        zoom: 10,
+        pitch: 75,
+        bearing: 0,
+      }),
+    underground: () =>
+      smoothTransitionTo({
+        ...viewState,
+        zoom: 16,
+        pitch: 60,
+        bearing: 0,
+      }),
+    isometric: () =>
+      smoothTransitionTo({
+        ...viewState,
+        zoom: 14,
+        pitch: 45,
+        bearing: 45,
+      }),
   };
 
   // Always return valid viewState with defaults
   const safeViewState: CameraState = {
-    longitude: viewState.longitude ?? -74.0060,
+    longitude: viewState.longitude ?? -74.006,
     latitude: viewState.latitude ?? 40.7128,
     zoom: viewState.zoom ?? 12,
     pitch: viewState.pitch ?? 45,
-    bearing: viewState.bearing ?? 0
+    bearing: viewState.bearing ?? 0,
   };
 
   return {
@@ -344,7 +358,7 @@ export function useCamera(initialState: CameraState) {
       hasGyroscope: deviceMotion.supported,
       hasVR: 'xr' in navigator,
       gyroscopeEnabled: controls.enableGyroscope && deviceMotion.permissionGranted,
-      vrEnabled: controls.enableVR
-    }
+      vrEnabled: controls.enableVR,
+    },
   };
 }

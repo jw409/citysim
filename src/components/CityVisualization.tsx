@@ -27,7 +27,15 @@ interface CityVisualizationProps {
   onTogglePerformance: () => void;
 }
 
-export function CityVisualization({ optimizationResult, onStart, onPause, onSetSpeed, isInitialized, showPerformance, onTogglePerformance }: CityVisualizationProps) {
+export function CityVisualization({
+  optimizationResult,
+  onStart,
+  onPause,
+  onSetSpeed,
+  isInitialized,
+  showPerformance,
+  onTogglePerformance,
+}: CityVisualizationProps) {
   const { state, dispatch } = useSimulationContext();
   const { state: terrainState } = useTerrainContext();
   const [enhancedData, setEnhancedData] = useState<any>(null);
@@ -35,11 +43,11 @@ export function CityVisualization({ optimizationResult, onStart, onPause, onSetS
 
   // Initialize camera with working 3D view
   const camera = useCamera({
-    longitude: -74.0060,
+    longitude: -74.006,
     latitude: 40.7128,
     zoom: 12,
     pitch: 45,
-    bearing: 0
+    bearing: 0,
   });
 
   const toggleZones = useCallback(() => {
@@ -58,7 +66,7 @@ export function CityVisualization({ optimizationResult, onStart, onPause, onSetS
         latitude: bounds.latitude,
         zoom: 12,
         pitch: 45,
-        bearing: 0
+        bearing: 0,
       };
       console.log('Setting camera to working bounds:', workingBounds);
       camera.setViewState(workingBounds);
@@ -96,22 +104,31 @@ export function CityVisualization({ optimizationResult, onStart, onPause, onSetS
           enhancedZones: cityModelToUse.zones?.length || 0,
           originalPOIs: state.cityModel.pois?.length || 0,
           enhancedPOIs: cityModelToUse.pois?.length || 0,
-          geographicFeatures: cityModelToUse.geographic_metadata?.geographic_features || 0
+          geographicFeatures: cityModelToUse.geographic_metadata?.geographic_features || 0,
         });
       }
 
       // Then enhance with multi-layer infrastructure
-      const enhanced = enhanceSimulationDataWithLayers({
-        buildings: cityModelToUse.buildings || [],
-        roads: cityModelToUse.roads || [],
-        agents: state.agents || [],
-        pois: cityModelToUse.pois || []
-      }, cityModelToUse);
+      const enhanced = enhanceSimulationDataWithLayers(
+        {
+          buildings: cityModelToUse.buildings || [],
+          roads: cityModelToUse.roads || [],
+          agents: state.agents || [],
+          pois: cityModelToUse.pois || [],
+        },
+        cityModelToUse
+      );
 
       setEnhancedData(enhanced);
       console.log('Enhanced data generated:', enhanced);
     }
-  }, [state.cityModel, state.agents, terrainState.isEnabled, terrainState.seed, terrainState.terrainProfile]);
+  }, [
+    state.cityModel,
+    state.agents,
+    terrainState.isEnabled,
+    terrainState.seed,
+    terrainState.terrainProfile,
+  ]);
 
   // Pass enhanced data to the simulation context
   useEffect(() => {

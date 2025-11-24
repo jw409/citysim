@@ -24,16 +24,27 @@ export function OptimizationResults({ result, onClear }: OptimizationResultsProp
 
   const getSolutionStatusIcon = (status: string) => {
     switch (status) {
-      case 'OPTIMAL': return '🌟';
-      case 'FEASIBLE': return '✅';
-      case 'INFEASIBLE': return '❌';
-      default: return '⚠️';
+      case 'OPTIMAL':
+        return '🌟';
+      case 'FEASIBLE':
+        return '✅';
+      case 'INFEASIBLE':
+        return '❌';
+      default:
+        return '⚠️';
     }
   };
 
   return (
     <div style={{ padding: '1rem', borderBottom: '1px solid var(--border-color)' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '1rem',
+        }}
+      >
         <h3 className="toolbar-title">🎯 Optimization Results</h3>
         <button
           className="button button-secondary"
@@ -78,19 +89,32 @@ export function OptimizationResults({ result, onClear }: OptimizationResultsProp
         </div>
       </div>
 
-      <div style={{ marginTop: '1rem', padding: '0.75rem', background: 'var(--background-color)', borderRadius: 'var(--border-radius)' }}>
+      <div
+        style={{
+          marginTop: '1rem',
+          padding: '0.75rem',
+          background: 'var(--background-color)',
+          borderRadius: 'var(--border-radius)',
+        }}
+      >
         <h4 style={{ fontSize: '0.875rem', margin: '0 0 0.5rem', color: 'var(--text-primary)' }}>
           📍 Station Locations
         </h4>
         <div style={{ maxHeight: '120px', overflowY: 'auto' }}>
           {result.stations.map((station, index) => (
-            <div key={station.id} style={{
-              fontSize: '0.75rem',
-              color: 'var(--text-secondary)',
-              padding: '0.25rem 0',
-              borderBottom: index < result.stations.length - 1 ? '1px solid var(--border-color)' : 'none'
-            }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div
+              key={station.id}
+              style={{
+                fontSize: '0.75rem',
+                color: 'var(--text-secondary)',
+                padding: '0.25rem 0',
+                borderBottom:
+                  index < result.stations.length - 1 ? '1px solid var(--border-color)' : 'none',
+              }}
+            >
+              <div
+                style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+              >
                 <span>
                   <strong>{station.id.replace('station_', 'Station ')}</strong>
                 </span>
@@ -99,9 +123,8 @@ export function OptimizationResults({ result, onClear }: OptimizationResultsProp
                 </span>
               </div>
               <div style={{ fontSize: '0.7rem', opacity: 0.8, marginTop: '0.125rem' }}>
-                Coverage: {(station.coverage_radius / 1000).toFixed(1)}km •
-                Capacity: {station.capacity} ports •
-                Traffic: {station.traffic_coverage.toFixed(1)}
+                Coverage: {(station.coverage_radius / 1000).toFixed(1)}km • Capacity:{' '}
+                {station.capacity} ports • Traffic: {station.traffic_coverage.toFixed(1)}
               </div>
             </div>
           ))}
@@ -109,25 +132,43 @@ export function OptimizationResults({ result, onClear }: OptimizationResultsProp
       </div>
 
       {result.coverage_map.length > 0 && (
-        <div style={{ marginTop: '1rem', padding: '0.75rem', background: 'var(--background-color)', borderRadius: 'var(--border-radius)' }}>
+        <div
+          style={{
+            marginTop: '1rem',
+            padding: '0.75rem',
+            background: 'var(--background-color)',
+            borderRadius: 'var(--border-radius)',
+          }}
+        >
           <h4 style={{ fontSize: '0.875rem', margin: '0 0 0.5rem', color: 'var(--text-primary)' }}>
             🗺️ Coverage Summary
           </h4>
           <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
+            <div
+              style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}
+            >
               <span>Total Coverage Areas:</span>
               <strong>{result.coverage_map.length}</strong>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
+            <div
+              style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}
+            >
               <span>Average Coverage Radius:</span>
               <strong>
-                {(result.coverage_map.reduce((sum, area) => sum + area.radius, 0) / result.coverage_map.length / 1000).toFixed(1)}km
+                {(
+                  result.coverage_map.reduce((sum, area) => sum + area.radius, 0) /
+                  result.coverage_map.length /
+                  1000
+                ).toFixed(1)}
+                km
               </strong>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
               <span>Total Traffic Covered:</span>
               <strong>
-                {result.coverage_map.reduce((sum, area) => sum + area.traffic_covered, 0).toFixed(1)}
+                {result.coverage_map
+                  .reduce((sum, area) => sum + area.traffic_covered, 0)
+                  .toFixed(1)}
               </strong>
             </div>
           </div>

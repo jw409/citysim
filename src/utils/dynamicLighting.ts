@@ -23,11 +23,11 @@ export function getDynamicLighting(timeOfDay: number = 12): LightingConfig {
   const sunDistance = Math.cos((sunAngle * Math.PI) / 180) * 8000; // Distance from center
 
   // Base coordinates (NYC center)
-  const centerLng = -74.0060;
+  const centerLng = -74.006;
   const centerLat = 40.7128;
 
   // Calculate sun position
-  const sunLng = centerLng + (sunDistance / 100000); // Convert to degrees
+  const sunLng = centerLng + sunDistance / 100000; // Convert to degrees
   const sunLat = centerLat;
   const sunZ = Math.max(1000, sunHeight);
 
@@ -44,7 +44,7 @@ export function getDynamicLighting(timeOfDay: number = 12): LightingConfig {
       lightsStrength: [1.5],
       numberOfLights: 1,
       sunColor: [255, 200, 150],
-      skyColor: [255, 180, 120]
+      skyColor: [255, 180, 120],
     };
   } else if (hour >= 8 && hour <= 17) {
     // Day - bright clear light
@@ -53,14 +53,20 @@ export function getDynamicLighting(timeOfDay: number = 12): LightingConfig {
       diffuseRatio: 0.7,
       specularRatio: 0.4,
       lightsPosition: [
-        sunLng, sunLat, sunZ,                    // Main sun
-        centerLng + 0.01, centerLat, 5000,      // Fill light
-        centerLng - 0.01, centerLat, 3000       // Ambient fill
+        sunLng,
+        sunLat,
+        sunZ, // Main sun
+        centerLng + 0.01,
+        centerLat,
+        5000, // Fill light
+        centerLng - 0.01,
+        centerLat,
+        3000, // Ambient fill
       ],
       lightsStrength: [2.5, 0.8, 0.5],
       numberOfLights: 3,
       sunColor: [255, 255, 240],
-      skyColor: [135, 206, 235]
+      skyColor: [135, 206, 235],
     };
   } else if (hour >= 17 && hour <= 19) {
     // Sunset - warm orange/red light
@@ -72,7 +78,7 @@ export function getDynamicLighting(timeOfDay: number = 12): LightingConfig {
       lightsStrength: [2.0],
       numberOfLights: 1,
       sunColor: [255, 150, 80],
-      skyColor: [255, 140, 100]
+      skyColor: [255, 140, 100],
     };
   } else {
     // Night - artificial lighting with moon
@@ -85,14 +91,20 @@ export function getDynamicLighting(timeOfDay: number = 12): LightingConfig {
       diffuseRatio: 0.4,
       specularRatio: 0.6,
       lightsPosition: [
-        moonLng, moonLat, moonZ,                 // Moon light
-        centerLng, centerLat, 1000,              // Street lights
-        centerLng + 0.005, centerLat, 800        // Building lights
+        moonLng,
+        moonLat,
+        moonZ, // Moon light
+        centerLng,
+        centerLat,
+        1000, // Street lights
+        centerLng + 0.005,
+        centerLat,
+        800, // Building lights
       ],
       lightsStrength: [0.8, 1.2, 1.0],
       numberOfLights: 3,
       sunColor: [200, 220, 255],
-      skyColor: [25, 25, 50]
+      skyColor: [25, 25, 50],
     };
   }
 
@@ -108,7 +120,7 @@ export function getTimeBasedColors(timeOfDay: number = 12) {
     office: [180, 180, 180, 255],
     commercial: [160, 160, 180, 255],
     industrial: [140, 160, 140, 255],
-    mixed: [220, 200, 180, 255]
+    mixed: [220, 200, 180, 255],
   };
 
   // Apply time-based color temperature
@@ -118,7 +130,7 @@ export function getTimeBasedColors(timeOfDay: number = 12) {
       const color = baseBuildingColors[key as keyof typeof baseBuildingColors];
       color[0] = Math.min(255, color[0] * 1.1); // More red
       color[1] = Math.min(255, color[1] * 1.05); // Slightly more green
-      color[2] = Math.min(255, color[2] * 0.9);  // Less blue
+      color[2] = Math.min(255, color[2] * 0.9); // Less blue
     });
   } else if (hour >= 19 || hour <= 6) {
     // Night - cooler, darker tones with lit windows

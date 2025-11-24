@@ -87,7 +87,7 @@ function createPlanetaryTerrainLayers(bounds: any, terrainState: TerrainState): 
       scale,
       timeOfDay,
       seed,
-      showAtmosphere: showAtmosphere && scale > 50
+      showAtmosphere: showAtmosphere && scale > 50,
     };
 
     // The PlanetaryTerrain component returns React elements, but we need deck.gl layers
@@ -108,7 +108,10 @@ function createBasicTerrainLayers(bounds: any, terrainState: TerrainState, cityD
   try {
     // Use the existing terrain generator with enhanced parameters
     const enhancedBounds = bounds || {
-      min_x: -5000, min_y: -5000, max_x: 5000, max_y: 5000
+      min_x: -5000,
+      min_y: -5000,
+      max_x: 5000,
+      max_y: 5000,
     };
 
     return generateTerrainLayers(enhancedBounds, timeOfDay, seed);
@@ -124,23 +127,31 @@ function createBasicTerrainLayers(bounds: any, terrainState: TerrainState, cityD
 function generatePlanetaryStyleLayers(bounds: any, terrainState: TerrainState): any[] {
   const { scale, seed, timeOfDay, customParameters, terrainProfile } = terrainState;
   const profile = getTerrainProfile(terrainProfile);
-  const params = terrainProfile === 'custom' ? customParameters : profile?.parameters || customParameters;
+  const params =
+    terrainProfile === 'custom' ? customParameters : profile?.parameters || customParameters;
 
   // Create a noise generator for terrain
   const noiseGenerator = new SimplePlanetaryNoise(seed);
   const layers: any[] = [];
 
   // Generate terrain mesh
-  const terrainMesh = generatePlanetaryTerrainMesh(bounds, params, noiseGenerator, scale, timeOfDay);
+  const terrainMesh = generatePlanetaryTerrainMesh(
+    bounds,
+    params,
+    noiseGenerator,
+    scale,
+    timeOfDay
+  );
 
   if (terrainMesh.length > 0) {
     const terrainLayer = new PolygonLayer({
       id: 'enhanced_planetary_terrain',
       data: terrainMesh,
-      getPolygon: (d: any) => d.vertices.map((v: any) => {
-        // Convert local coordinates to lng/lat (simplified)
-        return [v.x / 111320, v.y / 110540];
-      }),
+      getPolygon: (d: any) =>
+        d.vertices.map((v: any) => {
+          // Convert local coordinates to lng/lat (simplified)
+          return [v.x / 111320, v.y / 110540];
+        }),
       getElevation: (d: any) => Math.max(0, d.elevation * (scale > 100 ? 0.1 : 2.0)),
       getFillColor: (d: any) => d.color,
       getLineColor: [0, 0, 0, 0],
@@ -153,8 +164,8 @@ function generatePlanetaryStyleLayers(bounds: any, terrainState: TerrainState): 
         ambient: 0.4,
         diffuse: 0.8,
         shininess: 32,
-        specularColor: [255, 255, 255]
-      }
+        specularColor: [255, 255, 255],
+      },
     });
 
     layers.push(terrainLayer);
@@ -177,7 +188,7 @@ function generatePlanetaryTerrainMesh(
   const terrainMesh: any[] = [];
 
   // Adjust resolution based on scale - smaller numbers = higher detail
-  let resolution = scale > 100 ? 1000 : scale > 10 ? 100 : 50;
+  const resolution = scale > 100 ? 1000 : scale > 10 ? 100 : 50;
 
   // Generate height map
   const heightMap: { [key: string]: any } = {};
@@ -205,10 +216,10 @@ function generatePlanetaryTerrainMesh(
           vertices: [
             { x: p1.x, y: p1.y, z: p1.elevation },
             { x: p2.x, y: p2.y, z: p2.elevation },
-            { x: p3.x, y: p3.y, z: p3.elevation }
+            { x: p3.x, y: p3.y, z: p3.elevation },
           ],
           elevation: (p1.elevation + p2.elevation + p3.elevation) / 3,
-          color: blendColors([p1.color, p2.color, p3.color])
+          color: blendColors([p1.color, p2.color, p3.color]),
         });
       }
 
@@ -217,10 +228,10 @@ function generatePlanetaryTerrainMesh(
           vertices: [
             { x: p2.x, y: p2.y, z: p2.elevation },
             { x: p3.x, y: p3.y, z: p3.elevation },
-            { x: p4.x, y: p4.y, z: p4.elevation }
+            { x: p4.x, y: p4.y, z: p4.elevation },
           ],
           elevation: (p2.elevation + p3.elevation + p4.elevation) / 3,
-          color: blendColors([p2.color, p3.color, p4.color])
+          color: blendColors([p2.color, p3.color, p4.color]),
         });
       }
     }
@@ -246,7 +257,7 @@ function generateTerrainElevation(
   const ridgeNoise = noise.ridgedNoise(x, y, 4, ridgeScale, params.mountainHeight * 0.5);
   const detailNoise = noise.noise2D(x * noiseScale * 3, y * noiseScale * 3) * 0.2;
 
-  return (baseNoise * params.mountainHeight * 0.3) + ridgeNoise + detailNoise + params.waterLevel;
+  return baseNoise * params.mountainHeight * 0.3 + ridgeNoise + detailNoise + params.waterLevel;
 }
 
 /**
@@ -274,7 +285,12 @@ function getTerrainType(elevation: number, params: any, scale: number): string {
 /**
  * Get color for terrain based on type and time of day
  */
-function getTerrainColor(elevation: number, terrainType: string, timeOfDay: number, scale: number): number[] {
+function getTerrainColor(
+  elevation: number,
+  terrainType: string,
+  timeOfDay: number,
+  scale: number
+): number[] {
   const isDaytime = timeOfDay >= 6 && timeOfDay <= 18;
   const lightIntensity = isDaytime ? 0.8 : 0.4;
 
@@ -283,23 +299,47 @@ function getTerrainColor(elevation: number, terrainType: string, timeOfDay: numb
   if (scale > 100) {
     // Planetary scale colors
     switch (terrainType) {
-      case 'deep_ocean': baseColor = [25, 25, 112]; break;
-      case 'ocean': baseColor = [65, 105, 225]; break;
-      case 'coastal': baseColor = [100, 149, 237]; break;
-      case 'lowlands': baseColor = [34, 139, 34]; break;
-      case 'highlands': baseColor = [107, 142, 35]; break;
-      case 'mountains': baseColor = [139, 137, 137]; break;
-      default: baseColor = [160, 160, 160];
+      case 'deep_ocean':
+        baseColor = [25, 25, 112];
+        break;
+      case 'ocean':
+        baseColor = [65, 105, 225];
+        break;
+      case 'coastal':
+        baseColor = [100, 149, 237];
+        break;
+      case 'lowlands':
+        baseColor = [34, 139, 34];
+        break;
+      case 'highlands':
+        baseColor = [107, 142, 35];
+        break;
+      case 'mountains':
+        baseColor = [139, 137, 137];
+        break;
+      default:
+        baseColor = [160, 160, 160];
     }
   } else {
     // City scale colors
     switch (terrainType) {
-      case 'water': baseColor = [70, 130, 180]; break;
-      case 'lowland': baseColor = [120, 150, 80]; break;
-      case 'grassland': baseColor = [95, 115, 70]; break;
-      case 'hills': baseColor = [139, 119, 101]; break;
-      case 'mountains': baseColor = [105, 105, 105]; break;
-      default: baseColor = [150, 150, 150];
+      case 'water':
+        baseColor = [70, 130, 180];
+        break;
+      case 'lowland':
+        baseColor = [120, 150, 80];
+        break;
+      case 'grassland':
+        baseColor = [95, 115, 70];
+        break;
+      case 'hills':
+        baseColor = [139, 119, 101];
+        break;
+      case 'mountains':
+        baseColor = [105, 105, 105];
+        break;
+      default:
+        baseColor = [150, 150, 150];
     }
   }
 
@@ -366,7 +406,8 @@ class SimplePlanetaryNoise {
     const A = this.perm[X] + Y;
     const B = this.perm[X + 1] + Y;
 
-    return lerp(v,
+    return lerp(
+      v,
       lerp(u, this.grad(this.perm[A], x, y), this.grad(this.perm[B], x - 1, y)),
       lerp(u, this.grad(this.perm[A + 1], x, y - 1), this.grad(this.perm[B + 1], x - 1, y - 1))
     );
@@ -423,17 +464,14 @@ export function getTerrainLayerInfo(terrainState: TerrainState): {
     activeSystem,
     reason,
     scale: terrainState.scale,
-    profile: terrainState.terrainProfile
+    profile: terrainState.terrainProfile,
   };
 }
 
 /**
  * Performance monitoring for terrain layers
  */
-export function measureTerrainPerformance<T>(
-  operation: () => T,
-  operationName: string
-): T {
+export function measureTerrainPerformance<T>(operation: () => T, operationName: string): T {
   const startTime = performance.now();
   const result = operation();
   const endTime = performance.now();

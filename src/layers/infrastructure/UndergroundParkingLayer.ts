@@ -36,12 +36,12 @@ export function createUndergroundParkingLayer(parkingData: any[]) {
       ambient: 0.2,
       diffuse: 0.6,
       shininess: 16,
-      specularColor: [150, 150, 150]
+      specularColor: [150, 150, 150],
     },
     transitions: {
       getFillColor: 600,
-      getElevation: 400
-    }
+      getElevation: 400,
+    },
   });
 }
 
@@ -73,7 +73,7 @@ export function generateUndergroundParking(buildings: any[], density: number = 0
           occupied_spots: occupiedSpots,
           hourly_rate: 2 + Math.random() * 3,
           access_type: level === 1 ? 'ramp' : 'elevator',
-          security_level: Math.random() > 0.5 ? 'secured' : 'public'
+          security_level: Math.random() > 0.5 ? 'secured' : 'public',
         });
       }
     }

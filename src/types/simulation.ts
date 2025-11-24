@@ -6,6 +6,7 @@ export interface Point2D {
 export interface Agent {
   id: number;
   position: Point2D;
+  initialPosition?: Point2D; // Initial starting position for agent
   destination?: string;
   current_poi?: string;
   agent_type: 'Pedestrian' | 'Car' | 'Bus' | 'Truck';
@@ -70,6 +71,14 @@ export interface CityModel {
   roads: Road[];
   pois: POI[];
   buildings: Building[];
+  bounds?: {
+    min_x: number;
+    max_x: number;
+    min_y: number;
+    max_y: number;
+  };
+  river?: any; // TODO: Define proper river type
+  geographic_metadata?: any; // TODO: Define proper metadata type
 }
 
 export interface TrafficData {

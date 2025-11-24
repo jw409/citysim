@@ -1,12 +1,19 @@
 import { PolygonLayer } from '@deck.gl/layers';
-import { TerrainTextureAtlas, TerrainNoiseGenerator, getTerrainTextureKey } from '../utils/terrainTextureGenerator';
+import {
+  TerrainTextureAtlas,
+  TerrainNoiseGenerator,
+  getTerrainTextureKey,
+} from '../utils/terrainTextureGenerator';
 import { distance2D, exponentialDecayHeight } from '../utils/coordinates';
 
 // Enhanced terrain generation with multiple noise functions
 class EnhancedTerrainGenerator {
   private static instance: EnhancedTerrainGenerator;
   private textureAtlas: TerrainTextureAtlas;
-  private terrainCache: Map<string, { elevation: number; textureKey: string; materials: any; slope: number }> = new Map();
+  private terrainCache: Map<
+    string,
+    { elevation: number; textureKey: string; materials: any; slope: number }
+  > = new Map();
 
   private constructor() {
     this.textureAtlas = new TerrainTextureAtlas(2048);
@@ -24,8 +31,11 @@ class EnhancedTerrainGenerator {
     return this.textureAtlas;
   }
 
-  public getTerrainData(x: number, y: number): { elevation: number; textureKey: string; materials: any; slope: number } {
-    const cacheKey = `${Math.floor(x/10)}_${Math.floor(y/10)}`;
+  public getTerrainData(
+    x: number,
+    y: number
+  ): { elevation: number; textureKey: string; materials: any; slope: number } {
+    const cacheKey = `${Math.floor(x / 10)}_${Math.floor(y / 10)}`;
     let cached = this.terrainCache.get(cacheKey);
 
     if (!cached) {
@@ -47,19 +57,15 @@ class EnhancedTerrainGenerator {
   private calculateTerrainHeight(x: number, y: number): number {
     // Multi-scale Fractional Brownian Motion for realistic terrain
     const scale = 0.0008;
-    const primaryTerrain = TerrainNoiseGenerator.fractionalBrownianMotion(
-      x * scale, y * scale, 6, 0.6, 1
-    ) * 25;
+    const primaryTerrain =
+      TerrainNoiseGenerator.fractionalBrownianMotion(x * scale, y * scale, 6, 0.6, 1) * 25;
 
     // Ridged noise for mountain ridges and valleys
-    const ridgedTerrain = TerrainNoiseGenerator.ridgedNoise(
-      x * scale * 0.5, y * scale * 0.5, 4
-    ) * 15;
+    const ridgedTerrain =
+      TerrainNoiseGenerator.ridgedNoise(x * scale * 0.5, y * scale * 0.5, 4) * 15;
 
     // Large-scale terrain features using Perlin noise
-    const largeTerrain = TerrainNoiseGenerator.perlinNoise(
-      x * scale * 0.3, y * scale * 0.3
-    ) * 40;
+    const largeTerrain = TerrainNoiseGenerator.perlinNoise(x * scale * 0.3, y * scale * 0.3) * 40;
 
     // Create prominent hills with smooth falloff
     const hills = this.calculateHillContributions(x, y);
@@ -89,7 +95,7 @@ class EnhancedTerrainGenerator {
 
     // Rural areas can have full terrain elevation but still influenced by river
     const ruralTransition = Math.min(1, (distanceFromCenter - 6000) / 2000);
-    const flatteningFactor = 0.35 + (ruralTransition * 0.65);
+    const flatteningFactor = 0.35 + ruralTransition * 0.65;
     const ruralElevation = totalElevation * flatteningFactor;
 
     return Math.min(ruralElevation, riverElevation); // River flows through entire terrain
@@ -98,11 +104,11 @@ class EnhancedTerrainGenerator {
   private calculateHillContributions(x: number, y: number): number {
     // EXTREME CLIFFSIDE CITY - 2x higher cliff formations with ocean at bottom
     const hills = [
-      { x: 7000, y: 0, height: 1600, radius: 4000 },      // Eastern cliff wall - EXTREME CLIFF
-      { x: -7000, y: 0, height: 1500, radius: 3800 },     // Western cliff wall - MEGA TOWERING
-      { x: 0, y: 8000, height: 1400, radius: 4200 },      // Northern highlands - MASSIVE MOUNTAIN
-      { x: 4000, y: -6000, height: 1300, radius: 3600 },  // Southeast cliff - EXTREME RIDGE
-      { x: -4000, y: 6000, height: 1200, radius: 3400 }   // Northwest peaks - ULTRA HIGH PLATEAU
+      { x: 7000, y: 0, height: 1600, radius: 4000 }, // Eastern cliff wall - EXTREME CLIFF
+      { x: -7000, y: 0, height: 1500, radius: 3800 }, // Western cliff wall - MEGA TOWERING
+      { x: 0, y: 8000, height: 1400, radius: 4200 }, // Northern highlands - MASSIVE MOUNTAIN
+      { x: 4000, y: -6000, height: 1300, radius: 3600 }, // Southeast cliff - EXTREME RIDGE
+      { x: -4000, y: 6000, height: 1200, radius: 3400 }, // Northwest peaks - ULTRA HIGH PLATEAU
     ];
 
     let totalHillHeight = 0;
@@ -113,10 +119,13 @@ class EnhancedTerrainGenerator {
 
       if (hillBase > 2) {
         // Add surface variation to hills
-        const variation = TerrainNoiseGenerator.perlinNoise(
-          x * 0.001 + hill.x * 0.0001,
-          y * 0.001 + hill.y * 0.0001
-        ) * hillBase * 0.12;
+        const variation =
+          TerrainNoiseGenerator.perlinNoise(
+            x * 0.001 + hill.x * 0.0001,
+            y * 0.001 + hill.y * 0.0001
+          ) *
+          hillBase *
+          0.12;
 
         totalHillHeight += hillBase + variation;
       }
@@ -140,7 +149,7 @@ class EnhancedTerrainGenerator {
 
   private calculateUrbanFactor(x: number, y: number): number {
     const distanceFromCenter = Math.sqrt(x * x + y * y);
-    return Math.max(0, 1 - (distanceFromCenter / 5000));
+    return Math.max(0, 1 - distanceFromCenter / 5000);
   }
 
   private calculateDistanceFromWater(x: number, y: number): number {
@@ -148,7 +157,7 @@ class EnhancedTerrainGenerator {
     // In a real implementation, this would check actual water body positions
     return Math.min(
       distance2D(x, y, 2000, -1000), // River 1
-      distance2D(x, y, -1500, 2000)  // River 2
+      distance2D(x, y, -1500, 2000) // River 2
     );
   }
 
@@ -160,12 +169,12 @@ class EnhancedTerrainGenerator {
     // Main ocean bay (runs east-west through city center)
     const mainBayY = 0;
     const mainBayWidth = 1500; // MASSIVE ocean bay
-    const mainBayDepth = 60;   // Very deep ocean channel
+    const mainBayDepth = 60; // Very deep ocean channel
 
     const distanceFromMainBay = Math.abs(y - mainBayY);
     if (distanceFromMainBay <= mainBayWidth / 2) {
       const normalizedDist = distanceFromMainBay / (mainBayWidth / 2);
-      const depthFactor = 1 - (normalizedDist * normalizedDist);
+      const depthFactor = 1 - normalizedDist * normalizedDist;
       const oceanElevation = -mainBayDepth * depthFactor;
       minElevation = Math.min(minElevation, oceanElevation);
     }
@@ -178,7 +187,7 @@ class EnhancedTerrainGenerator {
     const distanceFromNorthFjord = Math.abs(y - northFjordY);
     if (distanceFromNorthFjord <= northFjordWidth / 2) {
       const normalizedDist = distanceFromNorthFjord / (northFjordWidth / 2);
-      const depthFactor = 1 - (normalizedDist * normalizedDist);
+      const depthFactor = 1 - normalizedDist * normalizedDist;
       const fjordElevation = -northFjordDepth * depthFactor;
       minElevation = Math.min(minElevation, fjordElevation);
     }
@@ -191,7 +200,7 @@ class EnhancedTerrainGenerator {
     const distanceFromSouthFjord = Math.abs(y - southFjordY);
     if (distanceFromSouthFjord <= southFjordWidth / 2) {
       const normalizedDist = distanceFromSouthFjord / (southFjordWidth / 2);
-      const depthFactor = 1 - (normalizedDist * normalizedDist);
+      const depthFactor = 1 - normalizedDist * normalizedDist;
       const fjordElevation = -southFjordDepth * depthFactor;
       minElevation = Math.min(minElevation, fjordElevation);
     }
@@ -204,7 +213,7 @@ class EnhancedTerrainGenerator {
     const distanceFromEastInlet = Math.abs(x - eastInletX);
     if (distanceFromEastInlet <= eastInletWidth / 2) {
       const normalizedDist = distanceFromEastInlet / (eastInletWidth / 2);
-      const depthFactor = 1 - (normalizedDist * normalizedDist);
+      const depthFactor = 1 - normalizedDist * normalizedDist;
       const inletElevation = -eastInletDepth * depthFactor;
       minElevation = Math.min(minElevation, inletElevation);
     }
@@ -233,7 +242,9 @@ class EnhancedTerrainGenerator {
     const riverCenterY = centerlineY + meander2;
 
     // Distance from point to river centerline
-    return Math.sqrt((x - riverCenterX) * (x - riverCenterX) + (y - riverCenterY) * (y - riverCenterY));
+    return Math.sqrt(
+      (x - riverCenterX) * (x - riverCenterX) + (y - riverCenterY) * (y - riverCenterY)
+    );
   }
 
   private getRiverWidth(x: number, y: number): number {
@@ -314,7 +325,7 @@ export function createTerrainLayer() {
 
       // Calculate lighting effects based on slope and environment
       const distanceFromCenter = Math.sqrt(centerX * centerX + centerY * centerY);
-      const urbanFactor = Math.max(0, 1 - (distanceFromCenter / 5000));
+      const urbanFactor = Math.max(0, 1 - distanceFromCenter / 5000);
 
       // Enhanced slope-based lighting calculation
       const slopeShading = calculateSlopeShading(slope, centerX, centerY);
@@ -325,10 +336,35 @@ export function createTerrainLayer() {
 
       // Apply lighting and atmospheric effects
       const finalColor = [
-        Math.max(20, Math.min(255, Math.floor(baseColor[0] * slopeShading * atmosphericEffect.lighting + atmosphericEffect.haze))),
-        Math.max(20, Math.min(255, Math.floor(baseColor[1] * slopeShading * atmosphericEffect.lighting + atmosphericEffect.haze))),
-        Math.max(20, Math.min(255, Math.floor(baseColor[2] * slopeShading * atmosphericEffect.lighting + atmosphericEffect.haze * 1.1))),
-        255
+        Math.max(
+          20,
+          Math.min(
+            255,
+            Math.floor(
+              baseColor[0] * slopeShading * atmosphericEffect.lighting + atmosphericEffect.haze
+            )
+          )
+        ),
+        Math.max(
+          20,
+          Math.min(
+            255,
+            Math.floor(
+              baseColor[1] * slopeShading * atmosphericEffect.lighting + atmosphericEffect.haze
+            )
+          )
+        ),
+        Math.max(
+          20,
+          Math.min(
+            255,
+            Math.floor(
+              baseColor[2] * slopeShading * atmosphericEffect.lighting +
+                atmosphericEffect.haze * 1.1
+            )
+          )
+        ),
+        255,
       ];
 
       // Create terrain patch with texture coordinates
@@ -339,7 +375,7 @@ export function createTerrainLayer() {
           [centerX - halfPatch, centerY - halfPatch],
           [centerX + halfPatch, centerY - halfPatch],
           [centerX + halfPatch, centerY + halfPatch],
-          [centerX - halfPatch, centerY + halfPatch]
+          [centerX - halfPatch, centerY + halfPatch],
         ],
         elevation: elevation,
         color: finalColor,
@@ -348,14 +384,14 @@ export function createTerrainLayer() {
           [textureRegion.x, textureRegion.y], // Bottom-left
           [textureRegion.x + textureRegion.width, textureRegion.y], // Bottom-right
           [textureRegion.x + textureRegion.width, textureRegion.y + textureRegion.height], // Top-right
-          [textureRegion.x, textureRegion.y + textureRegion.height] // Top-left
+          [textureRegion.x, textureRegion.y + textureRegion.height], // Top-left
         ],
         materials: materials || {
           ambient: 0.4,
           diffuse: 0.8,
           specular: 0.1,
-          roughness: 0.8
-        }
+          roughness: 0.8,
+        },
       });
     }
   }
@@ -364,7 +400,7 @@ export function createTerrainLayer() {
     id: 'terrain-layer',
     data: terrainPatches,
     coordinateSystem: 2, // COORDINATE_SYSTEM.METER_OFFSETS to match buildings
-    coordinateOrigin: [-74.0060, 40.7128, 0], // NYC center
+    coordinateOrigin: [-74.006, 40.7128, 0], // NYC center
     getPolygon: (d: any) => d.polygon,
     getElevation: (d: any) => d.elevation,
     getFillColor: (d: any) => d.color,
@@ -381,21 +417,21 @@ export function createTerrainLayer() {
       ambient: d.materials?.ambient || 0.4,
       diffuse: d.materials?.diffuse || 0.8,
       shininess: 1 / (d.materials?.roughness || 0.8), // Convert roughness to shininess
-      specularColor: d.materials?.metallic > 0.1 ? [100, 100, 120] : [40, 45, 50]
+      specularColor: d.materials?.metallic > 0.1 ? [100, 100, 120] : [40, 45, 50],
     }),
     // Enhanced lighting settings optimized for textured terrain
     lightSettings: {
-      lightsPosition: [-74.0060, 40.7128, 5000, -74.0060, 40.7128, 5000],
-      ambientRatio: 0.3,   // Lower ambient for better texture definition
-      diffuseRatio: 0.7,   // Higher diffuse for realistic lighting
+      lightsPosition: [-74.006, 40.7128, 5000, -74.006, 40.7128, 5000],
+      ambientRatio: 0.3, // Lower ambient for better texture definition
+      diffuseRatio: 0.7, // Higher diffuse for realistic lighting
       specularRatio: 0.05, // Minimal specular for natural terrain
-      numberOfLights: 2
+      numberOfLights: 2,
     },
     // Note: Actual texture mapping would require a TextureLayer or custom shader
     // For now, we use enhanced color-based representation
     updateTriggers: {
-      getFillColor: [terrainPatches.length] // Trigger updates when terrain changes
-    }
+      getFillColor: [terrainPatches.length], // Trigger updates when terrain changes
+    },
   });
 }
 
@@ -406,19 +442,27 @@ function calculateSlopeShading(slope: number, x: number, y: number): number {
   const normalizedSlope = Math.min(slope, 1.0); // Clamp extreme slopes
 
   // Calculate surface normal approximation
-  const slopeEffect = 1 + (normalizedSlope * lightDirection.y - normalizedSlope * lightDirection.x) * 0.4;
+  const slopeEffect =
+    1 + (normalizedSlope * lightDirection.y - normalizedSlope * lightDirection.x) * 0.4;
   return Math.max(0.5, Math.min(1.5, slopeEffect));
 }
 
-function calculateAtmosphericEffect(distanceFromCenter: number): { lighting: number; haze: number } {
+function calculateAtmosphericEffect(distanceFromCenter: number): {
+  lighting: number;
+  haze: number;
+} {
   const atmosphericDistance = Math.min(1, distanceFromCenter / 10000);
   return {
-    lighting: 1 - (atmosphericDistance * 0.2), // Slight dimming with distance
-    haze: atmosphericDistance * 15 // Blue atmospheric haze
+    lighting: 1 - atmosphericDistance * 0.2, // Slight dimming with distance
+    haze: atmosphericDistance * 15, // Blue atmospheric haze
   };
 }
 
-function getTextureBasedColor(textureKey: string, elevation: number, urbanFactor: number): [number, number, number] {
+function getTextureBasedColor(
+  textureKey: string,
+  elevation: number,
+  urbanFactor: number
+): [number, number, number] {
   // Base colors that complement our texture atlas
   const colorMap: Record<string, [number, number, number]> = {
     lush_grass: [74, 124, 89],
@@ -432,19 +476,19 @@ function getTextureBasedColor(textureKey: string, elevation: number, urbanFactor
     forest_floor: [34, 139, 34],
     sandy_beach: [244, 164, 96],
     marsh_wetland: [85, 107, 47],
-    coarse_gravel: [128, 128, 128]
+    coarse_gravel: [128, 128, 128],
   };
 
   const baseColor = colorMap[textureKey] || [100, 100, 100];
 
   // Apply environmental modulations
-  const elevationFactor = 1 + (elevation / 1000); // Slight brightening with elevation
+  const elevationFactor = 1 + elevation / 1000; // Slight brightening with elevation
   const urbanTint = urbanFactor > 0.3 ? 1.1 : 1.0; // Slightly brighter in urban areas
 
   return [
     Math.min(255, baseColor[0] * elevationFactor * urbanTint),
     Math.min(255, baseColor[1] * elevationFactor * urbanTint),
-    Math.min(255, baseColor[2] * elevationFactor * urbanTint)
+    Math.min(255, baseColor[2] * elevationFactor * urbanTint),
   ];
 }
 
@@ -452,7 +496,7 @@ export function createWaterLayer(riverData?: any) {
   // Use the actual generated river data if available
   if (!riverData || !riverData.path || riverData.path.length === 0) {
     // Fallback to default rivers if no river data provided
-    const centerLng = -74.0060;
+    const centerLng = -74.006;
     const centerLat = 40.7128;
 
     const waterBodies = [
@@ -462,9 +506,9 @@ export function createWaterLayer(riverData?: any) {
           [centerLng - 0.02, centerLat - 0.01],
           [centerLng + 0.02, centerLat - 0.01],
           [centerLng + 0.02, centerLat + 0.01],
-          [centerLng - 0.02, centerLat + 0.01]
-        ]
-      }
+          [centerLng - 0.02, centerLat + 0.01],
+        ],
+      },
     ];
 
     return new PolygonLayer({
@@ -478,7 +522,7 @@ export function createWaterLayer(riverData?: any) {
       wireframe: false,
       filled: true,
       stroked: false,
-      pickable: false
+      pickable: false,
     });
   }
 
@@ -494,15 +538,15 @@ export function createWaterLayer(riverData?: any) {
     if (!p1 || !p2) continue;
 
     // Convert from local coordinates to lat/lng (simplified conversion)
-    const centerLng = -74.0060;
+    const centerLng = -74.006;
     const centerLat = 40.7128;
     const metersToDegreesLng = 1 / 111320;
     const metersToDegreesLat = 1 / 110540;
 
-    const lng1 = centerLng + (p1.x * metersToDegreesLng);
-    const lat1 = centerLat + (p1.y * metersToDegreesLat);
-    const lng2 = centerLng + (p2.x * metersToDegreesLng);
-    const lat2 = centerLat + (p2.y * metersToDegreesLat);
+    const lng1 = centerLng + p1.x * metersToDegreesLng;
+    const lat1 = centerLat + p1.y * metersToDegreesLat;
+    const lng2 = centerLng + p2.x * metersToDegreesLng;
+    const lat2 = centerLat + p2.y * metersToDegreesLat;
 
     // Create water segment with width
     const dx = lng2 - lng1;
@@ -510,8 +554,8 @@ export function createWaterLayer(riverData?: any) {
     const length = Math.sqrt(dx * dx + dy * dy);
 
     if (length > 0) {
-      const perpX = -dy / length * (riverWidth * metersToDegreesLng / 2);
-      const perpY = dx / length * (riverWidth * metersToDegreesLat / 2);
+      const perpX = (-dy / length) * ((riverWidth * metersToDegreesLng) / 2);
+      const perpY = (dx / length) * ((riverWidth * metersToDegreesLat) / 2);
 
       waterBodies.push({
         id: `river-segment-${i}`,
@@ -519,8 +563,8 @@ export function createWaterLayer(riverData?: any) {
           [lng1 + perpX, lat1 + perpY],
           [lng1 - perpX, lat1 - perpY],
           [lng2 - perpX, lat2 - perpY],
-          [lng2 + perpX, lat2 + perpY]
-        ]
+          [lng2 + perpX, lat2 + perpY],
+        ],
       });
     }
   }
@@ -543,7 +587,7 @@ export function createWaterLayer(riverData?: any) {
       ambient: 0.3,
       diffuse: 0.6,
       shininess: 128,
-      specularColor: [255, 255, 255]
-    }
+      specularColor: [255, 255, 255],
+    },
   });
 }

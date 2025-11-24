@@ -5,7 +5,7 @@ import {
   DeviceBenchmarkResult,
   PerformanceState,
   AdaptationSettings,
-  PerformanceMetrics
+  PerformanceMetrics,
 } from '../types/performance';
 
 export class PerformanceProfiler {
@@ -70,7 +70,7 @@ export class PerformanceProfiler {
   }
 
   private async benchmarkGPU(): Promise<number> {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       const canvas = document.createElement('canvas');
       canvas.width = 256;
       canvas.height = 256;
@@ -87,21 +87,27 @@ export class PerformanceProfiler {
 
       // Create a simple shader program
       const vertexShader = gl.createShader(gl.VERTEX_SHADER)!;
-      gl.shaderSource(vertexShader, `
+      gl.shaderSource(
+        vertexShader,
+        `
         attribute vec2 position;
         void main() {
           gl_Position = vec4(position, 0.0, 1.0);
         }
-      `);
+      `
+      );
       gl.compileShader(vertexShader);
 
       const fragmentShader = gl.createShader(gl.FRAGMENT_SHADER)!;
-      gl.shaderSource(fragmentShader, `
+      gl.shaderSource(
+        fragmentShader,
+        `
         precision mediump float;
         void main() {
           gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
         }
-      `);
+      `
+      );
       gl.compileShader(fragmentShader);
 
       const program = gl.createProgram()!;
@@ -125,7 +131,7 @@ export class PerformanceProfiler {
   }
 
   private async detectRefreshRate(): Promise<number> {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       let frameCount = 0;
       const startTime = performance.now();
 
@@ -172,8 +178,8 @@ export class PerformanceProfiler {
       test_results: {
         cpu_score: cpuScore,
         memory_score: memoryScore,
-        render_score: renderScore
-      }
+        render_score: renderScore,
+      },
     };
 
     console.log('✅ Benchmark complete:', result);
@@ -198,7 +204,7 @@ export class PerformanceProfiler {
         max_agents: 50000,
         render_distance: 1000.0,
         update_frequency: 120,
-        level: PerformanceLevel.Ultra
+        level: PerformanceLevel.Ultra,
       };
     }
 
@@ -209,7 +215,7 @@ export class PerformanceProfiler {
         max_agents: 15000,
         render_distance: 800.0,
         update_frequency: 60,
-        level: PerformanceLevel.High
+        level: PerformanceLevel.High,
       };
     }
 
@@ -220,7 +226,7 @@ export class PerformanceProfiler {
         max_agents: 5000,
         render_distance: 600.0,
         update_frequency: 30,
-        level: PerformanceLevel.Medium
+        level: PerformanceLevel.Medium,
       };
     }
 
@@ -231,7 +237,7 @@ export class PerformanceProfiler {
         max_agents: 2000,
         render_distance: 400.0,
         update_frequency: 15,
-        level: PerformanceLevel.Low
+        level: PerformanceLevel.Low,
       };
     }
 
@@ -241,7 +247,7 @@ export class PerformanceProfiler {
       max_agents: 500,
       render_distance: 200.0,
       update_frequency: 10,
-      level: PerformanceLevel.UltraLow
+      level: PerformanceLevel.UltraLow,
     };
   }
 
@@ -258,7 +264,8 @@ export class PerformanceProfiler {
       }
 
       // Calculate average FPS
-      const avgFrameTime = this.frameTimeHistory.reduce((a, b) => a + b, 0) / this.frameTimeHistory.length;
+      const avgFrameTime =
+        this.frameTimeHistory.reduce((a, b) => a + b, 0) / this.frameTimeHistory.length;
       const currentFps = 1000 / avgFrameTime;
 
       // Estimate memory usage (rough approximation)
@@ -271,7 +278,7 @@ export class PerformanceProfiler {
         agent_count: 0, // Will be updated by consumer
         memory_usage_mb: Math.round(memoryUsage),
         gpu_utilization: 0, // Difficult to measure in browser
-        cpu_utilization: 0  // Difficult to measure in browser
+        cpu_utilization: 0, // Difficult to measure in browser
       };
 
       callback(metrics);
@@ -294,7 +301,7 @@ export class PerformanceProfiler {
       fps_tolerance: 5.0,
       adaptation_delay_ms: 2000,
       min_stable_frames: 30,
-      performance_priority: 'balanced'
+      performance_priority: 'balanced',
     };
   }
 }

@@ -9,10 +9,17 @@ import { createBuildingLayer } from '../layers/BuildingLayer';
 import { createAgentLayer } from '../layers/AgentLayer';
 import { createRoadLayer } from '../layers/RoadLayer';
 import { createZoneLayer } from '../layers/ZoneLayer';
-import { createHexagonLayer, generateUrbanDensityData, generateTrafficData } from '../layers/HexagonLayer';
+import {
+  createHexagonLayer,
+  generateUrbanDensityData,
+  generateTrafficData,
+} from '../layers/HexagonLayer';
 import { createTerrainLayer, createWaterLayer } from '../layers/TerrainLayer';
 import { createGroundLayer } from '../layers/GroundLayer';
-import { createAutonomousAgentLayer, generateAutonomousAgents } from '../layers/AutonomousAgentLayer';
+import {
+  createAutonomousAgentLayer,
+  generateAutonomousAgents,
+} from '../layers/AutonomousAgentLayer';
 import { createWeatherLayer, generateWeatherSystem, createWindLayer } from '../layers/WeatherLayer';
 import { getBoundsFromCityModel } from '../utils/coordinates';
 import { PolygonLayer } from '@deck.gl/layers';
@@ -44,19 +51,23 @@ interface CityscapeProps {
   camera?: any;
 }
 
-export function Cityscape({ optimizationResult, showZones = false, onToggleZones }: CityscapeProps) {
+export function Cityscape({
+  optimizationResult,
+  showZones = false,
+  onToggleZones,
+}: CityscapeProps) {
   const { state } = useSimulationContext();
   const { state: terrainState } = useTerrainContext();
   const [debugVisible, setDebugVisible] = useState(false);
 
   // FIXED: Proper camera positioning to show the full city
   const camera = useCamera({
-    longitude: -74.0060,
+    longitude: -74.006,
     latitude: 40.7128,
-    zoom: 14,      // Closer zoom to see building details
-    pitch: 60,     // Good 3D perspective without being too extreme
-    bearing: 30,   // Slight rotation for better 3D view
-    target: [0, 0, 0]  // Look at ground level, camera will be above
+    zoom: 14, // Closer zoom to see building details
+    pitch: 60, // Good 3D perspective without being too extreme
+    bearing: 30, // Slight rotation for better 3D view
+    target: [0, 0, 0], // Look at ground level, camera will be above
   });
 
   // DISABLED: Update camera to center on city when model loads (for static view)
@@ -94,7 +105,7 @@ export function Cityscape({ optimizationResult, showZones = false, onToggleZones
       roads: cityData.roads?.length || 0,
       buildings: cityData.buildings?.length || 0,
       agents: state.agents?.length || 0,
-      hasEnhancedData: !!enhancedData
+      hasEnhancedData: !!enhancedData,
     });
 
     // Layer ordering for professional 3D visualization:
@@ -105,7 +116,7 @@ export function Cityscape({ optimizationResult, showZones = false, onToggleZones
       const terrainLayers = createEnhancedTerrainLayer({
         bounds: state.cityModel.bounds,
         terrainState,
-        cityData
+        cityData,
       });
       activeLayers.push(...terrainLayers);
 
@@ -113,7 +124,7 @@ export function Cityscape({ optimizationResult, showZones = false, onToggleZones
         layerCount: terrainLayers.length,
         terrainEnabled: terrainState.isEnabled,
         activeTerrainLayer: terrainState.activeLayer,
-        terrainProfile: terrainState.terrainProfile
+        terrainProfile: terrainState.terrainProfile,
       });
     }
 
@@ -125,7 +136,7 @@ export function Cityscape({ optimizationResult, showZones = false, onToggleZones
 
     // Generate sophisticated simulation data
     const centerLat = 40.7128;
-    const centerLng = -74.0060;
+    const centerLng = -74.006;
 
     // Add realistic autonomous agents (cars from residences, drones from rooftops, people from entrances)
     const autonomousAgents = generateAutonomousAgents(centerLat, centerLng, cityData);
@@ -145,7 +156,11 @@ export function Cityscape({ optimizationResult, showZones = false, onToggleZones
     //   activeLayers.push(createZoneLayer(cityData.zones || [], state.currentTime || 12, true));
     // }
 
-    console.log('Creating building layer with buildings:', cityData.buildings?.length, cityData.buildings?.slice(0, 2));
+    console.log(
+      'Creating building layer with buildings:',
+      cityData.buildings?.length,
+      cityData.buildings?.slice(0, 2)
+    );
 
     const buildingLayer = createBuildingLayer(cityData.buildings || [], state.currentTime || 12);
     console.log('Building layer created with', cityData.buildings?.length || 0, 'buildings');
@@ -202,12 +217,14 @@ export function Cityscape({ optimizationResult, showZones = false, onToggleZones
           optimizationResult.stations,
           optimizationResult.coverage_map,
           true, // showCoverage
-          true  // showLabels
+          true // showLabels
         )
       );
     }
 
-    console.log(`Rendering ${activeLayers.length} layers (${activeLayers.map(l => l.id).join(', ')})`);
+    console.log(
+      `Rendering ${activeLayers.length} layers (${activeLayers.map(l => l.id).join(', ')})`
+    );
 
     // Register layers with debug manager
     activeLayers.forEach(layer => {
@@ -218,39 +235,52 @@ export function Cityscape({ optimizationResult, showZones = false, onToggleZones
     debugManager.buildSpatialIndex();
 
     return activeLayers;
-  }, [state.cityModel, state.agents, state.simulationData, showZones, terrainState, optimizationResult]);
+  }, [
+    state.cityModel,
+    state.agents,
+    state.simulationData,
+    showZones,
+    terrainState,
+    optimizationResult,
+  ]);
 
-  const handleViewStateChange = useCallback(({ viewState: newViewState }: any) => {
-    console.log('🎥 ViewState changing:', newViewState);
-    camera.setViewState(newViewState);
+  const handleViewStateChange = useCallback(
+    ({ viewState: newViewState }: any) => {
+      console.log('🎥 ViewState changing:', newViewState);
+      camera.setViewState(newViewState);
 
-    // Update debug manager with new view state
-    debugManager.updateViewState({
-      longitude: newViewState.longitude,
-      latitude: newViewState.latitude,
-      zoom: newViewState.zoom,
-      pitch: newViewState.pitch,
-      bearing: newViewState.bearing
-    });
-  }, [camera.setViewState]);
+      // Update debug manager with new view state
+      debugManager.updateViewState({
+        longitude: newViewState.longitude,
+        latitude: newViewState.latitude,
+        zoom: newViewState.zoom,
+        pitch: newViewState.pitch,
+        bearing: newViewState.bearing,
+      });
+    },
+    [camera.setViewState]
+  );
 
   // DEBUG: Log current viewState
   console.log('🎥 Current camera viewState:', camera.viewState);
 
-  const handleClick = useCallback((info: any) => {
-    if (info.object) {
-      console.log('Clicked object:', info.object);
+  const handleClick = useCallback(
+    (info: any) => {
+      if (info.object) {
+        console.log('Clicked object:', info.object);
 
-      // If clicking on an agent, start following it
-      if (info.layer?.id === 'agents' && info.object.id) {
-        if (camera.controls.followTarget === info.object.id) {
-          camera.stopFollowing();
-        } else {
-          camera.startFollowing(info.object.id);
+        // If clicking on an agent, start following it
+        if (info.layer?.id === 'agents' && info.object.id) {
+          if (camera.controls.followTarget === info.object.id) {
+            camera.stopFollowing();
+          } else {
+            camera.startFollowing(info.object.id);
+          }
         }
       }
-    }
-  }, [camera]);
+    },
+    [camera]
+  );
 
   const toggleZones = useCallback(() => {
     if (onToggleZones) {
@@ -318,7 +348,7 @@ export function Cityscape({ optimizationResult, showZones = false, onToggleZones
         viewState={{
           ...camera.viewState,
           pitch: camera.viewState.pitch || 60,
-          bearing: camera.viewState.bearing || 30
+          bearing: camera.viewState.bearing || 30,
         }}
         onViewStateChange={handleViewStateChange}
         onClick={handleClick}
@@ -329,14 +359,14 @@ export function Cityscape({ optimizationResult, showZones = false, onToggleZones
             id: 'map',
             repeat: true,
             nearZMultiplier: 0.01,
-            farZMultiplier: 1000,  // Increased far plane to prevent clipping
+            farZMultiplier: 1000, // Increased far plane to prevent clipping
             orthographic: false,
             controller: {
-              maxZoom: 25,      // Infinite zoom capability
-              minZoom: 0,       // Allow global view in MapView
-              maxPitch: 85
-            }
-          })
+              maxZoom: 25, // Infinite zoom capability
+              minZoom: 0, // Allow global view in MapView
+              maxPitch: 85,
+            },
+          }),
         ]}
         controller={{
           dragRotate: true,
@@ -345,11 +375,11 @@ export function Cityscape({ optimizationResult, showZones = false, onToggleZones
           touchZoom: true,
           touchRotate: true,
           keyboard: true,
-          inertia: false,  // DISABLED: Prevents automatic movement after user input
+          inertia: false, // DISABLED: Prevents automatic movement after user input
           scrollZoomSpeed: 0.5,
-          dragRotateSpeed: 0.01
+          dragRotateSpeed: 0.01,
         }}
-        getCursor={() => camera.controls.followTarget ? 'crosshair' : 'grab'}
+        getCursor={() => (camera.controls.followTarget ? 'crosshair' : 'grab')}
         getTooltip={({ object, layer }) => {
           if (!object) return null;
 
@@ -365,30 +395,28 @@ export function Cityscape({ optimizationResult, showZones = false, onToggleZones
           }
         }}
         style={{
-          background: '#1a1a2e'
+          background: '#1a1a2e',
         }}
       />
 
-
       {/* Status Indicator */}
-      <div style={{
-        position: 'absolute',
-        bottom: 10,
-        right: 10,
-        background: 'rgba(0, 0, 0, 0.8)',
-        color: 'white',
-        padding: '5px 10px',
-        borderRadius: '3px',
-        fontSize: '12px'
-      }}>
+      <div
+        style={{
+          position: 'absolute',
+          bottom: 10,
+          right: 10,
+          background: 'rgba(0, 0, 0, 0.8)',
+          color: 'white',
+          padding: '5px 10px',
+          borderRadius: '3px',
+          fontSize: '12px',
+        }}
+      >
         {layers.length} layers active
       </div>
 
       {/* Debug Overlay */}
-      <DebugOverlay
-        isVisible={debugVisible}
-        onToggle={() => setDebugVisible(!debugVisible)}
-      />
+      <DebugOverlay isVisible={debugVisible} onToggle={() => setDebugVisible(!debugVisible)} />
     </div>
   );
 }

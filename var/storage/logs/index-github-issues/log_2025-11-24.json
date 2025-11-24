@@ -1,0 +1,4 @@
+{"level":30,"time":"2025-11-24T07:14:22.301Z","pid":610797,"category":"index-github-issues","msg":"Starting GitHub issues indexing","event":"info","repo":"jw409/citysim","state":"all","limit":50,"partition":"project"}
+{"level":30,"time":"2025-11-24T07:14:22.821Z","pid":610797,"category":"index-github-issues","msg":"Fetched issues from GitHub","event":"info","count":0,"sample_issues":[],"operation":"fetch_github_issues"}
+{"level":30,"time":"2025-11-24T07:28:00.358Z","pid":615856,"category":"index-github-issues","msg":"Starting GitHub issues indexing","event":"info","repo":"jw409/citysim","state":"all","limit":50,"partition":"project"}
+{"level":30,"time":"2025-11-24T07:28:00.984Z","pid":615856,"category":"index-github-issues","msg":"Fetched issues from GitHub","event":"info","count":0,"sample_issues":[],"operation":"fetch_github_issues"}

@@ -13,18 +13,20 @@ export function ViewControls({
   onToggleDayNight,
   onResetView,
   showZones,
-  isNight
+  isNight,
 }: ViewControlsProps) {
   return (
-    <div style={{
-      position: 'absolute',
-      top: '1rem',
-      right: '1rem',
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '0.5rem',
-      zIndex: 1000,
-    }}>
+    <div
+      style={{
+        position: 'absolute',
+        top: '1rem',
+        right: '1rem',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '0.5rem',
+        zIndex: 1000,
+      }}
+    >
       <button
         className="button button-secondary"
         onClick={onToggleZones}

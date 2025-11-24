@@ -1,0 +1,8 @@
+{"level":30,"time":"2025-11-24T07:14:19.105Z","pid":610797,"category":"bm25-documents-repository","msg":"🔍 BM25DocumentsRepository constructor called","event":"info","dbType":"object","hasDb":true,"operation":"bm25_repository_init"}
+{"level":30,"time":"2025-11-24T07:14:19.105Z","pid":610797,"category":"bm25-documents-repository","msg":"🔍 BM25DocumentsRepository.initialize() called","event":"info"}
+{"level":30,"time":"2025-11-24T07:14:19.109Z","pid":610797,"category":"bm25-documents-repository","msg":"🔍 Table exists check","event":"info","exists":true,"operation":"bm25_table_check"}
+{"level":30,"time":"2025-11-24T07:14:19.109Z","pid":610797,"category":"bm25-documents-repository","msg":"🔍 BM25DocumentsRepository.initialize() complete","event":"info"}
+{"level":30,"time":"2025-11-24T07:27:53.255Z","pid":615856,"category":"bm25-documents-repository","msg":"🔍 BM25DocumentsRepository constructor called","event":"info","dbType":"object","hasDb":true,"operation":"bm25_repository_init"}
+{"level":30,"time":"2025-11-24T07:27:53.255Z","pid":615856,"category":"bm25-documents-repository","msg":"🔍 BM25DocumentsRepository.initialize() called","event":"info"}
+{"level":30,"time":"2025-11-24T07:27:53.257Z","pid":615856,"category":"bm25-documents-repository","msg":"🔍 Table exists check","event":"info","exists":true,"operation":"bm25_table_check"}
+{"level":30,"time":"2025-11-24T07:27:53.257Z","pid":615856,"category":"bm25-documents-repository","msg":"🔍 BM25DocumentsRepository.initialize() complete","event":"info"}

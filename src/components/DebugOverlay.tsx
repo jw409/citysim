@@ -71,7 +71,7 @@ export function DebugOverlay({ isVisible, onToggle }: DebugOverlayProps) {
           padding: '8px 12px',
           borderRadius: '4px',
           cursor: 'pointer',
-          fontSize: '12px'
+          fontSize: '12px',
         }}
       >
         🔍 Debug
@@ -80,22 +80,31 @@ export function DebugOverlay({ isVisible, onToggle }: DebugOverlayProps) {
   }
 
   return (
-    <div style={{
-      position: 'fixed',
-      top: 10,
-      right: 10,
-      width: '400px',
-      maxHeight: '80vh',
-      background: 'rgba(0, 0, 0, 0.9)',
-      color: 'white',
-      borderRadius: '8px',
-      padding: '16px',
-      fontSize: '12px',
-      overflow: 'auto',
-      zIndex: 1000,
-      fontFamily: 'monospace'
-    }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+    <div
+      style={{
+        position: 'fixed',
+        top: 10,
+        right: 10,
+        width: '400px',
+        maxHeight: '80vh',
+        background: 'rgba(0, 0, 0, 0.9)',
+        color: 'white',
+        borderRadius: '8px',
+        padding: '16px',
+        fontSize: '12px',
+        overflow: 'auto',
+        zIndex: 1000,
+        fontFamily: 'monospace',
+      }}
+    >
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '16px',
+        }}
+      >
         <h3 style={{ margin: 0 }}>🔍 Debug Panel</h3>
         <button
           onClick={onToggle}
@@ -105,7 +114,7 @@ export function DebugOverlay({ isVisible, onToggle }: DebugOverlayProps) {
             border: '1px solid #666',
             padding: '4px 8px',
             borderRadius: '4px',
-            cursor: 'pointer'
+            cursor: 'pointer',
           }}
         >
           ✕
@@ -116,12 +125,22 @@ export function DebugOverlay({ isVisible, onToggle }: DebugOverlayProps) {
       <div style={{ marginBottom: '16px' }}>
         <h4 style={{ margin: '0 0 8px 0', color: '#fbbf24' }}>Performance</h4>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-          <div>FPS: <span style={{ color: getPerformanceColor(60 - (debugInfo.performance?.fps || 0), 60) }}>
-            {debugInfo.performance?.fps || 0}
-          </span></div>
-          <div>Frame: <span style={{ color: getPerformanceColor(debugInfo.performance?.frameTime || 0, 16.67) }}>
-            {(debugInfo.performance?.frameTime || 0).toFixed(1)}ms
-          </span></div>
+          <div>
+            FPS:{' '}
+            <span
+              style={{ color: getPerformanceColor(60 - (debugInfo.performance?.fps || 0), 60) }}
+            >
+              {debugInfo.performance?.fps || 0}
+            </span>
+          </div>
+          <div>
+            Frame:{' '}
+            <span
+              style={{ color: getPerformanceColor(debugInfo.performance?.frameTime || 0, 16.67) }}
+            >
+              {(debugInfo.performance?.frameTime || 0).toFixed(1)}ms
+            </span>
+          </div>
           <div>Layers: {debugInfo.performance?.layerCount || 0}</div>
           <div>Objects: {debugInfo.performance?.totalObjects || 0}</div>
         </div>
@@ -141,7 +160,9 @@ export function DebugOverlay({ isVisible, onToggle }: DebugOverlayProps) {
 
       {/* Layers Section */}
       <div style={{ marginBottom: '16px' }}>
-        <h4 style={{ margin: '0 0 8px 0', color: '#34d399' }}>Layers ({debugInfo.layers?.length || 0})</h4>
+        <h4 style={{ margin: '0 0 8px 0', color: '#34d399' }}>
+          Layers ({debugInfo.layers?.length || 0})
+        </h4>
         <div style={{ maxHeight: '200px', overflow: 'auto' }}>
           {debugInfo.layers?.map((layer, index) => (
             <div
@@ -153,7 +174,7 @@ export function DebugOverlay({ isVisible, onToggle }: DebugOverlayProps) {
                 background: selectedLayer === layer.id ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
                 cursor: 'pointer',
                 borderRadius: '2px',
-                border: layer.visible ? '1px solid #22c55e' : '1px solid #666'
+                border: layer.visible ? '1px solid #22c55e' : '1px solid #666',
               }}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -187,7 +208,7 @@ export function DebugOverlay({ isVisible, onToggle }: DebugOverlayProps) {
           type="text"
           placeholder="Search by ID, type, or name..."
           value={searchQuery}
-          onChange={(e) => handleSearch(e.target.value)}
+          onChange={e => handleSearch(e.target.value)}
           style={{
             width: '100%',
             padding: '4px',
@@ -195,7 +216,7 @@ export function DebugOverlay({ isVisible, onToggle }: DebugOverlayProps) {
             border: '1px solid #666',
             borderRadius: '4px',
             color: 'white',
-            fontSize: '12px'
+            fontSize: '12px',
           }}
         />
         {searchResults.length > 0 && (
@@ -237,7 +258,7 @@ export function DebugOverlay({ isVisible, onToggle }: DebugOverlayProps) {
             padding: '6px 12px',
             borderRadius: '4px',
             cursor: 'pointer',
-            fontSize: '11px'
+            fontSize: '11px',
           }}
         >
           Log to Console
@@ -251,7 +272,7 @@ export function DebugOverlay({ isVisible, onToggle }: DebugOverlayProps) {
             padding: '6px 12px',
             borderRadius: '4px',
             cursor: 'pointer',
-            fontSize: '11px'
+            fontSize: '11px',
           }}
         >
           Export JSON
@@ -260,7 +281,9 @@ export function DebugOverlay({ isVisible, onToggle }: DebugOverlayProps) {
 
       {/* Instructions */}
       <div style={{ marginTop: '12px', fontSize: '10px', color: '#999', lineHeight: '1.4' }}>
-        <div>• Use <code>urbanSynthDebug</code> in console for more tools</div>
+        <div>
+          • Use <code>urbanSynthDebug</code> in console for more tools
+        </div>
         <div>• Click layers to see details</div>
         <div>• Search objects by ID, type, or name</div>
       </div>

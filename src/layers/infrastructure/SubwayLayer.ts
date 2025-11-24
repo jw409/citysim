@@ -17,12 +17,12 @@ export function createSubwayLayer(subwayData: any[]) {
       getColor: (d: any) => {
         // Color by subway line
         const lineColors: Record<string, [number, number, number, number]> = {
-          'red': [255, 0, 0, 220],
-          'blue': [0, 100, 255, 220],
-          'green': [0, 200, 0, 220],
-          'yellow': [255, 200, 0, 220],
-          'purple': [150, 0, 200, 220],
-          'orange': [255, 150, 0, 220]
+          red: [255, 0, 0, 220],
+          blue: [0, 100, 255, 220],
+          green: [0, 200, 0, 220],
+          yellow: [255, 200, 0, 220],
+          purple: [150, 0, 200, 220],
+          orange: [255, 150, 0, 220],
         };
         return lineColors[d.line_color] || layerConfig.color;
       },
@@ -36,12 +36,12 @@ export function createSubwayLayer(subwayData: any[]) {
         ambient: 0.3,
         diffuse: 0.7,
         shininess: 64,
-        specularColor: [200, 200, 200]
+        specularColor: [200, 200, 200],
       },
       transitions: {
         getColor: 800,
-        getWidth: 400
-      }
+        getWidth: 400,
+      },
     }),
 
     // Subway stations
@@ -59,9 +59,9 @@ export function createSubwayLayer(subwayData: any[]) {
       material: {
         ambient: 0.4,
         diffuse: 0.8,
-        shininess: 32
-      }
-    })
+        shininess: 32,
+      },
+    }),
   ];
 }
 
@@ -99,7 +99,7 @@ export function generateSubwaySystem(bounds: any, lineCount: number = 4): any[] 
         line_color: lineColor,
         name: `${lineColor.charAt(0).toUpperCase() + lineColor.slice(1)} Line Station ${stationIndex + 1}`,
         passenger_capacity: 500 + Math.random() * 1000,
-        daily_passengers: Math.random() * 10000
+        daily_passengers: Math.random() * 10000,
       };
 
       stations.push(station);
@@ -116,41 +116,43 @@ export function generateSubwaySystem(bounds: any, lineCount: number = 4): any[] 
         type: 'tunnel',
         path: [
           [startStation.x, startStation.y],
-          [endStation.x, endStation.y]
+          [endStation.x, endStation.y],
         ],
         width: 4,
         elevation: -15,
         line_color: lineColor,
         length: Math.sqrt(
-          Math.pow(endStation.x - startStation.x, 2) +
-          Math.pow(endStation.y - startStation.y, 2)
+          Math.pow(endStation.x - startStation.x, 2) + Math.pow(endStation.y - startStation.y, 2)
         ),
         capacity: 2000,
-        current_load: Math.random() * 1500
+        current_load: Math.random() * 1500,
       });
     }
 
     // Add transfer tunnels between lines occasionally
     if (lineIndex > 0 && Math.random() > 0.5) {
       const currentLineStations = stations;
-      const previousLineStations = subway
-        .filter(d => d.type === 'station' && d.line_color === lineColors[lineIndex - 1]);
+      const previousLineStations = subway.filter(
+        d => d.type === 'station' && d.line_color === lineColors[lineIndex - 1]
+      );
 
       if (previousLineStations.length > 0) {
-        const currentStation = currentLineStations[Math.floor(Math.random() * currentLineStations.length)];
-        const previousStation = previousLineStations[Math.floor(Math.random() * previousLineStations.length)];
+        const currentStation =
+          currentLineStations[Math.floor(Math.random() * currentLineStations.length)];
+        const previousStation =
+          previousLineStations[Math.floor(Math.random() * previousLineStations.length)];
 
         subway.push({
           id: `transfer_${lineColor}_${lineColors[lineIndex - 1]}`,
           type: 'tunnel',
           path: [
             [currentStation.x, currentStation.y],
-            [previousStation.x, previousStation.y]
+            [previousStation.x, previousStation.y],
           ],
           width: 3,
           elevation: -13,
           line_color: 'transfer',
-          is_transfer: true
+          is_transfer: true,
         });
       }
     }

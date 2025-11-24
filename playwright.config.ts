@@ -89,16 +89,12 @@ export default defineConfig({
     /* Maximum time expect() should wait for the condition to be met. */
     timeout: 10_000,
     /* Threshold for screenshot comparison */
-    threshold: 0.3,
-    /* Animation handling */
     toHaveScreenshot: {
       threshold: 0.3,
-      mode: 'local',
       animations: 'disabled',
     },
     toMatchSnapshot: {
       threshold: 0.3,
-      mode: 'local',
     },
   },
 

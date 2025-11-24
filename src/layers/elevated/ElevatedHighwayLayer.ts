@@ -26,12 +26,12 @@ export function createElevatedHighwayLayer(highwayData: any[]) {
       ambient: 0.3,
       diffuse: 0.7,
       shininess: 48,
-      specularColor: [200, 200, 200]
+      specularColor: [200, 200, 200],
     },
     transitions: {
       getColor: 500,
-      getWidth: 300
-    }
+      getWidth: 300,
+    },
   });
 }
 
@@ -61,31 +61,37 @@ export function generateElevatedHighways(bounds: any, density: number = 0.4): an
     lanes: 6,
     speed_limit: 80,
     traffic_density: 0.3 + Math.random() * 0.4,
-    type: 'ring'
+    type: 'ring',
   });
 
   // Shorter central highways (limit to 3km to prevent planetary artifacts)
   const maxHighwayLength = 3000;
   highways.push({
     id: 'highway_ns',
-    path: [[centerX, centerY - maxHighwayLength/2], [centerX, centerY + maxHighwayLength/2]],
+    path: [
+      [centerX, centerY - maxHighwayLength / 2],
+      [centerX, centerY + maxHighwayLength / 2],
+    ],
     width: 10,
     elevation: 35,
     lanes: 4,
     speed_limit: 70,
     traffic_density: 0.4 + Math.random() * 0.3,
-    type: 'arterial'
+    type: 'arterial',
   });
 
   highways.push({
     id: 'highway_ew',
-    path: [[centerX - maxHighwayLength/2, centerY], [centerX + maxHighwayLength/2, centerY]],
+    path: [
+      [centerX - maxHighwayLength / 2, centerY],
+      [centerX + maxHighwayLength / 2, centerY],
+    ],
     width: 10,
     elevation: 35,
     lanes: 4,
     speed_limit: 70,
     traffic_density: 0.4 + Math.random() * 0.3,
-    type: 'arterial'
+    type: 'arterial',
   });
 
   // Connector ramps and local elevated roads
@@ -107,8 +113,8 @@ export function generateElevatedHighways(bounds: any, density: number = 0.4): an
 
       // Add some curvature
       const curveOffset = Math.sin(progress * Math.PI) * 50;
-      const curveX = x + Math.cos(angle + Math.PI/2) * curveOffset;
-      const curveY = y + Math.sin(angle + Math.PI/2) * curveOffset;
+      const curveX = x + Math.cos(angle + Math.PI / 2) * curveOffset;
+      const curveY = y + Math.sin(angle + Math.PI / 2) * curveOffset;
 
       pathPoints.push([curveX, curveY]);
     }
@@ -121,7 +127,7 @@ export function generateElevatedHighways(bounds: any, density: number = 0.4): an
       lanes: 2,
       speed_limit: 50,
       traffic_density: Math.random() * 0.6,
-      type: 'connector'
+      type: 'connector',
     });
   }
 

@@ -1,0 +1,36 @@
+{"level":30,"time":"2025-11-24T07:12:59.451Z","pid":610797,"category":"drizzle-manager","msg":"Connection pooling enabled","event":"info","poolSize":5,"isMainProcess":true}
+{"level":30,"time":"2025-11-24T07:12:59.453Z","pid":610797,"category":"drizzle-manager","msg":"DrizzleManager initialized successfully","event":"info","dbPath":"/home/jw/dev/citysim/var/db/zmcp_local.db","isMainProcess":true,"walMode":true,"connectionPoolingEnabled":true,"poolSize":5}
+{"level":30,"time":"2025-11-24T07:12:59.602Z","pid":610797,"category":"drizzle-manager","msg":"Connection pooling enabled","event":"info","poolSize":5,"isMainProcess":true}
+{"level":30,"time":"2025-11-24T07:12:59.603Z","pid":610797,"category":"drizzle-manager","msg":"DrizzleManager initialized successfully","event":"info","dbPath":"/home/jw/dev/citysim/var/db/zmcp_local.db","isMainProcess":true,"walMode":true,"connectionPoolingEnabled":true,"poolSize":5}
+{"level":30,"time":"2025-11-24T07:12:59.740Z","pid":610797,"category":"drizzle-manager","msg":"Starting auto-migration system","event":"info"}
+{"level":30,"time":"2025-11-24T07:12:59.741Z","pid":610797,"category":"drizzle-manager","msg":"Found 4 already-applied migrations","event":"info"}
+{"level":30,"time":"2025-11-24T07:12:59.741Z","pid":610797,"category":"drizzle-manager","msg":"Looking for migrations in: /home/jw/dev/game1/ZMCPTools/drizzle","event":"info"}
+{"level":30,"time":"2025-11-24T07:12:59.741Z","pid":610797,"category":"drizzle-manager","msg":"DrizzleManager initialization completed","event":"info","isMainProcess":true,"checkpointingEnabled":true}
+{"level":30,"time":"2025-11-24T07:14:08.933Z","pid":610797,"category":"drizzle-manager","msg":"Connection pooling enabled","event":"info","poolSize":5,"isMainProcess":true}
+{"level":30,"time":"2025-11-24T07:14:08.933Z","pid":610797,"category":"drizzle-manager","msg":"DrizzleManager initialized successfully","event":"info","dbPath":"/home/jw/dev/citysim/var/db/zmcp_local.db","isMainProcess":true,"walMode":true,"connectionPoolingEnabled":true,"poolSize":5}
+{"level":30,"time":"2025-11-24T07:14:08.933Z","pid":610797,"category":"drizzle-manager","msg":"Starting auto-migration system","event":"info"}
+{"level":30,"time":"2025-11-24T07:14:08.933Z","pid":610797,"category":"drizzle-manager","msg":"Found 4 already-applied migrations","event":"info"}
+{"level":30,"time":"2025-11-24T07:14:08.933Z","pid":610797,"category":"drizzle-manager","msg":"Looking for migrations in: /home/jw/dev/game1/ZMCPTools/drizzle","event":"info"}
+{"level":30,"time":"2025-11-24T07:14:08.933Z","pid":610797,"category":"drizzle-manager","msg":"DrizzleManager initialization completed","event":"info","isMainProcess":true,"checkpointingEnabled":true}
+{"level":50,"time":"2025-11-24T07:14:09.020Z","pid":610797,"category":"drizzle-manager","msg":"Transaction failed after all retries","event":"error","attempts":6,"finalError":"no such table: tool_call_logs","errorCode":"SQLITE_ERROR"}
+{"level":50,"time":"2025-11-24T07:14:22.253Z","pid":610797,"category":"drizzle-manager","msg":"Transaction failed after all retries","event":"error","attempts":6,"finalError":"no such table: tool_call_logs","errorCode":"SQLITE_ERROR"}
+{"level":50,"time":"2025-11-24T07:14:22.821Z","pid":610797,"category":"drizzle-manager","msg":"Transaction failed after all retries","event":"error","attempts":6,"finalError":"no such table: tool_call_logs","errorCode":"SQLITE_ERROR"}
+{"level":50,"time":"2025-11-24T07:14:36.763Z","pid":610797,"category":"drizzle-manager","msg":"Transaction failed after all retries","event":"error","attempts":6,"finalError":"no such table: tool_call_logs","errorCode":"SQLITE_ERROR"}
+{"level":30,"time":"2025-11-24T07:22:07.615Z","pid":615856,"category":"drizzle-manager","msg":"Connection pooling enabled","event":"info","poolSize":5,"isMainProcess":true}
+{"level":30,"time":"2025-11-24T07:22:07.628Z","pid":615856,"category":"drizzle-manager","msg":"DrizzleManager initialized successfully","event":"info","dbPath":"/home/jw/dev/citysim/var/db/zmcp_local.db","isMainProcess":true,"walMode":true,"connectionPoolingEnabled":true,"poolSize":5}
+{"level":30,"time":"2025-11-24T07:22:07.793Z","pid":615856,"category":"drizzle-manager","msg":"Connection pooling enabled","event":"info","poolSize":5,"isMainProcess":true}
+{"level":30,"time":"2025-11-24T07:22:07.801Z","pid":615856,"category":"drizzle-manager","msg":"DrizzleManager initialized successfully","event":"info","dbPath":"/home/jw/dev/citysim/var/db/zmcp_local.db","isMainProcess":true,"walMode":true,"connectionPoolingEnabled":true,"poolSize":5}
+{"level":30,"time":"2025-11-24T07:22:07.890Z","pid":615856,"category":"drizzle-manager","msg":"Starting auto-migration system","event":"info"}
+{"level":30,"time":"2025-11-24T07:22:07.890Z","pid":615856,"category":"drizzle-manager","msg":"Found 4 already-applied migrations","event":"info"}
+{"level":30,"time":"2025-11-24T07:22:07.890Z","pid":615856,"category":"drizzle-manager","msg":"Looking for migrations in: /home/jw/dev/game1/ZMCPTools/drizzle","event":"info"}
+{"level":30,"time":"2025-11-24T07:22:07.890Z","pid":615856,"category":"drizzle-manager","msg":"DrizzleManager initialization completed","event":"info","isMainProcess":true,"checkpointingEnabled":true}
+{"level":30,"time":"2025-11-24T07:27:44.413Z","pid":615856,"category":"drizzle-manager","msg":"Connection pooling enabled","event":"info","poolSize":5,"isMainProcess":true}
+{"level":30,"time":"2025-11-24T07:27:44.414Z","pid":615856,"category":"drizzle-manager","msg":"DrizzleManager initialized successfully","event":"info","dbPath":"/home/jw/dev/citysim/var/db/zmcp_local.db","isMainProcess":true,"walMode":true,"connectionPoolingEnabled":true,"poolSize":5}
+{"level":30,"time":"2025-11-24T07:27:44.414Z","pid":615856,"category":"drizzle-manager","msg":"Starting auto-migration system","event":"info"}
+{"level":30,"time":"2025-11-24T07:27:44.414Z","pid":615856,"category":"drizzle-manager","msg":"Found 4 already-applied migrations","event":"info"}
+{"level":30,"time":"2025-11-24T07:27:44.414Z","pid":615856,"category":"drizzle-manager","msg":"Looking for migrations in: /home/jw/dev/game1/ZMCPTools/drizzle","event":"info"}
+{"level":30,"time":"2025-11-24T07:27:44.414Z","pid":615856,"category":"drizzle-manager","msg":"DrizzleManager initialization completed","event":"info","isMainProcess":true,"checkpointingEnabled":true}
+{"level":50,"time":"2025-11-24T07:27:56.409Z","pid":615856,"category":"drizzle-manager","msg":"Transaction failed after all retries","event":"error","attempts":6,"finalError":"no such table: tool_call_logs","errorCode":"SQLITE_ERROR"}
+{"level":50,"time":"2025-11-24T07:28:00.984Z","pid":615856,"category":"drizzle-manager","msg":"Transaction failed after all retries","event":"error","attempts":6,"finalError":"no such table: tool_call_logs","errorCode":"SQLITE_ERROR"}
+{"level":50,"time":"2025-11-24T07:28:16.971Z","pid":615856,"category":"drizzle-manager","msg":"Transaction failed after all retries","event":"error","attempts":6,"finalError":"no such table: tool_call_logs","errorCode":"SQLITE_ERROR"}
+{"level":50,"time":"2025-11-24T07:28:21.563Z","pid":615856,"category":"drizzle-manager","msg":"Transaction failed after all retries","event":"error","attempts":6,"finalError":"no such table: tool_call_logs","errorCode":"SQLITE_ERROR"}

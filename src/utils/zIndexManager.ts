@@ -39,7 +39,14 @@ export const Z_INDEX = {
 /**
  * Panel types for z-index management
  */
-export type PanelType = 'terrain' | 'camera' | 'time' | 'performance';
+export type PanelType =
+  | 'terrain'
+  | 'camera'
+  | 'time'
+  | 'performance'
+  | 'controls'
+  | 'stats'
+  | 'toolbar';
 
 /**
  * Get the z-index for a specific panel type

@@ -43,10 +43,10 @@ const initialState: TerrainState = {
     waterLevel: 0,
     hilliness: 0.7, // Increased hilliness for more variation
     riverProbability: 0.3,
-    coastalDistance: 5000
+    coastalDistance: 5000,
   },
   activeLayer: 'basic',
-  autoRegenerateCity: false
+  autoRegenerateCity: false,
 };
 
 function terrainReducer(state: TerrainState, action: TerrainAction): TerrainState {
@@ -64,7 +64,7 @@ function terrainReducer(state: TerrainState, action: TerrainAction): TerrainStat
         // Automatically switch terrain layer based on scale
         activeLayer: action.payload > 50 ? 'planetary' : 'basic',
         // Enable atmosphere for large scales
-        showAtmosphere: action.payload > 100 ? true : state.showAtmosphere
+        showAtmosphere: action.payload > 100 ? true : state.showAtmosphere,
       };
       break;
 
@@ -87,7 +87,7 @@ function terrainReducer(state: TerrainState, action: TerrainAction): TerrainStat
     case 'UPDATE_CUSTOM_PARAMETERS':
       newState = {
         ...state,
-        customParameters: { ...state.customParameters, ...action.payload }
+        customParameters: { ...state.customParameters, ...action.payload },
       };
       break;
 
@@ -138,7 +138,7 @@ export function TerrainProvider({ children }: { children: ReactNode }) {
         // Ensure all required fields exist (for backwards compatibility)
         return {
           ...initialState,
-          ...parsedState
+          ...parsedState,
         };
       }
     } catch (e) {
@@ -157,11 +157,7 @@ export function TerrainProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  return (
-    <TerrainContext.Provider value={{ state, dispatch }}>
-      {children}
-    </TerrainContext.Provider>
-  );
+  return <TerrainContext.Provider value={{ state, dispatch }}>{children}</TerrainContext.Provider>;
 }
 
 export function useTerrainContext() {

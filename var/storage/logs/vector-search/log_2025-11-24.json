@@ -1,0 +1,3 @@
+{"level":30,"time":"2025-11-24T07:12:42.680Z","pid":610490,"category":"vector-search","msg":"VectorSearchService initialized with TalentOS GPU-aware embedding client","event":"info","projectPath":"/home/jw/dev/citysim","preferLocal":true}
+{"level":30,"time":"2025-11-24T07:12:59.689Z","pid":610797,"category":"vector-search","msg":"VectorSearchService initialized with TalentOS GPU-aware embedding client","event":"info","projectPath":"/home/jw/dev/citysim","preferLocal":true}
+{"level":30,"time":"2025-11-24T07:22:07.864Z","pid":615856,"category":"vector-search","msg":"VectorSearchService initialized with TalentOS GPU-aware embedding client","event":"info","projectPath":"/home/jw/dev/citysim","preferLocal":true}

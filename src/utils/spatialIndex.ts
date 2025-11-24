@@ -37,7 +37,7 @@ export class QuadTree {
     this.root = {
       bounds,
       objects: [],
-      level: 0
+      level: 0,
     };
     this.nodeCount = 1;
   }
@@ -73,7 +73,7 @@ export class QuadTree {
       minX: centerX - radius,
       maxX: centerX + radius,
       minY: centerY - radius,
-      maxY: centerY + radius
+      maxY: centerY + radius,
     };
 
     const candidates = this.query(bounds);
@@ -95,7 +95,7 @@ export class QuadTree {
     // Calculate distances and sort
     const withDistances = allObjects.map(obj => ({
       object: obj,
-      distance: this.getDistance(x, y, obj.longitude, obj.latitude)
+      distance: this.getDistance(x, y, obj.longitude, obj.latitude),
     }));
 
     withDistances.sort((a, b) => a.distance - b.distance);
@@ -126,7 +126,7 @@ export class QuadTree {
     this.root = {
       bounds: this.root.bounds,
       objects: [],
-      level: 0
+      level: 0,
     };
     this.nodeCount = 1;
     this.maxDepth = 0;
@@ -145,14 +145,16 @@ export class QuadTree {
     this.collectLeafNodes(this.root, leafNodes);
 
     const totalObjects = this.getAllObjects().length;
-    const averageObjectsPerLeaf = leafNodes.length > 0 ?
-      leafNodes.reduce((sum, node) => sum + node.objects.length, 0) / leafNodes.length : 0;
+    const averageObjectsPerLeaf =
+      leafNodes.length > 0
+        ? leafNodes.reduce((sum, node) => sum + node.objects.length, 0) / leafNodes.length
+        : 0;
 
     return {
       totalObjects,
       nodeCount: this.nodeCount,
       maxDepth: this.maxDepth,
-      averageObjectsPerLeaf
+      averageObjectsPerLeaf,
     };
   }
 
@@ -180,13 +182,9 @@ export class QuadTree {
           const cluster: ObjectCluster = {
             id: `cluster_${clusters.length}`,
             type: this.getMostCommonType(clusterObjects),
-            position: [
-              (bounds.minX + bounds.maxX) / 2,
-              (bounds.minY + bounds.maxY) / 2,
-              0
-            ],
+            position: [(bounds.minX + bounds.maxX) / 2, (bounds.minY + bounds.maxY) / 2, 0],
             bounds,
-            objects: clusterObjects
+            objects: clusterObjects,
           };
 
           clusters.push(cluster);
@@ -246,26 +244,26 @@ export class QuadTree {
       {
         bounds: { minX: bounds.minX, maxX: midX, minY: midY, maxY: bounds.maxY },
         objects: [],
-        level: level + 1
+        level: level + 1,
       },
       // NE
       {
         bounds: { minX: midX, maxX: bounds.maxX, minY: midY, maxY: bounds.maxY },
         objects: [],
-        level: level + 1
+        level: level + 1,
       },
       // SW
       {
         bounds: { minX: bounds.minX, maxX: midX, minY: bounds.minY, maxY: midY },
         objects: [],
-        level: level + 1
+        level: level + 1,
       },
       // SE
       {
         bounds: { minX: midX, maxX: bounds.maxX, minY: bounds.minY, maxY: midY },
         objects: [],
-        level: level + 1
-      }
+        level: level + 1,
+      },
     ];
 
     this.nodeCount += 4;
@@ -325,8 +323,12 @@ export class QuadTree {
   }
 
   private boundsIntersect(bounds1: BoundingBox, bounds2: BoundingBox): boolean {
-    return !(bounds1.maxX < bounds2.minX || bounds1.minX > bounds2.maxX ||
-             bounds1.maxY < bounds2.minY || bounds1.minY > bounds2.maxY);
+    return !(
+      bounds1.maxX < bounds2.minX ||
+      bounds1.minX > bounds2.maxX ||
+      bounds1.maxY < bounds2.minY ||
+      bounds1.minY > bounds2.maxY
+    );
   }
 
   private getDistance(x1: number, y1: number, x2: number, y2: number): number {
@@ -389,7 +391,10 @@ export interface ObjectCluster {
 /**
  * Utility function to create spatial objects from layer data
  */
-export function createSpatialObjectsFromLayerData(layerData: any[], layerType: string): SpatialObject[] {
+export function createSpatialObjectsFromLayerData(
+  layerData: any[],
+  layerType: string
+): SpatialObject[] {
   const objects: SpatialObject[] = [];
 
   for (const item of layerData) {
@@ -421,7 +426,7 @@ export function createSpatialObjectsFromLayerData(layerData: any[], layerType: s
       longitude,
       latitude,
       type: layerType,
-      data: item
+      data: item,
     });
   }
 

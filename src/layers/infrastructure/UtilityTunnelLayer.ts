@@ -12,11 +12,16 @@ export function createUtilityTunnelLayer(utilityData: any[]) {
     getColor: (d: any) => {
       // Color by utility type
       switch (d.utility_type) {
-        case 'power': return [255, 255, 0, 200]; // Yellow for power
-        case 'water': return [0, 150, 255, 200]; // Blue for water
-        case 'gas': return [255, 100, 0, 200]; // Orange for gas
-        case 'telecom': return [128, 0, 255, 200]; // Purple for telecom
-        default: return layerConfig.color;
+        case 'power':
+          return [255, 255, 0, 200]; // Yellow for power
+        case 'water':
+          return [0, 150, 255, 200]; // Blue for water
+        case 'gas':
+          return [255, 100, 0, 200]; // Orange for gas
+        case 'telecom':
+          return [128, 0, 255, 200]; // Purple for telecom
+        default:
+          return layerConfig.color;
       }
     },
     opacity: layerConfig.opacity,
@@ -29,12 +34,12 @@ export function createUtilityTunnelLayer(utilityData: any[]) {
       ambient: 0.2,
       diffuse: 0.6,
       shininess: 32,
-      specularColor: [255, 255, 255]
+      specularColor: [255, 255, 255],
     },
     transitions: {
       getColor: 500,
-      getWidth: 300
-    }
+      getWidth: 300,
+    },
   });
 }
 
@@ -49,28 +54,34 @@ export function generateUtilityNetwork(bounds: any, density: number = 0.8): any[
     const depth = -5 - typeIndex * 2; // Stack utilities at different depths
 
     // North-South corridors
-    for (let x = min_x + spacing/2; x < max_x; x += spacing) {
+    for (let x = min_x + spacing / 2; x < max_x; x += spacing) {
       utilities.push({
         id: `${type}_ns_${x}`,
-        path: [[x, min_y], [x, max_y]],
+        path: [
+          [x, min_y],
+          [x, max_y],
+        ],
         width: type === 'power' ? 2 : 1.5,
         elevation: depth,
         utility_type: type,
         capacity: Math.random() * 100,
-        load: Math.random() * 80
+        load: Math.random() * 80,
       });
     }
 
     // East-West corridors
-    for (let y = min_y + spacing/2; y < max_y; y += spacing) {
+    for (let y = min_y + spacing / 2; y < max_y; y += spacing) {
       utilities.push({
         id: `${type}_ew_${y}`,
-        path: [[min_x, y], [max_x, y]],
+        path: [
+          [min_x, y],
+          [max_x, y],
+        ],
         width: type === 'power' ? 2 : 1.5,
         elevation: depth,
         utility_type: type,
         capacity: Math.random() * 100,
-        load: Math.random() * 80
+        load: Math.random() * 80,
       });
     }
   });
@@ -85,12 +96,15 @@ export function generateUtilityNetwork(bounds: any, density: number = 0.8): any[
 
     utilities.push({
       id: `${type}_service_${i}`,
-      path: [[startX, startY], [endX, endY]],
+      path: [
+        [startX, startY],
+        [endX, endY],
+      ],
       width: 0.8,
       elevation: -3,
       utility_type: type,
       capacity: Math.random() * 20,
-      load: Math.random() * 15
+      load: Math.random() * 15,
     });
   }
 

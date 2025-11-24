@@ -1,0 +1,24 @@
+# Build output
+dist/
+build/
+*.wasm
+
+# Dependencies
+node_modules/
+
+# Generated files
+src/wasm/
+src/data/city_model.js
+src/data/city_model.d.ts
+
+# Test output
+test-results/
+playwright-report/
+tests/temp-screenshots/
+
+# Logs and local data
+var/
+*.log
+
+# Lock files
+package-lock.json

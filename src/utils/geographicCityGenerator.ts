@@ -6,8 +6,8 @@ interface GeographicContext {
   isWater: (x: number, y: number) => boolean;
   distanceToWater: (x: number, y: number) => number;
   slope: (x: number, y: number) => number;
-  riverPaths: Array<{ x: number, y: number }[]>;
-  coastlines: Array<{ x: number, y: number }[]>;
+  riverPaths: Array<{ x: number; y: number }[]>;
+  coastlines: Array<{ x: number; y: number }[]>;
   bounds: { min_x: number; min_y: number; max_x: number; max_y: number };
 }
 
@@ -34,7 +34,8 @@ export class GeographicCityGenerator {
   private buildGeographicContext(bounds: any): GeographicContext {
     const { customParameters, terrainProfile, seed } = this.terrainState;
     const profile = getTerrainProfile(terrainProfile);
-    const params = terrainProfile === 'custom' ? customParameters : profile?.parameters || customParameters;
+    const params =
+      terrainProfile === 'custom' ? customParameters : profile?.parameters || customParameters;
 
     const noiseScale = 0.001;
     const ridgeNoiseScale = 0.003;
@@ -46,7 +47,7 @@ export class GeographicCityGenerator {
       const detailNoise = this.noiseGenerator.noise2D(x * noiseScale * 4, y * noiseScale * 4) * 0.3;
 
       // Combine different noise octaves
-      const combinedNoise = baseNoise + (Math.abs(ridgeNoise) * 0.7) + detailNoise;
+      const combinedNoise = baseNoise + Math.abs(ridgeNoise) * 0.7 + detailNoise;
       return combinedNoise * params.mountainHeight + params.waterLevel;
     };
 
@@ -100,20 +101,25 @@ export class GeographicCityGenerator {
       slope,
       riverPaths,
       coastlines,
-      bounds
+      bounds,
     };
   }
 
-  private generateRiverPaths(bounds: any, params: any, terrainHeight: (x: number, y: number) => number): Array<{ x: number, y: number }[]> {
-    const rivers: Array<{ x: number, y: number }[]> = [];
+  private generateRiverPaths(
+    bounds: any,
+    params: any,
+    terrainHeight: (x: number, y: number) => number
+  ): Array<{ x: number; y: number }[]> {
+    const rivers: Array<{ x: number; y: number }[]> = [];
 
     if (Math.random() < params.riverProbability) {
       // Generate main river flowing through terrain
-      const riverPath: { x: number, y: number }[] = [];
+      const riverPath: { x: number; y: number }[] = [];
 
       // Start from high elevation, flow to low elevation
-      let currentX = bounds.min_x + (bounds.max_x - bounds.min_x) * 0.3 + (Math.random() - 0.5) * 2000;
-      let currentY = bounds.min_y;
+      let currentX =
+        bounds.min_x + (bounds.max_x - bounds.min_x) * 0.3 + (Math.random() - 0.5) * 2000;
+      const currentY = bounds.min_y;
 
       const stepSize = 150;
       const steps = Math.floor((bounds.max_y - bounds.min_y) / stepSize);
@@ -127,7 +133,7 @@ export class GeographicCityGenerator {
         let lowestHeight = terrainHeight(currentX, y);
 
         for (let i = 0; i < samples; i++) {
-          const testX = currentX + (i - samples/2) * 100;
+          const testX = currentX + (i - samples / 2) * 100;
           const height = terrainHeight(testX, y);
           if (height < lowestHeight) {
             lowestHeight = height;
@@ -148,9 +154,12 @@ export class GeographicCityGenerator {
     return rivers;
   }
 
-  private generateCoastlines(bounds: any, isWater: (x: number, y: number) => boolean): Array<{ x: number, y: number }[]> {
+  private generateCoastlines(
+    bounds: any,
+    isWater: (x: number, y: number) => boolean
+  ): Array<{ x: number; y: number }[]> {
     // Simplified coastline detection
-    const coastlines: Array<{ x: number, y: number }[]> = [];
+    const coastlines: Array<{ x: number; y: number }[]> = [];
     // Implementation would trace water boundaries
     return coastlines;
   }
@@ -165,12 +174,11 @@ export class GeographicCityGenerator {
     // Calculate center distance for accessibility
     const centerX = (bounds.min_x + bounds.max_x) / 2;
     const centerY = (bounds.min_y + bounds.max_y) / 2;
-    const distanceFromCenter = Math.sqrt(
-      Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2)
-    );
-    const maxDistance = Math.sqrt(
-      Math.pow(bounds.max_x - bounds.min_x, 2) + Math.pow(bounds.max_y - bounds.min_y, 2)
-    ) / 2;
+    const distanceFromCenter = Math.sqrt(Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2));
+    const maxDistance =
+      Math.sqrt(
+        Math.pow(bounds.max_x - bounds.min_x, 2) + Math.pow(bounds.max_y - bounds.min_y, 2)
+      ) / 2;
 
     return {
       flatness: Math.max(0, 1 - slope * 10), // Higher slope = lower flatness
@@ -178,7 +186,7 @@ export class GeographicCityGenerator {
       elevation: Math.max(0, Math.min(1, (height + 50) / 200)), // Relative elevation 0-1
       accessibility: Math.max(0, 1 - distanceFromCenter / maxDistance), // Closer to center = more accessible
       drainage: Math.max(0, 1 - Math.max(0, -height / 20)), // Above flood level = better drainage
-      view: Math.max(0, height / 100) // Higher = better views
+      view: Math.max(0, height / 100), // Higher = better views
     };
   }
 
@@ -219,7 +227,7 @@ export class GeographicCityGenerator {
         suitability *= factors.waterAccess * 0.7 + 0.3; // Good for transport
         suitability *= factors.accessibility * 0.5 + 0.5; // Less critical
         suitability *= factors.drainage * 0.8 + 0.2; // Need to avoid flooding
-        suitability *= (1 - factors.view * 0.2); // Views not important
+        suitability *= 1 - factors.view * 0.2; // Views not important
         break;
 
       case 'park':
@@ -267,9 +275,9 @@ export class GeographicCityGenerator {
     searchRadius: number,
     centerX: number,
     centerY: number,
-    existingPOIs: Array<{ x: number, y: number }> = []
-  ): { x: number, y: number, suitability: number } | null {
-    let bestLocation: { x: number, y: number, suitability: number } | null = null;
+    existingPOIs: Array<{ x: number; y: number }> = []
+  ): { x: number; y: number; suitability: number } | null {
+    let bestLocation: { x: number; y: number; suitability: number } | null = null;
     let bestSuitability = 0;
 
     const samples = 30;
@@ -282,8 +290,8 @@ export class GeographicCityGenerator {
       const y = centerY + Math.sin(angle) * distance;
 
       // Check minimum distance from existing POIs
-      const tooClose = existingPOIs.some(poi =>
-        Math.sqrt(Math.pow(x - poi.x, 2) + Math.pow(y - poi.y, 2)) < minDistance
+      const tooClose = existingPOIs.some(
+        poi => Math.sqrt(Math.pow(x - poi.x, 2) + Math.pow(y - poi.y, 2)) < minDistance
       );
 
       if (tooClose) continue;
@@ -328,14 +336,15 @@ export class GeographicCityGenerator {
 
   // Generate terrain-aware road network
   public generateTerrainAwareRoadPath(
-    from: { x: number, y: number },
-    to: { x: number, y: number },
+    from: { x: number; y: number },
+    to: { x: number; y: number },
     maxSlope: number = 0.15
-  ): { x: number, y: number }[] {
+  ): { x: number; y: number }[] {
     const path = [from];
-    const numSegments = Math.max(8, Math.floor(
-      Math.sqrt(Math.pow(to.x - from.x, 2) + Math.pow(to.y - from.y, 2)) / 300
-    ));
+    const numSegments = Math.max(
+      8,
+      Math.floor(Math.sqrt(Math.pow(to.x - from.x, 2) + Math.pow(to.y - from.y, 2)) / 300)
+    );
 
     for (let i = 1; i < numSegments; i++) {
       const t = i / numSegments;
@@ -380,7 +389,7 @@ export class GeographicCityGenerator {
     return Math.max(0, 1 - slope / maxSlope); // Prefer flatter areas
   }
 
-  private smoothPath(path: { x: number, y: number }[]): { x: number, y: number }[] {
+  private smoothPath(path: { x: number; y: number }[]): { x: number; y: number }[] {
     if (path.length < 3) return path;
 
     const smoothed = [path[0]];
@@ -416,7 +425,10 @@ export class GeographicCityGenerator {
   }
 
   // Get terrain analysis for debugging/display
-  public getTerrainAnalysis(x: number, y: number): {
+  public getTerrainAnalysis(
+    x: number,
+    y: number
+  ): {
     height: number;
     slope: number;
     waterDistance: number;
@@ -428,7 +440,7 @@ export class GeographicCityGenerator {
       slope: this.context.slope(x, y),
       waterDistance: this.context.distanceToWater(x, y),
       isWater: this.context.isWater(x, y),
-      factors: this.getSuitabilityFactors(x, y)
+      factors: this.getSuitabilityFactors(x, y),
     };
   }
 }
@@ -473,7 +485,8 @@ class SimplexNoise {
     const A = this.perm[X] + Y;
     const B = this.perm[X + 1] + Y;
 
-    return lerp(v,
+    return lerp(
+      v,
       lerp(u, this.grad(this.perm[A], x, y), this.grad(this.perm[B], x - 1, y)),
       lerp(u, this.grad(this.perm[A + 1], x, y - 1), this.grad(this.perm[B + 1], x - 1, y - 1))
     );
@@ -494,27 +507,33 @@ export function enhanceCityWithGeography(cityModel: any, terrainState: TerrainSt
   }
 
   const bounds = cityModel.bounds || {
-    min_x: -5000, min_y: -5000, max_x: 5000, max_y: 5000
+    min_x: -5000,
+    min_y: -5000,
+    max_x: 5000,
+    max_y: 5000,
   };
 
   const generator = new GeographicCityGenerator(terrainState, bounds);
 
   // Re-evaluate zones based on geography
-  const enhancedZones = cityModel.zones?.map((zone: any) => {
-    const centerX = zone.boundary?.reduce((sum: number, p: any) => sum + p.x, 0) / (zone.boundary?.length || 1);
-    const centerY = zone.boundary?.reduce((sum: number, p: any) => sum + p.y, 0) / (zone.boundary?.length || 1);
+  const enhancedZones =
+    cityModel.zones?.map((zone: any) => {
+      const centerX =
+        zone.boundary?.reduce((sum: number, p: any) => sum + p.x, 0) / (zone.boundary?.length || 1);
+      const centerY =
+        zone.boundary?.reduce((sum: number, p: any) => sum + p.y, 0) / (zone.boundary?.length || 1);
 
-    const zoneTypeNames = ['residential', 'commercial', 'industrial', 'downtown', 'park'];
-    const zoneTypeName = zoneTypeNames[zone.type] || 'residential';
-    const suitability = generator.getZoneSuitability(centerX, centerY, zoneTypeName);
-    const analysis = generator.getTerrainAnalysis(centerX, centerY);
+      const zoneTypeNames = ['residential', 'commercial', 'industrial', 'downtown', 'park'];
+      const zoneTypeName = zoneTypeNames[zone.type] || 'residential';
+      const suitability = generator.getZoneSuitability(centerX, centerY, zoneTypeName);
+      const analysis = generator.getTerrainAnalysis(centerX, centerY);
 
-    return {
-      ...zone,
-      geographic_suitability: suitability,
-      terrain_analysis: analysis
-    };
-  }) || [];
+      return {
+        ...zone,
+        geographic_suitability: suitability,
+        terrain_analysis: analysis,
+      };
+    }) || [];
 
   // Add geography-specific POIs
   const geographicPOIs: any[] = [];
@@ -539,8 +558,8 @@ export function enhanceCityWithGeography(cityModel: any, terrainState: TerrainSt
           properties: {
             name: 'Harbor Lighthouse',
             landmark: true,
-            terrain_suitability: lighthouse.suitability
-          }
+            terrain_suitability: lighthouse.suitability,
+          },
         });
       }
     }
@@ -562,8 +581,8 @@ export function enhanceCityWithGeography(cityModel: any, terrainState: TerrainSt
           properties: {
             name: 'Scenic Overlook',
             landmark: true,
-            terrain_suitability: overlook.suitability
-          }
+            terrain_suitability: overlook.suitability,
+          },
         });
       }
     }
@@ -578,7 +597,7 @@ export function enhanceCityWithGeography(cityModel: any, terrainState: TerrainSt
       terrain_seed: terrainState.seed,
       geographic_features: geographicPOIs.length,
       terrain_enabled: true,
-      generation_timestamp: new Date().toISOString()
-    }
+      generation_timestamp: new Date().toISOString(),
+    },
   };
 }

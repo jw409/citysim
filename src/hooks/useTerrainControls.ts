@@ -1,6 +1,11 @@
 import { useCallback, useMemo } from 'react';
 import { useTerrainContext } from '../contexts/TerrainContext';
-import { getTerrainProfilePresets, getTerrainProfile, getTerrainDifficulty, getDevelopmentRecommendations } from '../utils/realWorldTerrainProfiles';
+import {
+  getTerrainProfilePresets,
+  getTerrainProfile,
+  getTerrainDifficulty,
+  getDevelopmentRecommendations,
+} from '../utils/realWorldTerrainProfiles';
 
 export function useTerrainControls() {
   const { state, dispatch } = useTerrainContext();
@@ -13,7 +18,7 @@ export function useTerrainControls() {
       label: profile.name,
       description: profile.description,
       difficulty: getTerrainDifficulty(profile),
-      characteristics: profile.characteristics
+      characteristics: profile.characteristics,
     }));
   }, []);
 
@@ -26,60 +31,87 @@ export function useTerrainControls() {
   }, [currentProfile]);
 
   // Basic terrain controls
-  const toggleTerrain = useCallback((enabled: boolean) => {
-    dispatch({ type: 'TOGGLE_TERRAIN', payload: enabled });
-  }, [dispatch]);
+  const toggleTerrain = useCallback(
+    (enabled: boolean) => {
+      dispatch({ type: 'TOGGLE_TERRAIN', payload: enabled });
+    },
+    [dispatch]
+  );
 
-  const setScale = useCallback((scale: number) => {
-    dispatch({ type: 'SET_SCALE', payload: scale });
-  }, [dispatch]);
+  const setScale = useCallback(
+    (scale: number) => {
+      dispatch({ type: 'SET_SCALE', payload: scale });
+    },
+    [dispatch]
+  );
 
-  const setSeed = useCallback((seed: number) => {
-    dispatch({ type: 'SET_SEED', payload: seed });
-  }, [dispatch]);
+  const setSeed = useCallback(
+    (seed: number) => {
+      dispatch({ type: 'SET_SEED', payload: seed });
+    },
+    [dispatch]
+  );
 
-  const setTimeOfDay = useCallback((time: number) => {
-    dispatch({ type: 'SET_TIME_OF_DAY', payload: time });
-  }, [dispatch]);
+  const setTimeOfDay = useCallback(
+    (time: number) => {
+      dispatch({ type: 'SET_TIME_OF_DAY', payload: time });
+    },
+    [dispatch]
+  );
 
-  const toggleAtmosphere = useCallback((enabled: boolean) => {
-    dispatch({ type: 'TOGGLE_ATMOSPHERE', payload: enabled });
-  }, [dispatch]);
+  const toggleAtmosphere = useCallback(
+    (enabled: boolean) => {
+      dispatch({ type: 'TOGGLE_ATMOSPHERE', payload: enabled });
+    },
+    [dispatch]
+  );
 
-  const toggleAutoRegenerate = useCallback((enabled: boolean) => {
-    dispatch({ type: 'TOGGLE_AUTO_REGENERATE', payload: enabled });
-  }, [dispatch]);
+  const toggleAutoRegenerate = useCallback(
+    (enabled: boolean) => {
+      dispatch({ type: 'TOGGLE_AUTO_REGENERATE', payload: enabled });
+    },
+    [dispatch]
+  );
 
   // Profile and parameter management
-  const setTerrainProfile = useCallback((profile: string) => {
-    dispatch({ type: 'SET_TERRAIN_PROFILE', payload: profile });
+  const setTerrainProfile = useCallback(
+    (profile: string) => {
+      dispatch({ type: 'SET_TERRAIN_PROFILE', payload: profile });
 
-    // Apply preset parameters if not custom
-    if (profile !== 'custom') {
-      const preset = getTerrainProfile(profile);
-      if (preset) {
-        dispatch({
-          type: 'UPDATE_CUSTOM_PARAMETERS',
-          payload: preset.parameters
-        });
-        dispatch({ type: 'SET_SCALE', payload: preset.recommendedScale });
+      // Apply preset parameters if not custom
+      if (profile !== 'custom') {
+        const preset = getTerrainProfile(profile);
+        if (preset) {
+          dispatch({
+            type: 'UPDATE_CUSTOM_PARAMETERS',
+            payload: preset.parameters,
+          });
+          dispatch({ type: 'SET_SCALE', payload: preset.recommendedScale });
+        }
       }
-    }
-  }, [dispatch]);
+    },
+    [dispatch]
+  );
 
-  const updateCustomParameter = useCallback((key: string, value: number) => {
-    dispatch({
-      type: 'UPDATE_CUSTOM_PARAMETERS',
-      payload: { [key]: value }
-    });
-  }, [dispatch]);
+  const updateCustomParameter = useCallback(
+    (key: string, value: number) => {
+      dispatch({
+        type: 'UPDATE_CUSTOM_PARAMETERS',
+        payload: { [key]: value },
+      });
+    },
+    [dispatch]
+  );
 
-  const updateMultipleParameters = useCallback((parameters: Partial<typeof state.customParameters>) => {
-    dispatch({
-      type: 'UPDATE_CUSTOM_PARAMETERS',
-      payload: parameters
-    });
-  }, [dispatch]);
+  const updateMultipleParameters = useCallback(
+    (parameters: Partial<typeof state.customParameters>) => {
+      dispatch({
+        type: 'UPDATE_CUSTOM_PARAMETERS',
+        payload: parameters,
+      });
+    },
+    [dispatch]
+  );
 
   // Utility functions
   const regenerateTerrain = useCallback(() => {
@@ -92,45 +124,75 @@ export function useTerrainControls() {
     dispatch({ type: 'RESET_TO_DEFAULTS' });
   }, [dispatch]);
 
-  const setActiveLayer = useCallback((layer: 'planetary' | 'basic' | 'none') => {
-    dispatch({ type: 'SET_ACTIVE_LAYER', payload: layer });
-  }, [dispatch]);
+  const setActiveLayer = useCallback(
+    (layer: 'planetary' | 'basic' | 'none') => {
+      dispatch({ type: 'SET_ACTIVE_LAYER', payload: layer });
+    },
+    [dispatch]
+  );
 
   // Advanced parameter controls with validation
-  const setMountainHeight = useCallback((height: number) => {
-    const clampedHeight = Math.max(0, Math.min(1000, height));
-    updateCustomParameter('mountainHeight', clampedHeight);
-  }, [updateCustomParameter]);
+  const setMountainHeight = useCallback(
+    (height: number) => {
+      const clampedHeight = Math.max(0, Math.min(1000, height));
+      updateCustomParameter('mountainHeight', clampedHeight);
+    },
+    [updateCustomParameter]
+  );
 
-  const setWaterLevel = useCallback((level: number) => {
-    const clampedLevel = Math.max(-2000, Math.min(100, level));
-    updateCustomParameter('waterLevel', clampedLevel);
-  }, [updateCustomParameter]);
+  const setWaterLevel = useCallback(
+    (level: number) => {
+      const clampedLevel = Math.max(-2000, Math.min(100, level));
+      updateCustomParameter('waterLevel', clampedLevel);
+    },
+    [updateCustomParameter]
+  );
 
-  const setHilliness = useCallback((hilliness: number) => {
-    const clampedHilliness = Math.max(0, Math.min(1, hilliness));
-    updateCustomParameter('hilliness', clampedHilliness);
-  }, [updateCustomParameter]);
+  const setHilliness = useCallback(
+    (hilliness: number) => {
+      const clampedHilliness = Math.max(0, Math.min(1, hilliness));
+      updateCustomParameter('hilliness', clampedHilliness);
+    },
+    [updateCustomParameter]
+  );
 
-  const setRiverProbability = useCallback((probability: number) => {
-    const clampedProbability = Math.max(0, Math.min(1, probability));
-    updateCustomParameter('riverProbability', clampedProbability);
-  }, [updateCustomParameter]);
+  const setRiverProbability = useCallback(
+    (probability: number) => {
+      const clampedProbability = Math.max(0, Math.min(1, probability));
+      updateCustomParameter('riverProbability', clampedProbability);
+    },
+    [updateCustomParameter]
+  );
 
-  const setCoastalDistance = useCallback((distance: number) => {
-    const clampedDistance = Math.max(100, Math.min(2000000, distance));
-    updateCustomParameter('coastalDistance', clampedDistance);
-  }, [updateCustomParameter]);
+  const setCoastalDistance = useCallback(
+    (distance: number) => {
+      const clampedDistance = Math.max(100, Math.min(2000000, distance));
+      updateCustomParameter('coastalDistance', clampedDistance);
+    },
+    [updateCustomParameter]
+  );
 
   // Quick preset actions
-  const applyManhattanProfile = useCallback(() => setTerrainProfile('manhattan'), [setTerrainProfile]);
-  const applySanFranciscoProfile = useCallback(() => setTerrainProfile('san_francisco'), [setTerrainProfile]);
+  const applyManhattanProfile = useCallback(
+    () => setTerrainProfile('manhattan'),
+    [setTerrainProfile]
+  );
+  const applySanFranciscoProfile = useCallback(
+    () => setTerrainProfile('san_francisco'),
+    [setTerrainProfile]
+  );
   const applyDenverProfile = useCallback(() => setTerrainProfile('denver'), [setTerrainProfile]);
   const applyMiamiProfile = useCallback(() => setTerrainProfile('miami'), [setTerrainProfile]);
   const applySeattleProfile = useCallback(() => setTerrainProfile('seattle'), [setTerrainProfile]);
   const applyChicagoProfile = useCallback(() => setTerrainProfile('chicago'), [setTerrainProfile]);
-  const applyLasVegasProfile = useCallback(() => setTerrainProfile('las_vegas'), [setTerrainProfile]);
-  const applyNewOrleansProfile = useCallback(() => setTerrainProfile('new_orleans'), [setTerrainProfile]);
+  const applyLasVegasProfile = useCallback(
+    () => setTerrainProfile('las_vegas'),
+    [setTerrainProfile]
+  );
+  const applyNewOrleansProfile = useCallback(
+    () => setTerrainProfile('new_orleans'),
+    [setTerrainProfile]
+  );
 
   // Computed properties
   const isCustomProfile = state.terrainProfile === 'custom';
@@ -169,32 +231,35 @@ export function useTerrainControls() {
       profileInfo: currentProfile,
       difficulty: terrainDifficulty,
       recommendations: developmentRecommendations,
-      exportedAt: new Date().toISOString()
+      exportedAt: new Date().toISOString(),
     };
   }, [state, currentProfile, terrainDifficulty, developmentRecommendations]);
 
   // Import configuration
-  const importConfiguration = useCallback((config: any) => {
-    try {
-      // Validate and load configuration
-      if (config.terrainProfile) {
-        dispatch({ type: 'SET_TERRAIN_PROFILE', payload: config.terrainProfile });
+  const importConfiguration = useCallback(
+    (config: any) => {
+      try {
+        // Validate and load configuration
+        if (config.terrainProfile) {
+          dispatch({ type: 'SET_TERRAIN_PROFILE', payload: config.terrainProfile });
+        }
+        if (config.customParameters) {
+          dispatch({ type: 'UPDATE_CUSTOM_PARAMETERS', payload: config.customParameters });
+        }
+        if (config.scale) {
+          dispatch({ type: 'SET_SCALE', payload: config.scale });
+        }
+        if (config.seed) {
+          dispatch({ type: 'SET_SEED', payload: config.seed });
+        }
+        return true;
+      } catch (error) {
+        console.error('Failed to import terrain configuration:', error);
+        return false;
       }
-      if (config.customParameters) {
-        dispatch({ type: 'UPDATE_CUSTOM_PARAMETERS', payload: config.customParameters });
-      }
-      if (config.scale) {
-        dispatch({ type: 'SET_SCALE', payload: config.scale });
-      }
-      if (config.seed) {
-        dispatch({ type: 'SET_SEED', payload: config.seed });
-      }
-      return true;
-    } catch (error) {
-      console.error('Failed to import terrain configuration:', error);
-      return false;
-    }
-  }, [dispatch]);
+    },
+    [dispatch]
+  );
 
   return {
     // State
@@ -248,6 +313,6 @@ export function useTerrainControls() {
     getScaleDescription,
     getTimeDescription,
     exportConfiguration,
-    importConfiguration
+    importConfiguration,
   };
 }
