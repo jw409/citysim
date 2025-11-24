@@ -1,5 +1,6 @@
 import { PolygonLayer } from '@deck.gl/layers';
 import { TerrainTextureAtlas, getTerrainTextureKey } from '../utils/terrainTextureGenerator';
+import { localToLatLng } from '../utils/coordinates';
 
 export function createGroundLayer() {
   // Initialize texture atlas for ground materials
@@ -61,14 +62,18 @@ export function createGroundLayer() {
       ];
 
       const halfTile = tileSize / 2;
+
+      // Convert meter coordinates to lat/lng (matching terrain layer coordinate system)
+      const corners = [
+        localToLatLng(centerX - halfTile, centerY - halfTile),
+        localToLatLng(centerX + halfTile, centerY - halfTile),
+        localToLatLng(centerX + halfTile, centerY + halfTile),
+        localToLatLng(centerX - halfTile, centerY + halfTile),
+      ];
+
       groundTiles.push({
         id: `ground-${x}-${y}`,
-        polygon: [
-          [centerX - halfTile, centerY - halfTile],
-          [centerX + halfTile, centerY - halfTile],
-          [centerX + halfTile, centerY + halfTile],
-          [centerX - halfTile, centerY + halfTile],
-        ],
+        polygon: corners,
         elevation: elevation - 0.5, // Slightly below terrain level
         color: finalColor,
         textureKey: textureKey,
@@ -91,8 +96,7 @@ export function createGroundLayer() {
   return new PolygonLayer({
     id: 'ground-layer',
     data: groundTiles,
-    coordinateSystem: 2, // COORDINATE_SYSTEM.METER_OFFSETS to match terrain
-    coordinateOrigin: [-74.006, 40.7128, 0], // NYC center
+    // Use default LNGLAT coordinate system to match terrain layer
     getPolygon: (d: any) => d.polygon,
     getElevation: (d: any) => d.elevation,
     getFillColor: (d: any) => d.color,

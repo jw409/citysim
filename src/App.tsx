@@ -94,7 +94,7 @@ function AppContent() {
             />
 
             {/* Simple time controls only */}
-            <ControlPanel />
+            <ControlPanel onStart={start} onPause={pause} onSetSpeed={setSpeed} />
 
             {/* Debug panel with performance monitor integrated - visible by default */}
             <DebugOverlay isVisible={showDebug} onToggle={() => setShowDebug(prev => !prev)} />

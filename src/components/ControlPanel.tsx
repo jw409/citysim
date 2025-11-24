@@ -1,10 +1,14 @@
 import { useSimulationContext } from '../contexts/SimulationContext';
-import { useSimulation } from '../hooks/useSimulation';
 import { DraggablePanel } from './DraggablePanel';
 
-export function ControlPanel() {
+interface ControlPanelProps {
+  onStart: () => void;
+  onPause: () => void;
+  onSetSpeed: (speed: number) => void;
+}
+
+export function ControlPanel({ onStart, onPause, onSetSpeed }: ControlPanelProps) {
   const { state } = useSimulationContext();
-  const { start, pause, setSpeed } = useSimulation();
 
   const formatTime = (time: number) => {
     const hours = Math.floor(time);
@@ -37,7 +41,7 @@ export function ControlPanel() {
         <div className="control-buttons">
           <button
             className="button button-primary"
-            onClick={state.isRunning ? pause : start}
+            onClick={state.isRunning ? onPause : onStart}
             style={{ minWidth: '100px' }}
           >
             {state.isRunning ? '⏸️ Pause' : '▶️ Play'}
@@ -53,7 +57,7 @@ export function ControlPanel() {
           max="5"
           step="0.1"
           value={state.speed}
-          onChange={e => setSpeed(parseFloat(e.target.value))}
+          onChange={e => onSetSpeed(parseFloat(e.target.value))}
           className="speed-slider"
           style={{ width: '100%' }}
         />
