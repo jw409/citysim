@@ -149,7 +149,7 @@ export function createRoadLayer(roads: any[], timeOfDay: number = 12) {
     widthScale: 1,
     widthMinPixels: 2,
     widthMaxPixels: 25,
-    pickable: true,
+    pickable: false, // PERF: Disabled to prevent picking overhead on interaction
     capRounded: true,
     jointRounded: true,
     billboard: false, // Allow 3D roads to follow terrain

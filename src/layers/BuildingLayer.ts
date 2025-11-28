@@ -118,7 +118,7 @@ export function createBuildingLayer(buildings: any[], timeOfDay: number = 12) {
     elevationScale: 1.0, // Realistic 1:1 scale - buildings already have proper heights in meters
     getElevationValue: (d: any) => d.height || 0, // Alternative elevation accessor
     elevationRange: [0, 3000], // Set max elevation range
-    pickable: true,
+    pickable: false, // PERF: Disabled to prevent picking overhead on interaction
     material: {
       ambient: 0.35, // Slightly lower ambient for more contrast
       diffuse: 0.8, // Higher diffuse for better surface definition

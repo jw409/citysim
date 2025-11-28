@@ -123,11 +123,11 @@ export function generateTerrainLayers(bounds: any, timeOfDay: number = 12, seed:
       new PolygonLayer({
         id: 'continuous_terrain',
         data: terrainMesh,
-        getPolygon: (d: any) =>
-          d.vertices.map((v: any) => {
-            const [lng, lat] = localToLatLng(v.x, v.y);
-            return [lng, lat];
-          }),
+        // PERF: Use METER_OFFSETS (same as buildings/roads) to avoid coordinate conversion
+        coordinateSystem: 2, // COORDINATE_SYSTEM.METER_OFFSETS
+        coordinateOrigin: [-74.006, 40.7128, 0], // NYC center - same as buildings
+        // PERF: Direct array access - no conversion needed with METER_OFFSETS
+        getPolygon: (d: any) => d.vertices.map((v: any) => [v.x, v.y]),
         getElevation: (d: any) => Math.max(0, d.elevation),
         getFillColor: (d: any) => d.color,
         getLineColor: [0, 0, 0, 0],
@@ -153,18 +153,18 @@ export function generateTerrainLayers(bounds: any, timeOfDay: number = 12, seed:
   }
 
   // Generate natural vegetation using noise patterns with elevation
+  // PERF: Pre-compute terrain elevation during vegetation generation, not in accessor
   const vegetation = generateNaturalVegetation(bounds, perlin, timeOfDay);
   if (vegetation.length > 0) {
     layers.push(
       new ScatterplotLayer({
         id: 'natural_vegetation',
         data: vegetation,
-        getPosition: (d: any) => {
-          const [lng, lat] = localToLatLng(d.x, d.y);
-          // Get terrain elevation at vegetation position
-          const terrainElevation = perlin.octaveNoise2D(d.x * 0.001, d.y * 0.001, 4, 0.5) * 100;
-          return [lng, lat, Math.max(0, terrainElevation + d.size / 2)]; // Place vegetation on terrain
-        },
+        // PERF: Use METER_OFFSETS to match terrain/buildings
+        coordinateSystem: 2, // COORDINATE_SYSTEM.METER_OFFSETS
+        coordinateOrigin: [-74.006, 40.7128, 0], // NYC center
+        // PERF: Use pre-computed elevation (z) - no coordinate conversion or noise calculation
+        getPosition: (d: any) => [d.x, d.y, d.z],
         getRadius: (d: any) => d.size,
         getFillColor: (d: any) => d.color,
         pickable: false,
@@ -380,11 +380,11 @@ function generateRiverLayer(bounds: any, timeOfDay: number, seed: number) {
   return new PathLayer({
     id: 'river',
     data: [{ path: riverPath }],
-    getPath: (d: any) =>
-      d.path.map((p: any) => {
-        const [lng, lat] = localToLatLng(p.x, p.y);
-        return [lng, lat, -2]; // Slightly below ground level
-      }),
+    // PERF: Use METER_OFFSETS to match terrain/buildings - no coordinate conversion
+    coordinateSystem: 2, // COORDINATE_SYSTEM.METER_OFFSETS
+    coordinateOrigin: [-74.006, 40.7128, 0], // NYC center
+    // PERF: Direct meter coordinates - no localToLatLng conversion
+    getPath: (d: any) => d.path.map((p: any) => [p.x, p.y, -2]),
     getColor: waterColor,
     getWidth: riverWidth,
     widthMinPixels: 8,
@@ -422,11 +422,17 @@ function generateNaturalVegetation(bounds: any, perlin: PerlinNoise, timeOfDay: 
         const scatterX = x + (Math.random() - 0.5) * 80;
         const scatterY = y + (Math.random() - 0.5) * 80;
 
+        // PERF: Pre-compute terrain elevation at vegetation position (was done per-frame before!)
+        const terrainElevation =
+          perlin.octaveNoise2D(scatterX * 0.001, scatterY * 0.001, 4, 0.5) * 100;
+        const size = vegetationType === 'tree' ? 8 + Math.random() * 6 : 4 + Math.random() * 3;
+
         vegetation.push({
           x: scatterX,
           y: scatterY,
+          z: Math.max(0, terrainElevation + size / 2), // Pre-computed z position
           type: vegetationType,
-          size: vegetationType === 'tree' ? 8 + Math.random() * 6 : 4 + Math.random() * 3,
+          size: size,
           color: getVegetationColor(timeOfDay, vegetationType),
         });
       }

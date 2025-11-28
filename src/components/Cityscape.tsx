@@ -1,19 +1,12 @@
-import React, { useMemo, useCallback, useState, useEffect } from 'react';
+import React, { useMemo, useCallback, useState, useEffect, useRef } from 'react';
 import DeckGL from '@deck.gl/react';
-import { MapView, COORDINATE_SYSTEM } from '@deck.gl/core';
-import { _GlobeView as GlobeView } from '@deck.gl/core';
+import { MapView } from '@deck.gl/core';
 import { useSimulationContext } from '../contexts/SimulationContext';
 import { useTerrainContext } from '../contexts/TerrainContext';
 import { useCamera } from '../hooks/useCamera';
 import { createBuildingLayer } from '../layers/BuildingLayer';
 import { createAgentLayer } from '../layers/AgentLayer';
 import { createRoadLayer } from '../layers/RoadLayer';
-import { createZoneLayer } from '../layers/ZoneLayer';
-import {
-  createHexagonLayer,
-  generateUrbanDensityData,
-  generateTrafficData,
-} from '../layers/HexagonLayer';
 import { createTerrainLayer, createWaterLayer } from '../layers/TerrainLayer';
 import { createGroundLayer } from '../layers/GroundLayer';
 import {
@@ -21,14 +14,11 @@ import {
   generateAutonomousAgents,
 } from '../layers/AutonomousAgentLayer';
 import { createWeatherLayer, generateWeatherSystem, createWindLayer } from '../layers/WeatherLayer';
-import { getBoundsFromCityModel } from '../utils/coordinates';
-import { PolygonLayer } from '@deck.gl/layers';
 import { createEnhancedTerrainLayer } from '../layers/EnhancedTerrainLayer';
 
 // Infrastructure layers
 import { createSewerLayer } from '../layers/infrastructure/SewerLayer';
 import { createUtilityTunnelLayer } from '../layers/infrastructure/UtilityTunnelLayer';
-import { createSubwayLayer } from '../layers/infrastructure/SubwayLayer';
 import { createUndergroundParkingLayer } from '../layers/infrastructure/UndergroundParkingLayer';
 // Elevated layers
 import { createElevatedHighwayLayer } from '../layers/elevated/ElevatedHighwayLayer';
@@ -59,15 +49,18 @@ export function Cityscape({
   const { state } = useSimulationContext();
   const { state: terrainState } = useTerrainContext();
   const [debugVisible, setDebugVisible] = useState(false);
+  const deckRef = useRef<any>(null);
 
-  // FIXED: Proper camera positioning to show the full city
+  // Track if we need to center on city model (one-time jump)
+  const cityCenterSet = useRef(false);
+
+  // Camera hook for presets and controls
   const camera = useCamera({
     longitude: -74.006,
     latitude: 40.7128,
-    zoom: 14, // Closer zoom to see building details
-    pitch: 60, // Good 3D perspective without being too extreme
-    bearing: 30, // Slight rotation for better 3D view
-    target: [0, 0, 0], // Look at ground level, camera will be above
+    zoom: 14,
+    pitch: 60,
+    bearing: 30,
   });
 
   // DISABLED: Update camera to center on city when model loads (for static view)
@@ -94,175 +87,158 @@ export function Cityscape({
   //   }
   // }, [state.agents]);
 
-  // Create layers with enhanced simulation data
-  const layers = useMemo(() => {
-    const cityData = state.cityModel || { zones: [], roads: [], pois: [], buildings: [] };
-    const enhancedData = state.simulationData;
-    const activeLayers: any[] = [];
+  // PERF FIX: Split layers into STATIC (expensive, rarely changes) and DYNAMIC (cheap, updates often)
 
-    console.log('Creating layers with city data:', {
-      zones: cityData.zones?.length || 0,
-      roads: cityData.roads?.length || 0,
-      buildings: cityData.buildings?.length || 0,
-      agents: state.agents?.length || 0,
-      hasEnhancedData: !!enhancedData,
+  // STATIC LAYERS - Only recreate when city model or terrain changes (NOT on agent updates!)
+  const staticLayers = useMemo(() => {
+    const startTime = performance.now();
+    performance.mark('staticLayers-start');
+    console.log(
+      '🔴 staticLayers useMemo EXECUTING at',
+      startTime.toFixed(0),
+      '- THIS SHOULD BE RARE!'
+    );
+    console.log('🔴 Dependencies:', {
+      hasCityModel: !!state.cityModel,
+      hasSimulationData: !!state.simulationData,
+      terrainIsEnabled: terrainState.isEnabled,
+      terrainScale: terrainState.scale,
+      terrainSeed: terrainState.seed,
+      terrainActiveLayer: terrainState.activeLayer,
+      hasOptResult: !!optimizationResult,
     });
 
-    // Layer ordering for professional 3D visualization:
-    // 1. Terrain (base) 2. River 3. Roads 4. Zones 5. Buildings 6. Agents
+    const cityData = state.cityModel || { zones: [], roads: [], pois: [], buildings: [] };
+    const enhancedData = state.simulationData;
+    const layers: any[] = [];
 
-    // Add enhanced terrain layers as base
+    // Terrain layers (expensive to generate)
     if (state.cityModel?.bounds) {
+      console.time('⏱️ createEnhancedTerrainLayer');
       const terrainLayers = createEnhancedTerrainLayer({
         bounds: state.cityModel.bounds,
         terrainState,
         cityData,
       });
-      activeLayers.push(...terrainLayers);
-
-      console.log('Enhanced terrain layers created:', {
-        layerCount: terrainLayers.length,
-        terrainEnabled: terrainState.isEnabled,
-        activeTerrainLayer: terrainState.activeLayer,
-        terrainProfile: terrainState.terrainProfile,
-      });
+      layers.push(...terrainLayers);
+      console.timeEnd('⏱️ createEnhancedTerrainLayer');
     }
 
-    // Roads layer (above terrain, below buildings)
-    // Add realistic terrain base layers FIRST
-    activeLayers.push(createGroundLayer()); // Textured ground plane (lowest level)
-    activeLayers.push(createWaterLayer(cityData.river)); // Water bodies using actual river data
-    activeLayers.push(createTerrainLayer()); // Ground terrain layer for elevation
+    // Base terrain layers
+    console.time('⏱️ base terrain layers');
+    layers.push(createGroundLayer());
+    layers.push(createWaterLayer(cityData.river));
+    layers.push(createTerrainLayer());
+    console.timeEnd('⏱️ base terrain layers');
 
-    // Generate sophisticated simulation data
+    // Static city infrastructure
     const centerLat = 40.7128;
     const centerLng = -74.006;
 
-    // Add realistic autonomous agents (cars from residences, drones from rooftops, people from entrances)
+    // Autonomous agents (static decorative ones, not simulation agents)
+    console.time('⏱️ autonomous agents');
     const autonomousAgents = generateAutonomousAgents(centerLat, centerLng, cityData);
-    activeLayers.push(...createAutonomousAgentLayer(autonomousAgents));
+    layers.push(...createAutonomousAgentLayer(autonomousAgents));
+    console.timeEnd('⏱️ autonomous agents');
 
-    // Add weather system
+    // Weather (static)
+    console.time('⏱️ weather system');
     const weatherData = generateWeatherSystem(centerLat, centerLng, 'clear');
-    activeLayers.push(createWeatherLayer(weatherData));
-    activeLayers.push(createWindLayer(centerLat, centerLng));
+    layers.push(createWeatherLayer(weatherData));
+    layers.push(createWindLayer(centerLat, centerLng));
+    console.timeEnd('⏱️ weather system');
 
-    // REMOVE HEXAGON DISTRACTIONS - focus on buildings only
+    // Roads and buildings (static)
+    layers.push(createRoadLayer(cityData.roads || [], 12));
+    layers.push(createBuildingLayer(cityData.buildings || [], 12));
 
-    activeLayers.push(createRoadLayer(cityData.roads || [], state.currentTime || 12));
-
-    // Zones layer (disabled - too visually distracting)
-    // if (showZones) {
-    //   activeLayers.push(createZoneLayer(cityData.zones || [], state.currentTime || 12, true));
-    // }
-
-    console.log(
-      'Creating building layer with buildings:',
-      cityData.buildings?.length,
-      cityData.buildings?.slice(0, 2)
-    );
-
-    const buildingLayer = createBuildingLayer(cityData.buildings || [], state.currentTime || 12);
-    console.log('Building layer created with', cityData.buildings?.length || 0, 'buildings');
-    activeLayers.push(buildingLayer);
-
-    activeLayers.push(createAgentLayer(state.agents, state.currentTime || 12));
-
-    // Advanced layers (only if enhanced data is available)
+    // Infrastructure layers
     if (enhancedData?.infrastructure) {
-      // Infrastructure layers (underground)
       if (enhancedData.infrastructure.sewers?.length > 0) {
-        activeLayers.push(createSewerLayer(enhancedData.infrastructure.sewers));
+        layers.push(createSewerLayer(enhancedData.infrastructure.sewers));
       }
       if (enhancedData.infrastructure.utilities?.length > 0) {
-        activeLayers.push(createUtilityTunnelLayer(enhancedData.infrastructure.utilities));
+        layers.push(createUtilityTunnelLayer(enhancedData.infrastructure.utilities));
       }
-      // DISABLED: Subway system too visually distracting
-      // if (enhancedData.infrastructure.subway?.length > 0) {
-      //   activeLayers.push(createSubwayLayer(enhancedData.infrastructure.subway));
-      // }
       if (enhancedData.infrastructure.parking?.length > 0) {
-        activeLayers.push(createUndergroundParkingLayer(enhancedData.infrastructure.parking));
+        layers.push(createUndergroundParkingLayer(enhancedData.infrastructure.parking));
       }
-
-      // Elevated layers
       if (enhancedData.infrastructure.elevatedRoads?.length > 0) {
-        activeLayers.push(createElevatedHighwayLayer(enhancedData.infrastructure.elevatedRoads));
+        layers.push(createElevatedHighwayLayer(enhancedData.infrastructure.elevatedRoads));
       }
       if (enhancedData.infrastructure.skyBridges?.length > 0) {
-        activeLayers.push(createSkyBridgeLayer(enhancedData.infrastructure.skyBridges));
+        layers.push(createSkyBridgeLayer(enhancedData.infrastructure.skyBridges));
       }
       if (enhancedData.infrastructure.elevatedTransit?.length > 0) {
-        activeLayers.push(createElevatedTransitLayer(enhancedData.infrastructure.elevatedTransit));
+        layers.push(createElevatedTransitLayer(enhancedData.infrastructure.elevatedTransit));
       }
     }
 
-    // Aerial traffic layers
+    // Aerial traffic
     if (enhancedData?.aerialTraffic) {
       if (enhancedData.aerialTraffic.helicopters?.length > 0) {
-        activeLayers.push(createHelicopterLayer(enhancedData.aerialTraffic.helicopters));
+        layers.push(createHelicopterLayer(enhancedData.aerialTraffic.helicopters));
       }
       if (enhancedData.aerialTraffic.aircraft?.length > 0) {
-        activeLayers.push(createAircraftLayer(enhancedData.aerialTraffic.aircraft));
+        layers.push(createAircraftLayer(enhancedData.aerialTraffic.aircraft));
       }
       if (enhancedData.aerialTraffic.drones?.length > 0) {
-        activeLayers.push(createDroneLayer(enhancedData.aerialTraffic.drones));
+        layers.push(createDroneLayer(enhancedData.aerialTraffic.drones));
       }
     }
 
-    // Optimization results layer (charging stations)
+    // Optimization results
     if (optimizationResult && optimizationResult.stations.length > 0) {
-      activeLayers.push(
+      layers.push(
         createChargingStationLayer(
           optimizationResult.stations,
           optimizationResult.coverage_map,
-          true, // showCoverage
-          true // showLabels
+          true,
+          true
         )
       );
     }
 
-    console.log(
-      `Rendering ${activeLayers.length} layers (${activeLayers.map(l => l.id).join(', ')})`
-    );
+    // Register with debug manager (only when static layers change)
+    // PERF: Defer expensive spatial index building to not block initial render
+    layers.forEach(layer => debugManager.registerLayer(layer));
+    requestIdleCallback(() => debugManager.buildSpatialIndex(), { timeout: 5000 });
 
-    // Register layers with debug manager
-    activeLayers.forEach(layer => {
-      debugManager.registerLayer(layer);
-    });
-
-    // Build spatial index from layer data
-    debugManager.buildSpatialIndex();
-
-    return activeLayers;
+    performance.mark('staticLayers-end');
+    performance.measure('staticLayers-total', 'staticLayers-start', 'staticLayers-end');
+    const duration = performance.now() - startTime;
+    console.log('🔴 staticLayers COMPLETED in', duration.toFixed(0), 'ms');
+    return layers;
   }, [
     state.cityModel,
-    state.agents,
     state.simulationData,
-    showZones,
-    terrainState,
+    // PERF: Use specific terrainState properties instead of entire object
+    // This prevents re-render when unrelated terrainState fields change
+    terrainState.isEnabled,
+    terrainState.scale,
+    terrainState.seed,
+    terrainState.activeLayer,
     optimizationResult,
+    // NOTE: state.agents is NOT a dependency - that's the key optimization!
   ]);
 
-  const handleViewStateChange = useCallback(
-    ({ viewState: newViewState }: any) => {
-      console.log('🎥 ViewState changing:', newViewState);
-      camera.setViewState(newViewState);
+  // DYNAMIC LAYERS - Only the agent layer, updates frequently but is cheap
+  const agentLayer = useMemo(() => {
+    console.log('🔵 agentLayer useMemo EXECUTING at', performance.now().toFixed(0));
+    return createAgentLayer(state.agents, state.currentTime || 12);
+  }, [state.agents, state.currentTime]);
 
-      // Update debug manager with new view state
-      debugManager.updateViewState({
-        longitude: newViewState.longitude,
-        latitude: newViewState.latitude,
-        zoom: newViewState.zoom,
-        pitch: newViewState.pitch,
-        bearing: newViewState.bearing,
-      });
-    },
-    [camera.setViewState]
-  );
+  // Combine static + dynamic layers
+  const layers = useMemo(() => {
+    console.log('🟣 layers combine useMemo EXECUTING at', performance.now().toFixed(0));
+    return [...staticLayers, agentLayer];
+  }, [staticLayers, agentLayer]);
 
-  // DEBUG: Log current viewState
-  console.log('🎥 Current camera viewState:', camera.viewState);
+  // PERF: Minimal viewState handler - no state updates, no React re-renders
+  const handleViewStateChange = useCallback(({ viewState: newViewState }: any) => {
+    // Just update refs, no React state changes during interaction
+    camera.viewState = newViewState;
+  }, []);
 
   const handleClick = useCallback(
     (info: any) => {
@@ -292,6 +268,38 @@ export function Cityscape({
   const handleContextMenu = useCallback((event: React.MouseEvent) => {
     event.preventDefault();
   }, []);
+
+  // PERF: Memoize DeckGL config objects to prevent unnecessary re-initialization
+  const mapViews = useMemo(
+    () => [
+      new MapView({
+        id: 'map',
+        repeat: true,
+        nearZMultiplier: 0.01,
+        farZMultiplier: 1000,
+        orthographic: false,
+      }),
+    ],
+    []
+  );
+
+  const getTooltipCallback = useCallback(({ object, layer }: any) => {
+    if (!object) return null;
+    switch (layer?.id) {
+      case 'buildings':
+        return `Building: ${object.type || 'Unknown'}\nHeight: ${object.height?.toFixed(1) || 0}m`;
+      case 'agents':
+        return `Agent: ${object.agent_type || 'Unknown'}\nSpeed: ${object.speed?.toFixed(1) || 0} km/h`;
+      case 'roads':
+        return `Road: ${object.road_type || 'Unknown'}\nSpeed Limit: ${object.speed_limit || 0} km/h`;
+      default:
+        return `${layer?.id}: ${object.id || 'Unknown'}`;
+    }
+  }, []);
+
+  const getCursorCallback = useCallback(() => {
+    return camera.controls.followTarget ? 'crosshair' : 'grab';
+  }, [camera.controls.followTarget]);
 
   // Handle keyboard shortcuts for camera controls
   useEffect(() => {
@@ -343,59 +351,47 @@ export function Cityscape({
       onContextMenu={handleContextMenu}
     >
       <DeckGL
+        ref={deckRef}
         width="100%"
         height="100%"
-        viewState={{
-          ...camera.viewState,
-          pitch: camera.viewState.pitch || 60,
-          bearing: camera.viewState.bearing || 30,
+        // PERF FIX: Use initialViewState (uncontrolled) instead of viewState (controlled)
+        // This prevents React re-renders on every mouse move during camera interaction
+        initialViewState={{
+          longitude: -74.006,
+          latitude: 40.7128,
+          zoom: 14,
+          pitch: 60,
+          bearing: 30,
         }}
         onViewStateChange={handleViewStateChange}
         onClick={handleClick}
         layers={layers}
-        views={[
-          // Use MapView for city-scale visualization to avoid dual rendering
-          new MapView({
-            id: 'map',
-            repeat: true,
-            nearZMultiplier: 0.01,
-            farZMultiplier: 1000, // Increased far plane to prevent clipping
-            orthographic: false,
-            controller: {
-              maxZoom: 25, // Infinite zoom capability
-              minZoom: 0, // Allow global view in MapView
-              maxPitch: 85,
-            },
-          }),
-        ]}
+        views={mapViews}
+        // PERF: Optimized controller settings for smooth interaction
         controller={{
-          dragRotate: true,
+          inertia: true,
+          scrollZoom: { smooth: true, speed: 0.01 },
           dragPan: true,
-          scrollZoom: true,
+          dragRotate: true,
+          doubleClickZoom: true,
           touchZoom: true,
           touchRotate: true,
           keyboard: true,
-          inertia: false, // DISABLED: Prevents automatic movement after user input
-          scrollZoomSpeed: 0.5,
-          dragRotateSpeed: 0.01,
         }}
-        getCursor={() => (camera.controls.followTarget ? 'crosshair' : 'grab')}
-        getTooltip={({ object, layer }) => {
-          if (!object) return null;
-
-          switch (layer?.id) {
-            case 'buildings':
-              return `Building: ${object.type || 'Unknown'}\nHeight: ${object.height?.toFixed(1) || 0}m`;
-            case 'agents':
-              return `Agent: ${object.agent_type || 'Unknown'}\nSpeed: ${object.speed?.toFixed(1) || 0} km/h`;
-            case 'roads':
-              return `Road: ${object.road_type || 'Unknown'}\nSpeed Limit: ${object.speed_limit || 0} km/h`;
-            default:
-              return `${layer?.id}: ${object.id || 'Unknown'}`;
-          }
-        }}
+        // PERF: Use device pixels for sharper rendering but with performance cap
+        useDevicePixels={1}
+        // PERF: Disable auto-highlight to prevent expensive picking on hover
+        _pickable={false}
+        getCursor={getCursorCallback}
+        // PERF: Disable tooltips entirely during initial test - they require picking
+        // getTooltip={getTooltipCallback}
         style={{
           background: '#1a1a2e',
+        }}
+        // PERF: WebGL parameters for better performance
+        parameters={{
+          depthTest: true,
+          blend: true,
         }}
       />
 

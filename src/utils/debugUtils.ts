@@ -60,6 +60,7 @@ class DebugManager {
   private frameCount = 0;
   private lastFPSUpdate = performance.now();
   private frameTimeStart = 0;
+  private lastSpatialBuild = 0;
 
   static getInstance(): DebugManager {
     if (!DebugManager.instance) {
@@ -129,11 +130,20 @@ class DebugManager {
    * Build spatial index from all layer data
    */
   buildSpatialIndex(): void {
+    const now = performance.now();
+    if (now - this.lastSpatialBuild < 2000) return; // Throttle to 2s
+    this.lastSpatialBuild = now;
+
     try {
       // Calculate bounds from all layers
       const allObjects: SpatialObject[] = [];
 
       for (const [layerId, layerInfo] of this.layers) {
+        // SKIP TERRAIN AND WATER LAYERS - processing their vertices for spatial index freezes the UI
+        if (layerId.includes('terrain') || layerId.includes('water') || layerId.includes('mesh')) {
+          continue;
+        }
+
         if (layerInfo.props?.data && Array.isArray(layerInfo.props.data)) {
           try {
             const spatialObjects = createSpatialObjectsFromLayerData(layerInfo.props.data, layerId);

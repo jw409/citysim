@@ -23,7 +23,7 @@ export function createSkyBridgeLayer(bridgeData: any[]) {
       }
     },
     opacity: layerConfig.opacity,
-    pickable: true,
+    pickable: false, // PERF: Disabled to prevent picking overhead on interaction
     widthMinPixels: 2,
     widthMaxPixels: 12,
     getElevation: (d: any) => d.elevation || 25,

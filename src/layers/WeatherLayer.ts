@@ -147,9 +147,10 @@ export function generateWeatherSystem(
 
 export function createWindLayer(centerLat: number, centerLng: number): PathLayer {
   // Generate wind flow visualization
+  // PERF: Reduced grid from 20x20=400 to 8x8=64 vectors
   const windVectors = [];
-  const gridSize = 20;
-  const spacing = 0.004;
+  const gridSize = 8;
+  const spacing = 0.01;
 
   for (let x = 0; x < gridSize; x++) {
     for (let y = 0; y < gridSize; y++) {

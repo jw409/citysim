@@ -582,7 +582,7 @@ export function createWaterLayer(riverData?: any) {
     filled: true,
     stroked: true,
     elevationScale: 1.0,
-    pickable: true,
+    pickable: false, // PERF: Water doesn't need picking
     material: {
       ambient: 0.3,
       diffuse: 0.6,

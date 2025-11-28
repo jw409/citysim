@@ -4,13 +4,18 @@ import { TerrainState } from '../contexts/TerrainContext';
 import { PlanetaryTerrain } from '../components/PlanetaryTerrain';
 import { generateTerrainLayers } from '../utils/terrainGenerator';
 import { getTerrainProfile } from '../utils/realWorldTerrainProfiles';
+import { createOptimizedTerrainLayer } from './OptimizedTerrainLayer';
 
 interface TerrainLayerConfig {
   bounds: any;
   terrainState: TerrainState;
   cityData?: any;
-  forceLayer?: 'planetary' | 'basic' | 'none';
+  forceLayer?: 'planetary' | 'basic' | 'optimized' | 'none';
 }
+
+// Simple module-level cache
+let cachedLayers: any[] = [];
+let lastConfigHash: string = '';
 
 /**
  * Enhanced terrain layer that automatically chooses between different terrain systems
@@ -27,18 +32,39 @@ export function createEnhancedTerrainLayer(config: TerrainLayerConfig): any[] {
   // Determine which terrain system to use
   const activeLayer = forceLayer || determineOptimalTerrainSystem(terrainState);
 
+  // Create a simple hash of the config to detect changes
+  // Round bounds to avoid jitter updates
+  const boundsHash = `${Math.round(bounds.min_x)},${Math.round(bounds.min_y)},${Math.round(bounds.max_x)},${Math.round(bounds.max_y)}`;
+  const configHash = `${activeLayer}-${boundsHash}-${terrainState.seed}-${terrainState.timeOfDay}-${terrainState.activeLayer}`;
+
+  if (configHash === lastConfigHash && cachedLayers.length > 0) {
+    return cachedLayers;
+  }
+
   try {
+    let layers: any[] = [];
     switch (activeLayer) {
+      case 'optimized':
+        layers = createOptimizedTerrainLayer({ bounds, terrainState });
+        break;
+
       case 'planetary':
-        return createPlanetaryTerrainLayers(bounds, terrainState);
+        layers = createPlanetaryTerrainLayers(bounds, terrainState);
+        break;
 
       case 'basic':
-        return createBasicTerrainLayers(bounds, terrainState, cityData);
+        layers = createBasicTerrainLayers(bounds, terrainState, cityData);
+        break;
 
       case 'none':
       default:
-        return [];
+        layers = [];
+        break;
     }
+
+    cachedLayers = layers;
+    lastConfigHash = configHash;
+    return layers;
   } catch (error) {
     console.warn('Error creating terrain layers, falling back to basic terrain:', error);
     // Fallback to basic terrain if planetary fails
@@ -49,29 +75,23 @@ export function createEnhancedTerrainLayer(config: TerrainLayerConfig): any[] {
 /**
  * Determine the optimal terrain system based on current state
  */
-function determineOptimalTerrainSystem(terrainState: TerrainState): 'planetary' | 'basic' | 'none' {
+function determineOptimalTerrainSystem(
+  terrainState: TerrainState
+): 'planetary' | 'basic' | 'optimized' | 'none' {
   const { scale, activeLayer, terrainProfile } = terrainState;
 
   // Honor explicit layer selection
   if (activeLayer && activeLayer !== 'none') {
-    return activeLayer;
+    return activeLayer as any;
   }
 
-  // Auto-select based on scale and profile
-  if (scale > 100) {
-    // Large scale - use planetary terrain for continental/global views
-    return 'planetary';
-  } else if (scale > 10) {
-    // Regional scale - use planetary or basic depending on profile
-    const profile = getTerrainProfile(terrainProfile);
-    if (profile && profile.recommendedScale > 5) {
-      return 'planetary';
-    }
-    return 'basic';
-  } else {
-    // City scale - use basic terrain for detailed local features
-    return 'basic';
+  // Use optimized WASM terrain for large scales
+  if (scale > 10) {
+    return 'optimized';
   }
+
+  // City scale - use basic terrain for detailed local features
+  return 'basic';
 }
 
 /**
@@ -187,8 +207,9 @@ function generatePlanetaryTerrainMesh(
   const { min_x, min_y, max_x, max_y } = bounds;
   const terrainMesh: any[] = [];
 
-  // Adjust resolution based on scale - smaller numbers = higher detail
-  const resolution = scale > 100 ? 1000 : scale > 10 ? 100 : 50;
+  // Adjust resolution based on scale - LARGER numbers = FASTER generation
+  // Original: 50 for city scale = 40,000 iterations. Changed to 200 = 2,500 iterations (16x faster)
+  const resolution = scale > 100 ? 2000 : scale > 10 ? 500 : 200;
 
   // Generate height map
   const heightMap: { [key: string]: any } = {};

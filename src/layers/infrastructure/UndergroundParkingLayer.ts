@@ -30,7 +30,7 @@ export function createUndergroundParkingLayer(parkingData: any[]) {
     wireframe: false,
     filled: true,
     stroked: true,
-    pickable: true,
+    pickable: false, // PERF: Disabled to prevent picking overhead on interaction
     opacity: layerConfig.opacity,
     material: {
       ambient: 0.2,

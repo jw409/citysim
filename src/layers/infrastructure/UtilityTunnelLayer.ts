@@ -25,7 +25,7 @@ export function createUtilityTunnelLayer(utilityData: any[]) {
       }
     },
     opacity: layerConfig.opacity,
-    pickable: true,
+    pickable: false, // PERF: Disabled to prevent picking overhead on interaction
     widthMinPixels: 1,
     widthMaxPixels: 8,
     getElevation: (d: any) => d.elevation || -8,

@@ -396,8 +396,11 @@ export function createSpatialObjectsFromLayerData(
   layerType: string
 ): SpatialObject[] {
   const objects: SpatialObject[] = [];
+  // Safety limit to prevent freezing on large layers
+  const processLimit = Math.min(layerData.length, 5000);
 
-  for (const item of layerData) {
+  for (let i = 0; i < processLimit; i++) {
+    const item = layerData[i];
     let longitude: number, latitude: number;
 
     // Extract coordinates based on different data formats

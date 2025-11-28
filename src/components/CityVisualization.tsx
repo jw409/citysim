@@ -124,7 +124,8 @@ export function CityVisualization({
     }
   }, [
     state.cityModel,
-    state.agents,
+    // REMOVED: state.agents - agents shouldn't trigger infrastructure regeneration!
+    // This was causing staticLayers to rebuild whenever agents changed
     terrainState.isEnabled,
     terrainState.seed,
     terrainState.terrainProfile,

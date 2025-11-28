@@ -11,7 +11,7 @@ export function createSewerLayer(sewerData: any[]) {
     getWidth: (d: any) => d.diameter || 2,
     getColor: layerConfig.color,
     opacity: layerConfig.opacity,
-    pickable: true,
+    pickable: false, // PERF: Disabled to prevent picking overhead on interaction
     widthMinPixels: 2,
     widthMaxPixels: 10,
     // Position sewers underground

@@ -24,7 +24,7 @@ export function createAutonomousAgentLayer(agents: AutonomousAgent[]) {
       radiusScale: 1,
       radiusMinPixels: 2,
       radiusMaxPixels: 20,
-      pickable: true,
+      pickable: false, // PERF: Disabled to prevent picking overhead on interaction
       stroked: true,
       filled: true,
     }),
@@ -51,11 +51,12 @@ export function generateAutonomousAgents(
   const agents: AutonomousAgent[] = [];
 
   // Generate cars spawned near residential buildings (not randomly in air)
+  // PERF: Reduced from 100 to 20 cars for faster initial render
   if (cityData?.buildings) {
     const residentialBuildings = cityData.buildings.filter(
       (b: any) => b.type === 0 || b.zone_id?.includes('residential')
     );
-    const maxCars = Math.min(100, residentialBuildings.length * 2); // 2 cars per residential building max
+    const maxCars = Math.min(20, residentialBuildings.length); // Reduced for performance
 
     for (let i = 0; i < maxCars; i++) {
       const building =
@@ -106,9 +107,10 @@ export function generateAutonomousAgents(
   }
 
   // Generate drones spawned on building rooftops (realistic)
+  // PERF: Reduced from 15 to 5 drones for faster initial render
   if (cityData?.buildings) {
-    const tallBuildings = cityData.buildings.filter((b: any) => b.height > 50); // Only spawn on buildings taller than 50m
-    const maxDrones = Math.min(15, Math.floor(tallBuildings.length / 3)); // 1 drone per 3 tall buildings
+    const tallBuildings = cityData.buildings.filter((b: any) => b.height > 50);
+    const maxDrones = Math.min(5, Math.floor(tallBuildings.length / 5)); // Reduced for performance
 
     for (let i = 0; i < maxDrones; i++) {
       const building = tallBuildings[Math.floor(Math.random() * tallBuildings.length)];
@@ -176,9 +178,10 @@ export function generateAutonomousAgents(
   }
 
   // Generate people near building entrances (realistic pedestrians)
+  // PERF: Reduced from 50 to 15 for faster initial render
   if (cityData?.buildings) {
     const allBuildings = cityData.buildings;
-    const maxPeople = Math.min(50, allBuildings.length); // 1 person per building max
+    const maxPeople = Math.min(15, Math.floor(allBuildings.length / 3)); // Reduced for performance
 
     for (let i = 0; i < maxPeople; i++) {
       const building = allBuildings[Math.floor(Math.random() * allBuildings.length)];
@@ -225,8 +228,8 @@ export function generateAutonomousAgents(
     }
   }
 
-  // Generate airplanes
-  for (let i = 0; i < 10; i++) {
+  // Generate airplanes - PERF: Reduced from 10 to 3
+  for (let i = 0; i < 3; i++) {
     const altitude = 1000 + Math.random() * 5000; // 1-6km altitude
     const startLng = centerLng + (Math.random() - 0.5) * 0.1;
     const startLat = centerLat + (Math.random() - 0.5) * 0.1;
@@ -254,23 +257,7 @@ export function generateAutonomousAgents(
     });
   }
 
-  // Generate people
-  for (let i = 0; i < 500; i++) {
-    const position: [number, number, number] = [
-      centerLng + (Math.random() - 0.5) * 0.015,
-      centerLat + (Math.random() - 0.5) * 0.015,
-      1.7, // Average human height
-    ];
-
-    agents.push({
-      id: `person-${i}`,
-      type: 'person',
-      position,
-      velocity: [(Math.random() - 0.5) * 0.0001, (Math.random() - 0.5) * 0.0001, 0],
-      color: [255, 200, 100, 255], // Skin tone
-      size: 1,
-    });
-  }
+  // PERF: Removed duplicate 500 people generation - already generated above near buildings
 
   return agents;
 }
